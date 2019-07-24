@@ -1,0 +1,185 @@
+.menu {
+    background-color: gray; color: white;
+}
+
+.menu > ul {
+    margin: 0px; padding: 5px;
+}
+
+.menu > ul > li {
+    display: inline-block;
+    text-align: center;
+    min-width: 100px;
+    border-right: 1px solid white;
+}
+
+.menu > ul > li > a {
+    color: white;
+    text-decoration: none;
+}
+
+/**/
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: left;
+}
+/**/
+
+.field-in-error {
+    border-color: red;
+}
+
+.has-error span.error {
+    font-weight: normal; 
+    border-color: transparent !important; 
+    color: #e74c3c; 
+    font-size: 0.85em; 
+    margin-left: 10px;
+}
+
+.has-error input,
+.has-error textarea,
+.has-error select {
+    border-color: #e74c3c !important;
+}
+
+/*osy-datagrid-2*/
+.osy-datagrid-2-foot {
+    text-align: center; 
+    margin-top: 5px; 
+    margin-bottom: 5px;
+}
+
+.gly-spin {
+    -webkit-animation: spin 2s infinite linear; 
+    -moz-animation: spin 2s infinite linear; 
+    -o-animation: spin 2s infinite linear; 
+    animation: spin 2s infinite linear;
+}
+
+/**********wait mask***************/
+div#waitMask {
+    position: absolute;
+    background-color: #f8f8f8;
+    opacity: 0.70;
+    z-index: 1000; 
+    top: 0px; 
+    left: 0px;
+    vertical-align: middle;
+    border-radius: 5px;
+    border: 1px solid silver;
+}
+div#waitMask > div.message {
+    position: relative;
+    font-size: 14px; 
+    font-weight: bold;
+    text-align: center;
+    top: 40%;
+}
+
+div#waitMask > div.message > div.progress_msg {
+    width: 50%;
+    margin: auto;
+}
+
+div#waitMask > div.message > div.progress {
+    width: 50%;
+    border: 1px solid silver;
+    margin: auto;
+}
+
+.no-border {
+    border: 1px transparent !important;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+.overflow-auto {
+    overflow: auto;
+}
+
+.border-all {
+    border: 1px solid silver;
+    border-radius: 3px;
+}
+
+.osy-hr {
+    color: #888;
+    font-size: 14px;
+    margin-top: 15px;
+    position: relative;
+    display: block;
+    text-align: center;
+}
+
+.osy-hr span {
+    padding: 0 10px;
+    background-color: white;
+    z-index: 10;
+    position: relative;
+}
+
+.osy-hr:before {
+    border-top: 1px dotted #E1E2E4;
+    content: "";
+    height: 1px;
+    left: 0;
+    position: absolute;
+    top: 45%;
+    width: 100%;
+    z-index: 0;
+}
+
+.osy-input-underline {
+    border: 0px; 
+    border-bottom: 2px solid transparent; 
+    margin-left: 15px; 
+    width: 95%;
+}
+
+.osy-input-underline:focus, 
+.osy-input-underline:hover {
+    outline: 0; 
+    border-bottom: 2px solid #ddd !important
+};
+
+.osy-mt-10 {margin-top: 10px;}
+.osy-mt-20 {margin-top: 20px;}
+.osy-mt-30 {margin-top: 30px;}
+.osy-mb-10 {margin-bottom: 10px;}
+.osy-mb-20 {margin-bottom: 20px;}
+.osy-mb-30 {margin-bottom: 30px;}
+.osy-mr-10 {margin-right: 10px;}
+.osy-mr-20 {margin-right: 20px;}
+.osy-mr-30 {margin-right: 30px;}
+.osy-ml-10 {margin-left: 10px;}
+.osy-ml-20 {margin-left: 20px;}
+.osy-ml-30 {margin-left: 30px;}
+.osy-pt-10 {padding-top: 10px;}
+.osy-pt-20 {padding-top: 20px;}
+.osy-pt-30 {padding-top: 30px;}
+.osy-pb-10 {padding-bottom: 10px;}
+.osy-pb-20 {padding-bottom: 20px;}
+.osy-pb-30 {padding-bottom: 30px;}

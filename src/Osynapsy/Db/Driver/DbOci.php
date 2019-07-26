@@ -83,6 +83,7 @@ class DbOci implements InterfaceDbo
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         } else {
             $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
+            $this->execCommand('alter session set NLS_NUMERIC_CHARACTERS = ". "');
         }
     }
 

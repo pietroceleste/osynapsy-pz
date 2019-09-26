@@ -156,6 +156,26 @@ class Component extends Tag
     }
     
     /**
+     * Set action to recall via ajax
+     * 
+     * @param string $action name of the action without Action final
+     * @param string $parameters parameters list (comma separated) to pass action
+     * @return $this
+     */
+    public function setAction($action, $parameters = null, $class = 'click-execute', $confirm = null)
+    {
+        $this->setClass($class)
+             ->att('data-action',$action);
+        if (!empty($parameters) || $parameters === 0 || $parameters === '0') {
+            $this->att('data-action-parameters', $parameters);
+        }
+        if (!empty($confirm)) {
+            $this->att('data-action-confirm', $confirm);
+        }
+        return $this;
+    }
+    
+    /**
      * Append css class to component class attribute
      * 
      * @param $class name of css class to add;
@@ -176,6 +196,18 @@ class Component extends Tag
     {
         $this->data = $data;
         return $this;
+    }        
+    
+    /**
+     * Enable / disable component
+     * 
+     * @param boolean $condition
+     */
+    public function setDisabled($condition)
+    {
+        if ($condition) {
+            $this->att('disabled', 'disabled');
+        }
     }
     
     /**
@@ -192,23 +224,6 @@ class Component extends Tag
     }
     
     /**
-     * Set action to recall via ajax
-     * 
-     * @param string $action name of the action without Action final
-     * @param string $parameters parameters list (comma separated) to pass action
-     * @return $this
-     */
-    public function setAction($action, $parameters = null, $class = 'click-execute')
-    {
-        $this->setClass($class)
-             ->att('data-action',$action);
-        if (!empty($parameters) || $parameters === 0 || $parameters === '0') {
-            $this->att('data-action-parameters', $parameters);
-        }
-        return $this;
-    }
-    
-    /**
      * Set placeholder attribute
      * 
      * @param string $placeholder placeholder value    
@@ -218,5 +233,17 @@ class Component extends Tag
     {
         $this->att('placeholder', $placeholder);
         return $this;
+    }        
+    
+    /**
+     * Set readonly or not on component
+     * 
+     * @param type $condition
+     */
+    public function setReadOnly($condition)
+    {
+        if ($condition) {
+            $this->att('readonly', 'readonly');
+        }
     }
 }

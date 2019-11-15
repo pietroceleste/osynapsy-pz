@@ -7,7 +7,8 @@ OclMapTomtomBox = {
     polylinelist : {},
     datasets : {},
     autocenter : true,
-    startMarker : [], 
+    startMarker : [],
+    refreshGrid : false,
     init : function()
     {
         var self = this;
@@ -38,7 +39,12 @@ OclMapTomtomBox = {
             map.on('moveend', function(e) {
                 self.autocenter = false;
                 self.setVertex(map);
-                //OclMapTomtomBox.refreshDatagrid(map);
+                if (OclMapTomtomBox.refreshGridTimeout !== undefined) {
+                    clearTimeout(OclMapTomtomBox.refreshGridTimeout);
+		}                
+                OclMapTomtomBox.refreshGridTimeout = setTimeout(function(){
+                    OclMapTomtomBox.refreshDatagrid(map);                    
+                }, 1000);
             });                                                                                                                                       						                       
             if (Osynapsy.isEmpty($(this).data('marker'))){
                 return true;

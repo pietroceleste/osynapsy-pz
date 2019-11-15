@@ -67,5 +67,5 @@ class MapTomtomBox extends Component
     public function setStartPoint($lat, $lng, $marker = 'fa-building')
     {
         $this->setParameter('center', ['lat' => $lat, 'lng' => $lng, 'marker' => $marker]);
-    }        
+    }       
 }

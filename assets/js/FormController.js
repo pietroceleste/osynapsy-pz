@@ -203,6 +203,19 @@ var Osynapsy = new (function(){
         return v instanceof Object;
     };
     
+    pub.typingEvent = function(obj)
+    {
+        if (pub.typingTimeout !== undefined) {
+            clearTimeout(pub.typingTimeout);
+        }
+        pub.typingTimeout = setTimeout(function(){ 
+            var code = $(obj).attr('ontyping');
+            if (code) {
+                eval(code);
+            }
+        }, 500);  
+    };
+    
     pub.kernel.message = 
     {
         response : null,
@@ -359,6 +372,8 @@ var Osynapsy = new (function(){
                     $(this).attr('modal-width') ? $(this).attr('modal-width') : '75%',
                     $(this).attr('modal-height') ? $(this).attr('modal-height') : ($(window).innerHeight() - 250) + 'px'
                 );
+            }).on('keyup', '.typing-execute', function(){                
+               Osynapsy.typingEvent(this);
             });
             FormController.fire('init');
         }
@@ -374,6 +389,34 @@ var Osynapsy = new (function(){
         }
         $('body').append(form);
         form.submit();
+    };
+    
+    pub.refreshComponents = function(component)
+    {
+        var componentIds = Array.isArray(component) ? component : [component];
+        var data  = $('form').serialize();
+            data += (arguments.length > 1 && arguments[1]) ? '&'+arguments[1] : '';
+        if (!(typeof component === 'object')) {            
+            Osynapsy.waitMask.show(component);
+        } else if ($(component).is(':visible')) {           
+            Osynapsy.waitMask.show();
+        }
+        for (var id in componentIds) {
+            data += '&refreshComponentId[]=' + $(componentIds[id]).attr('id');        
+        }
+        $.ajax({
+            url  : window.location.href,
+            type : 'post',
+            data : data,
+            success : function(response) {
+                Osynapsy.waitMask.remove();
+                for (var i in componentIds) {
+                   var componentId = '#' + $(componentIds[i]).attr('id');
+                   var component = $(response).find(componentId);
+                   $(componentId).replaceWith(component);                
+                }
+            }
+        });
     };
     
     pub.waitMask = 

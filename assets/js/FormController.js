@@ -391,30 +391,47 @@ var Osynapsy = new (function(){
         form.submit();
     };
     
-    pub.refreshComponents = function(component)
-    {
-        var componentIds = Array.isArray(component) ? component : [component];
+    pub.refreshComponents = function(components)
+    {        
+        var cmps = Array.isArray(components) ? components : [components];       
         var data  = $('form').serialize();
             data += (arguments.length > 1 && arguments[1]) ? '&'+arguments[1] : '';
-        if (!(typeof component === 'object')) {            
-            Osynapsy.waitMask.show(component);
-        } else if ($(component).is(':visible')) {           
+        var fncOnSuccess = arguments.length > 2 ? arguments[2] : null;
+        if (cmps.length === 1) {            
+            Osynapsy.waitMask.show($('#' + cmps[0]));            
+        } else if ($(components).is(':visible')) {           
             Osynapsy.waitMask.show();
         }
-        for (var id in componentIds) {
-            data += '&refreshComponentId[]=' + $(componentIds[id]).attr('id');        
+        for (var i in cmps) {
+            data += '&ajax[]=' + cmps[i];
         }
         $.ajax({
             url  : window.location.href,
             type : 'post',
             data : data,
-            success : function(response) {
+            dataType : 'html',
+            success : function(response)
+            {
                 Osynapsy.waitMask.remove();
-                for (var i in componentIds) {
-                   var componentId = '#' + $(componentIds[i]).attr('id');
-                   var component = $(response).find(componentId);
-                   $(componentId).replaceWith(component);                
+                var successRefresh = false;
+                for (var i in cmps) {
+                    var componentID = '#'+ cmps[i];
+                    var componentRemote = $(response).find(componentID);
+                    if (componentRemote) {
+                        $(componentID).replaceWith(componentRemote);
+                        successRefresh = true;
+                    }                    
                 }
+                if (!successRefresh){
+                    console.log(response);
+                } else if (typeof fncOnSuccess === 'function') {                    
+                    fncOnSuccess();
+                }
+            },
+            error : function(response)
+            {
+                Osynapsy.waitMask.remove();
+                console.log(response);
             }
         });
     };

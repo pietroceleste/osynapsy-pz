@@ -333,7 +333,7 @@ class DbOci implements InterfaceDbo
 
     public function replace($table, array $args, array $conditions)
     {                        
-        $result = $this->select($table, ['NUMROWS' => 'count(*)'], $conditions);
+        $result = $this->select($table, ['count(*) AS NUMROWS'], $conditions);
         if (!empty($result) && !empty($result[0]) && !empty($result[0]['NUMROWS'])) {
             $this->update($table, $args, $conditions);
             return;

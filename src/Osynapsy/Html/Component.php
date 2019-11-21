@@ -170,7 +170,7 @@ class Component extends Tag
             $this->att('data-action-parameters', $parameters);
         }
         if (!empty($confirm)) {
-            $this->att('data-action-confirm', $confirm);
+            $this->att('data-confirm', $confirm);
         }
         return $this;
     }

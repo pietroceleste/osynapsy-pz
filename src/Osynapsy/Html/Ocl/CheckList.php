@@ -19,6 +19,7 @@ class CheckList extends Component
     private $table = null;
     private $values = array();
     private $groups = array();
+    private $appendTextBoxAfterLabel = false;
     
     public function __construct($name)
     {
@@ -40,8 +41,11 @@ class CheckList extends Component
         if (!empty($_REQUEST[$this->id]) && is_array($_REQUEST[$this->id]) && in_array($value[0],$_REQUEST[$this->id])) {
             $value['selected'] = true;
         }
-        $tr->add(new Tag('td'))           
-           ->add(str_repeat('&nbsp;',$lev*7).'<input type="checkbox" class="i-checks" name="'.$this->id.'[]" value="'.$value[0].'"'.(!empty($value['selected']) ? ' checked' : '').'>&nbsp;'.$value[1]);
+        $td = $tr->add(new Tag('td'));
+        $td->add(str_repeat('&nbsp;',$lev*7).'<input type="checkbox" class="i-checks" onclick="$(this).prop(\'checked\') == true ? $(this).closest(\'td\').find(\'.form-control\').removeClass(\'hidden\') : $(this).closest(\'td\').find(\'.form-control\').addClass(\'hidden\').val(\'\');" name="'.$this->id.'[]" value="'.$value[0].'"'.(!empty($value['selected']) ? ' checked' : '').'>&nbsp;'.$value[1]);
+        if ($this->appendTextBoxAfterLabel) {            
+            $td->add('<br><input type="textbox" name="'.$this->id.'_text[]" value="" class="form-control'.(!empty($value['selected']) ? '' : ' hidden d-none').'">');
+        }
         if (!empty($this->groups[$value[0]])) {
             $lev += 1;
             foreach($this->groups[$value[0]] as $k => $value) {
@@ -83,5 +87,10 @@ class CheckList extends Component
     public function setHeight($px)
     {
         $this->style = 'height: '.$px.'px; border: 1px solid black; overflow: auto;';
+    }
+    
+    public function appendTextBoxAfterLabel($bool)
+    {
+        $this->appendTextBoxAfterLabel = $bool;
     }
 }

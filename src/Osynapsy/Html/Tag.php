@@ -20,11 +20,14 @@ class Tag
     public $tagdep = 0;
     public $parent = null;
     
-    public function __construct($tag = 'dummy', $id = null)
+    public function __construct($tag = 'dummy', $id = null, $class = null)
     {
         $this->att(0,$tag);
         if (!empty($id)) {
             $this->att('id', $id);
+        }
+        if (!empty($class)) {
+            $this->att('class', $class);
         }
     }
     

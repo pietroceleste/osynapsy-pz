@@ -281,8 +281,8 @@ abstract class Model
         }
         if ($field->isUnique() && $value) {
             $nOccurence = $this->db->execUnique(
-                "SELECT COUNT(*) FROM {$this->table} WHERE {$field->name} = ?",
-                array($value)
+                "SELECT COUNT(*) FROM {$this->table} WHERE {$field->name} = :uniqueValue",
+                ['uniqueValue' => $value]
             );
             if (!empty($nOccurence)) {
                 $this->addError('unique', $field);

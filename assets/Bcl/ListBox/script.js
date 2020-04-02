@@ -1,18 +1,16 @@
 olistbox = {
     icoClose : 'glyphicon-chevron-right',
     icoOpen  : 'glyphicon-chevron-down',
-    init : function(){
-        console.log('ci sono');
+    init : function(){        
         $('.listbox').on('click','.listbox-box',function(){
-            var par = $(this).closest('.listbox');
-            var width = par.width();            
-            $('.listbox-list',par).toggle();
+            var par = $(this).closest('.listbox');            
+            $('.listbox-list',par).width(par.width()).toggle();
         }).on('click','.listbox-list .listbox-list-item',function(){
             $(this).closest('.listbox-list').toggle();
             var par = $(this).closest('.listbox');
             $('.listbox-list-item',par).removeClass('selected');
             $('input[type=hidden]',par).val($(this).attr('value'));
-            $('.listbox-box',par).text($(this).text());
+            $('.listbox-box',par).html($(this).html());
             $(this).addClass('selected');
         }).on('click','.'+this.icoClose,function(e){
             e.stopPropagation();
@@ -32,7 +30,7 @@ olistbox = {
                }
             });
         });
-        this.initObserve();
+        this.initObserve();        
     },
     initObserve : function()
     {

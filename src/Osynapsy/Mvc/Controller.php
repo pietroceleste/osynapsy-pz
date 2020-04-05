@@ -29,7 +29,7 @@ abstract class Controller implements InterfaceController, InterfaceSubject
     private $dbFactory;
     public $model;
     public $request;
-    public $response;
+    public $response;    
     public $app;
     
     public function __construct(Request $request = null, DbFactory $db = null, $appController = null)

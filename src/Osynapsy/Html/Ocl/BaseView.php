@@ -32,7 +32,10 @@ abstract class BaseView
     
     protected function add($part)
     {
-       $this->controller->response->send($part);
+        $this->controller->response->send($part);
+        if (is_object($part)) {
+            return $part;
+        }
     }
     
     public function get()

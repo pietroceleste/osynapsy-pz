@@ -238,8 +238,8 @@ class Pager extends Component
             $this->total['rows'] = $this->db->execUnique($count, $this->par);
             $this->att('data-total-rows',$this->total['rows']);
         } catch(\Exception $e) {
-            echo $this->errors[] = '<pre>'.$count."\n".$e->getMessage().'</pre>';
-            return array();
+            echo '<pre>'.$count."\n".$e->getMessage().'</pre>';
+            return [];
         }
         
         $this->calcPage($requestPage);

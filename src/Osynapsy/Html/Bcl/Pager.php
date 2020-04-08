@@ -124,7 +124,7 @@ class Pager extends Component
         $startFrom = ($this->page['current'] - 1) * $this->page['dimension'];
         $startFrom = max(0, $startFrom);
         
-        $sql .= "\nLIMIT ".$startFrom." , ".$this->page['dimension'];
+        $sql .= "\nLIMIT ".$startFrom." , ".$this->page['dimension'];        
         return $sql;
     }
     
@@ -154,12 +154,13 @@ class Pager extends Component
                         SELECT a.*
                         FROM ($this->sql) a
                         ".(empty($where) ? '' : $where)."
+                        ".(empty($this->orderBy) ? '' : " ORDER BY {$this->orderBy}")."
                         ".(!empty($_REQUEST[$this->id.'_order']) ? ' ORDER BY '.str_replace(array('][','[',']'),array(',','',''),$_REQUEST[$this->id.'_order']) : '')."
                     ) b
-                ) a ";
+                ) a ";        
         if (empty($this->page['dimension'])) {
             return $sql;
-        }
+        }        
         $startFrom = (($this->page['current'] - 1) * $this->page['dimension']) + 1 ;
         $endTo = ($this->page['current'] * $this->page['dimension']);
         $sql .=  "WHERE \"_rnum\" BETWEEN $startFrom AND $endTo";

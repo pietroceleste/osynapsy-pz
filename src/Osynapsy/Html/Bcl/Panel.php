@@ -206,4 +206,13 @@ class Panel extends Component
     {
         $this->formType = $type;
     }
+    
+    public function getBody()
+    {
+        if (empty($this->body)) {
+            $this->body = new Tag('div');
+            $this->body->att('class','panel-body');
+        }
+        return $this->body;
+    }
 }

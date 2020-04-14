@@ -31,7 +31,7 @@ class BoxGrid extends Component
         }
         foreach($this->data as $value) {            
             if (empty($i)) {
-                $this->getPanel()->addRow()->att('style','margin-top: 10px;');
+                $this->getPanel()->addRow()->att('style','margin-top: 10px !important;');
                 $i = 12;
             }
             $this->appendCell($value, $this->boxWidth);

@@ -44,8 +44,8 @@ class NavBar extends Component
         $container->att('class', $this->getParameter('containerClass'));        
         $this->headerFactory($container);
         $collapse = $container->add(new Tag('div',$this->id.'_collapse'))->att('class','collapse navbar-collapse');
-        $this->buildUlMenu($collapse, $this->data['primary'])->att('class','nav navbar-nav'); 
-        $this->buildUlMenu($collapse, $this->data['secondary'])->att('class','nav navbar-nav pull-right');
+        $this->ulMenuFactory($collapse, $this->data['primary'])->att('class','nav navbar-nav'); 
+        $this->ulMenuFactory($collapse, $this->data['secondary'])->att('class','nav navbar-nav pull-right');
     }
     
     /**
@@ -57,14 +57,7 @@ class NavBar extends Component
     private function headerFactory($container)
     {                
         $header = $container->add(new Tag('div', null, 'navbar-header'));
-        $header->add(
-            '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#'.$this->id.'_collapse" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>'
-        );
+        $header->add($this->buttonMobileShowMenuFactory());
         $header->add($this->brandFactory());
     }
     
@@ -77,6 +70,16 @@ class NavBar extends Component
         return new Link('navbar-brand-'.$this->id, $brand[1], $brand[0], 'navbar-brand');
     }
     
+    protected function buttonMobileShowMenuFactory()
+    {
+        return '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#'.$this->id.'_collapse" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>';
+    }
+    
     /**
      * Internal method for build a unordered list menù (recursive)
      * 
@@ -85,7 +88,7 @@ class NavBar extends Component
      * @param int $level
      * @return type
      */
-    private function buildUlMenu($container, array $data, $level = 0)
+    private function ulMenuFactory($container, array $data, $level = 0)
     {
         $ul = $container->add(new Tag('ul', null, ($level > 0 ? 'dropdown-menu' : '')));
         if (empty($data) || !is_array($data)) {
@@ -105,7 +108,7 @@ class NavBar extends Component
                 ->add(new Tag('a', null, 'dropdown-toggle'))
                 ->att(['href' => '#', 'data-toggle' => 'dropdown'])
                 ->add($label.' <span class="caret"></span>');
-            $this->buildUlMenu($li, $menu['_childrens'], $level + 1);
+            $this->ulMenuFactory($li, $menu['_childrens'], $level + 1);
         } elseif (!empty($menu['URL'])) {
             $li->add(new Tag('a'))->att('href', $menu['URL'])->add($label);                
         } else {

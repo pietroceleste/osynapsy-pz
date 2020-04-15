@@ -13,6 +13,7 @@ namespace Osynapsy\Html\Bcl;
 
 use Osynapsy\Html\Component;
 use Osynapsy\Html\Tag;
+use Osynapsy\Html\Bcl\Link;
 
 /**
  * Build a Bootstrap NavBar
@@ -25,10 +26,11 @@ class NavBar extends Component
      * 
      * @param string $id
      */
-    public function __construct($id)
+    public function __construct($id, $class = 'navbar navbar-default', $containerClass = 'container')
     {
-        parent::__construct('nav', $id.'_navbar');
-        $this->setParameter('containerClass', 'container');
+        parent::__construct('nav', $id);
+        $this->setClass($class);
+        $this->setParameter('containerClass', $containerClass);
         $this->setData([],[]);
     }
     
@@ -37,12 +39,10 @@ class NavBar extends Component
      * 
      */
     public function __build_extra__()
-    {
-        $this->setClass('navbar navbar-default');
+    {        
         $container = $this->add(new Tag('div'));
-        $container->att('class', $this->getParameter('containerClass'));
-        
-        $this->buildHeader($container);
+        $container->att('class', $this->getParameter('containerClass'));        
+        $this->headerFactory($container);
         $collapse = $container->add(new Tag('div',$this->id.'_collapse'))->att('class','collapse navbar-collapse');
         $this->buildUlMenu($collapse, $this->data['primary'])->att('class','nav navbar-nav'); 
         $this->buildUlMenu($collapse, $this->data['secondary'])->att('class','nav navbar-nav pull-right');
@@ -54,10 +54,9 @@ class NavBar extends Component
      * @param type $container
      * @return type
      */
-    private function buildHeader($container)
+    private function headerFactory($container)
     {                
-        $header = $container->add(new Tag('div'))
-                  ->att('class','navbar-header');
+        $header = $container->add(new Tag('div', null, 'navbar-header'));
         $header->add(
             '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#'.$this->id.'_collapse" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
@@ -66,14 +65,16 @@ class NavBar extends Component
                 <span class="icon-bar"></span>
             </button>'
         );
+        $header->add($this->brandFactory());
+    }
+    
+    protected function brandFactory()
+    {
         $brand = $this->getParameter('brand');
         if (empty($brand)) {
             return;
         }
-        $header->add(new Tag('a'))
-               ->att('href', $brand[1])
-               ->att('class','navbar-brand')
-               ->add($brand[0]);
+        return new Link('navbar-brand-'.$this->id, $brand[1], $brand[0], 'navbar-brand');
     }
     
     /**
@@ -86,26 +87,33 @@ class NavBar extends Component
      */
     private function buildUlMenu($container, array $data, $level = 0)
     {
-        $ul = $container->add(new Tag('ul'))
-                        ->att('class', ($level > 0 ? 'dropdown-menu' : ''));
+        $ul = $container->add(new Tag('ul', null, ($level > 0 ? 'dropdown-menu' : '')));
         if (empty($data) || !is_array($data)) {
             return $ul;
         }               
         foreach($data as $label => $menu){
-            $li = $ul->add(new Tag('li'));
-            if (!is_array($menu)) {
-                $li->add(new Tag('a'))->att('href',$menu)->add($label);                
-                continue;
-            }
-            $li->att('class','dropdown')
-                ->add(new Tag('a'))
-                ->att(['class' => 'dropdown-toggle', 'href' => '#', 'data-toggle' => 'dropdown'])
-                ->add($label.' <span class="caret"></span>');
-            $this->buildUlMenu($li, $menu, $level + 1);
+            $ul->add($this->listItemFactory($label, $menu, $level));            
         }
         return $ul;
     }
     
+    protected function listItemFactory($label, $menu, $level)
+    {
+        $li = new Tag('li');
+        if (!empty($menu['_childrens'])) {
+            $li->att('class','dropdown')
+                ->add(new Tag('a', null, 'dropdown-toggle'))
+                ->att(['href' => '#', 'data-toggle' => 'dropdown'])
+                ->add($label.' <span class="caret"></span>');
+            $this->buildUlMenu($li, $menu['_childrens'], $level + 1);
+        } elseif (!empty($menu['URL'])) {
+            $li->add(new Tag('a'))->att('href', $menu['URL'])->add($label);                
+        } else {
+            $li->add($label);
+        }
+        return $li;
+    }
+
     /**
      * Decide if use fluid (true) or static container (false)
      * 

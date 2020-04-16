@@ -107,7 +107,7 @@ class NavBar extends Component
             $li->att('class','dropdown')
                 ->add(new Tag('a', null, 'dropdown-toggle'))
                 ->att(['href' => '#', 'data-toggle' => 'dropdown'])
-                ->add($label.' <span class="caret"></span>');
+                ->add($label.' <span class="fa fa-caret-down"></span>');
             $this->ulMenuFactory($li, $menu['_childrens'], $level + 1);
         } elseif (!empty($menu['URL'])) {
             $li->add(new Tag('a'))->att('href', $menu['URL'])->add($label);                

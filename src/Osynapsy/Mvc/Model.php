@@ -259,6 +259,11 @@ abstract class Model
                 $where[$field->name] = $value;
             }
         }
+        
+        if (method_exists($this, 'validate')) {
+            $this->validate();
+        }
+        
         //If occurred some error stop db updating
         if ($this->controller->response->error()) { 
             return; 

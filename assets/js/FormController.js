@@ -439,10 +439,11 @@ var Osynapsy = new (function(){
     pub.waitMask = 
     {    
         build : function(message, parent, position)
-        {                        
-            var mask = $('<div id="waitMask" class="wait"><div class="message">'+message+'</div></div>');
+        {            
+            var mask = $('<div id="waitMask" class="wait"><div class="message">'+message+'</div></div>');            
             mask.width($(parent).width())
                 .height($(parent).height())
+                .css('position','absolute')
                 .css('top', position.top+'px')
                 .css('left',position.left+'px');
             $('body').append(mask);
@@ -450,10 +451,10 @@ var Osynapsy = new (function(){
         show : function()
         {        
             var message = 'PLEASE WAIT <span class="fa fa-refresh fa-spin"></span>';
-            var position = {top : '0px', left : '0px'};
+            var position = {top : '0', left : '0'};
             var parent = document;
-            if (arguments.length > 0) {
-                parent = arguments[0];
+            if (arguments.length > 0) {                
+                parent = arguments[0];                
                 position = $(parent).offset();
             }
             this.build(message, parent, position);

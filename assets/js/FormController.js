@@ -441,8 +441,8 @@ var Osynapsy = new (function(){
         build : function(message, parent, position)
         {            
             var mask = $('<div id="waitMask" class="wait"><div class="message">'+message+'</div></div>');            
-            mask.width($(parent).width())
-                .height($(parent).height())
+            mask.width($(parent).outerWidth())
+                .height($(parent).outerHeight())
                 .css('position','absolute')
                 .css('top', position.top+'px')
                 .css('left',position.left+'px');

@@ -21,6 +21,8 @@ use Osynapsy\Html\Bcl\Link;
  */
 class NavBar extends Component
 {        
+    public $container;
+    
     /**
      * Constructor require dom id of component
      * 
@@ -32,6 +34,7 @@ class NavBar extends Component
         $this->setClass($class);
         $this->setParameter('containerClass', $containerClass);
         $this->setData([],[]);
+        $this->container = $this->add(new Tag('div'));
     }
     
     /**
@@ -40,10 +43,10 @@ class NavBar extends Component
      */
     public function __build_extra__()
     {        
-        $container = $this->add(new Tag('div'));
-        $container->att('class', $this->getParameter('containerClass'));        
-        $this->headerFactory($container);
-        $collapse = $container->add(new Tag('div',$this->id.'_collapse'))->att('class','collapse navbar-collapse');
+        
+        $this->container->att('class', $this->getParameter('containerClass'));        
+        $this->headerFactory();
+        $collapse = $this->container->add(new Tag('div',$this->id.'_collapse'))->att('class','collapse navbar-collapse');
         $this->ulMenuFactory($collapse, $this->data['primary'])->att('class','nav navbar-nav'); 
         $this->ulMenuFactory($collapse, $this->data['secondary'])->att('class','nav navbar-nav pull-right');
     }
@@ -54,9 +57,9 @@ class NavBar extends Component
      * @param type $container
      * @return type
      */
-    private function headerFactory($container)
+    private function headerFactory()
     {                
-        $header = $container->add(new Tag('div', null, 'navbar-header'));
+        $header = $this->container->add(new Tag('div', null, 'navbar-header'));
         $header->add($this->buttonMobileShowMenuFactory());
         $header->add($this->brandFactory());
     }
@@ -72,7 +75,7 @@ class NavBar extends Component
     
     protected function buttonMobileShowMenuFactory()
     {
-        return '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#'.$this->id.'_collapse" aria-expanded="false" aria-controls="navbar">
+        return '<button type="button" class="navbar-toggle collapsed pull-left" data-toggle="collapse" data-target="#'.$this->id.'_collapse" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -102,9 +105,9 @@ class NavBar extends Component
     
     protected function listItemFactory($label, $menu, $level)
     {
-        $li = new Tag('li');
+        $li = new Tag('li', null, empty($menu['class']) ? null : $menu['class']);
         if (!empty($menu['_childrens'])) {
-            $li->att('class','dropdown')
+            $li->att('class',' dropdown', true)
                 ->add(new Tag('a', null, 'dropdown-toggle'))
                 ->att(['href' => '#', 'data-toggle' => 'dropdown'])
                 ->add($label.' <span class="fa fa-caret-down"></span>');

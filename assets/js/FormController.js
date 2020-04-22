@@ -668,7 +668,7 @@ var FormController =
         
         $('.modal').remove();
         var win  = '<div id="' + id + '" class="modal fade" role="dialog">\n';
-            win += '    <div class="modal-dialog modal-lg" style="width: '+wdt+';">\n';
+            win += '    <div class="modal-dialog modal-lg">\n';
             win += '        <div class="modal-content">\n';
             win += '            <div class="modal-header">\n';
             win += '                <button type="button" class="close" data-dismiss="modal">&times;</button>';
@@ -685,6 +685,9 @@ var FormController =
             win += '    </div>';
             win += '</div>';
             win = $(win);
+        if (!Osynapsy.isEmpty(wdt) && window.screen.availWidth > 1000) {            
+            $('.modal-dialog', win).css('max-width', wdt);                            
+        }
         $('body').append(win);
         $('iframe', '#'+id).on('load', function(){
             

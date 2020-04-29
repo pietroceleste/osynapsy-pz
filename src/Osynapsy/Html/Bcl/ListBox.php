@@ -47,6 +47,16 @@ class ListBox extends Component
         }
     }
     
+    public function setAction($action, $parameters = null, $class = 'click-execute', $confirm = null)
+    {
+        $this->hdn->att([
+           'class' => 'change-execute',
+            'data-action' => $action,
+            'data-action-parameters' => $parameters,
+            'data-confirm' => $confirm
+        ]);
+    }
+    
     public function SetData($data)
     {
         $this->data = $data;

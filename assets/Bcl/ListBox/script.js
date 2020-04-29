@@ -7,11 +7,12 @@ olistbox = {
             $('.listbox-list',par).width(par.width()).toggle();
         }).on('click','.listbox-list .listbox-list-item',function(){
             $(this).closest('.listbox-list').toggle();
-            var par = $(this).closest('.listbox');
+            var par = $(this).closest('.listbox');            
             $('.listbox-list-item',par).removeClass('selected');
             $('input[type=hidden]',par).val($(this).attr('value'));
             $('.listbox-box',par).html($(this).html());
             $(this).addClass('selected');
+            $('input[type=hidden]',par).trigger('change');
         }).on('click','.'+this.icoClose,function(e){
             e.stopPropagation();
             $(this).closest('div').next().removeClass('hidden');

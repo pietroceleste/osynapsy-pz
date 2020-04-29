@@ -51,4 +51,9 @@ class ListBox extends Component
     {
         $this->data = $data;
     }
+    
+    public function onChange($code)
+    {
+        $this->hdn->att('onchange', $code);
+    }
 }

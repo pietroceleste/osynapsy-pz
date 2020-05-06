@@ -1,11 +1,12 @@
-BclDatePicker = 
+BclDatePicker =
 {
     init : function()
     {
         $('.date-picker').each(function(){
             var self = this;
             var opt = {
-                format: $(this).data('format')
+                format: $(this).data('format'),
+                useCurrent: false
             };
             var minDate = $(this).data('min');
             if (typeof minDate !== 'undefined') {
@@ -16,7 +17,7 @@ BclDatePicker =
                 } else {
                     opt['minDate'] = new Date(minDate);
                 }
-            }            
+            }
             var maxDate = $(this).data('max');
             if (typeof maxDate !== 'undefined') {
                 if (maxDate.charAt(0) === '#') {
@@ -27,18 +28,18 @@ BclDatePicker =
                     opt['maxDate'] = new Date(maxDate);
                 }
             }
-            var onchange = $(this).attr('onchange');            
-            if (typeof onchange !== 'undefined') {                 
-                $(this).on('dp.change', function(){                    
-                    eval(onchange); 
-                });                
+            var onchange = $(this).attr('onchange');
+            if (typeof onchange !== 'undefined') {
+                $(this).on('dp.change', function(){
+                    eval(onchange);
+                });
             }
             $(this).datetimepicker(opt);
         });
     }
 };
 
-if (window.FormController){    
+if (window.FormController){
     FormController.register('init','BclDatePicker_init',function(){
         BclDatePicker.init();
     });

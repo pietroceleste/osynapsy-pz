@@ -17,13 +17,13 @@ use Osynapsy\Html\Bcl\PanelNew;
 
 /**
  * Build a card
- * 
+ *
  */
 class Card extends Component
 {
     private $head;
     private $body;
-    
+
     public function __construct($name, $title = null, array $commands = [])
     {
         parent::__construct('div',$name);
@@ -39,7 +39,7 @@ class Card extends Component
             $this->add($this->head);
         }
     }
-    
+
     private function buildCommandContainer($commands)
     {
         if (empty($commands)) {
@@ -52,7 +52,7 @@ class Card extends Component
         }
         $this->head->add($commandContainer);
     }
-    
+
     public function getBody()
     {
         if (empty($this->body)) {

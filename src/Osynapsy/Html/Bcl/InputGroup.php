@@ -18,7 +18,7 @@ class InputGroup extends Component
 {
     protected $textBox;
     protected $postfix;
-    
+
     public function __construct($name, $prefix = '', $postfix = '')
     {
         parent::__construct('div');
@@ -35,19 +35,19 @@ class InputGroup extends Component
             $this->textBox = $this->add(new TextBox($name));
             $this->textBox->att('aria-describedby',$name.'_prefix');
         }
-        
+
         if ($postfix) {
             $class = is_object($postfix) ?'input-group-btn' : 'input-group-addon';
             $this->postfix = $this->add(new Tag('span'))->att('class', $class);
             $this->postfix->add($postfix);
         }
     }
-    
+
     public function getTextBox()
     {
         return $this->textBox;
     }
-    
+
     public function getPostfix()
     {
         return $this->postfix;

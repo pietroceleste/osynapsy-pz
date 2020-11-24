@@ -181,6 +181,11 @@ class DbOci implements InterfaceDbo
         return $result;
     }
 
+    public function execQueryNum($sql, $par = null)
+    {
+        return $this->execQuery($sql, $par, 'NUM');
+    }
+
     public function getIterator($rs, $par = null, $method = null)
     {
 	    if (is_string($rs)) {
@@ -204,10 +209,12 @@ class DbOci implements InterfaceDbo
 	    }
 	    $this->freeRs($rs);
     }
+    
     public function query($sql)
     {
         return $this->execCommand($sql);
     }
+
     public function getFirst($rs, $par = null, $method = null)
     {
 	    if (is_string($rs)) {
@@ -251,6 +258,11 @@ class DbOci implements InterfaceDbo
        $res = $this->execQuery($sql, $par, $mth);
        if (empty($res)) return null;
        return (count($res[0])==1) ? $res[0][0] : $res[0];
+    }
+
+    public function execOneAssoc($sql, $par = null)
+    {
+        return $this->execUnique($sql, $par, 'ASSOC');
     }
 
     public function getColumns($stmt = null)

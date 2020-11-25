@@ -135,6 +135,11 @@ abstract class Controller implements InterfaceController, InterfaceSubject
         return $this->parameters[$key];
     }
 
+    public function getModel()
+    {
+        return $this->model;
+    }
+
     public function getResponse()
     {
         return $this->response;

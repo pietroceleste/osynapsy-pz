@@ -14,7 +14,7 @@ abstract class Base implements InterfaceAction
     protected $controller;
     protected $parameters;
     protected $triggers = [];
-    
+
     abstract public function execute();
 
     protected function executeTrigger($eventId)
@@ -38,6 +38,11 @@ abstract class Base implements InterfaceAction
     public function getModel()
     {
         return $this->getController()->getModel();
+    }
+
+    public function getParameter($key)
+    {
+        return array_key_exists($key, $this->parameters) ? $this->parameters[$key] : null;
     }
 
     public function getResponse()

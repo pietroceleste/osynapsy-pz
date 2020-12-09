@@ -1,17 +1,17 @@
 var Osynapsy = new (function(){
-    
+
     var pub = {
         kernel : {},
         history : {},
         plugin : {}
     };
-    
-    pub.action = 
+
+    pub.action =
     {
         execute : function(object)
         {
             var form = $(object).closest('form');
-            var action = $(object).data('action');        
+            var action = $(object).data('action');
             if (Osynapsy.isEmpty(action)) {
                 alert('Attribute data-action don\'t set.');
                 return;
@@ -19,8 +19,8 @@ var Osynapsy = new (function(){
             if (!Osynapsy.isEmpty($(object).data('confirm'))) {
                 if (!confirm($(object).data('confirm'))) {
                     return;
-                }   
-            }          
+                }
+            }
             this.remoteExecute(action, form, this.grabActionParameters(object));
         },
         grabActionParameters : function(object)
@@ -28,7 +28,7 @@ var Osynapsy = new (function(){
             if (Osynapsy.isEmpty($(object).data('action-parameters'))) {
                 return false;
             }
-            var values = [];        
+            var values = [];
             var params = String($(object).data('action-parameters')).split(',');
             for (var i in params) {
                 var value = params[i];
@@ -36,11 +36,11 @@ var Osynapsy = new (function(){
                     value = $(object).val();
                 } else if (value.charAt(0) === '#' && $(value).length > 0) {
                     value = $(value).val();
-                } 
+                }
                 values.push('actionParameters[]=' + encodeURIComponent(value));
             }
             return values.join('&');
-        },        
+        },
         remoteExecute : function(action, form, actionParameters)
         {
             var extraData = Osynapsy.isEmpty(actionParameters) ? '' : actionParameters;
@@ -52,26 +52,26 @@ var Osynapsy = new (function(){
                 },
                 type : 'post',
                 dataType : 'json',
-                success : function(response){            
+                success : function(response){
                     Osynapsy.waitMask.remove();
                     Osynapsy.kernel.message.dispatch(response);
                 },
-                error: function(xhr, status, error) {                
+                error: function(xhr, status, error) {
                     Osynapsy.waitMask.remove();
                     console.log(status);
                     console.log(error);
                     console.log(xhr);
                     alert(xhr.responseText);
                 }
-            };                        
-            if (!this.checkForUpload()) {               
+            };
+            if (!this.checkForUpload()) {
                 var options = {
                     beforeSend : function() {
                         Osynapsy.waitMask.show();
                     },
                     data : $(form).serialize()+'&'+extraData
                 };
-            } else {                
+            } else {
                 var options  = {
                     beforeSend : function() {
                         Osynapsy.waitMask.showProgress();
@@ -89,28 +89,28 @@ var Osynapsy = new (function(){
                     contentType : false,
                     cache : false,
                     processData :false
-                };        
+                };
             }
             $.extend(callParameters, options);
             $.ajax(callParameters);
         },
         checkForUpload : function()
         {
-            if (!window.FormData){            
+            if (!window.FormData){
                 return false; //No file to upload or IE9,IE8,etc browser
             }
             var upload = false;
             $('input[type=file]').each(function(){
                 //Carico il metodo per effettuare l'upload solo se c'è almeno un campo file pieno
                 if (!Osynapsy.isEmpty($(this).val())) {
-                    upload = true; 
+                    upload = true;
                     return false ;
                 }
             });
-            return upload;        
+            return upload;
         }
     };
-    
+
     pub.coalesce = function()
     {
         if (arguments.length === 0) {
@@ -123,7 +123,7 @@ var Osynapsy = new (function(){
         }
         return null;
     };
-    
+
     pub.hashCode = function(string) {
         var hash = 0, i, chr;
         if (string.length === 0) {
@@ -136,8 +136,8 @@ var Osynapsy = new (function(){
         }
         return hash;
     };
-    
-    pub.history = 
+
+    pub.history =
     {
         save : function()
         {
@@ -162,8 +162,8 @@ var Osynapsy = new (function(){
                     arr.push([$(this).attr('name'), $(this).val()]);
                 }
             });
-            hst.push({url : window.location.href, parameters : arr});        
-            sessionStorage.history = JSON.stringify(hst);        
+            hst.push({url : window.location.href, parameters : arr});
+            sessionStorage.history = JSON.stringify(hst);
         },
         back : function()
         {
@@ -180,43 +180,43 @@ var Osynapsy = new (function(){
             Osynapsy.post(stp.url, stp.parameters);
         }
     };
-    
+
     pub.isEmpty = function (value)
     {
         if (typeof value === 'undefined') {
             return true;
         }
         switch(value) {
-            case []:                
-            case {}:                
-            case null:                
-            case '':            
+            case []:
+            case {}:
+            case null:
+            case '':
             case false:
             return true;
         default:
             return false;
         }
     };
-    
+
     pub.isObject = function(v)
     {
         return v instanceof Object;
     };
-    
+
     pub.typingEvent = function(obj)
     {
         if (pub.typingTimeout !== undefined) {
             clearTimeout(pub.typingTimeout);
         }
-        pub.typingTimeout = setTimeout(function(){ 
+        pub.typingTimeout = setTimeout(function(){
             var code = $(obj).attr('ontyping');
             if (code) {
                 eval(code);
             }
-        }, 500);  
+        }, 500);
     };
-    
-    pub.kernel.message = 
+
+    pub.kernel.message =
     {
         response : null,
         dispatch : function (response)
@@ -225,7 +225,7 @@ var Osynapsy = new (function(){
             if (!Osynapsy.isObject(this.response)){
                 console.log('Resp is not an object : ', this.response);
                 return;
-            }       
+            }
             this.dispatchErrors(this.response);
             this.dispatchCommands(this.response);
         },
@@ -243,8 +243,8 @@ var Osynapsy = new (function(){
                 }
                 var cmp = $('#'+val[0]);
                 if ($(cmp).hasClass('field-in-error')){
-                    return true;                
-                }            
+                    return true;
+                }
                 errors.push(cmp.length > 0 ? self.showErrorOnLabel(cmp, val[1]) : val[1]);
             });
             if (errors.length === 0) {
@@ -260,7 +260,7 @@ var Osynapsy = new (function(){
             if (!('command' in response)) {
                 return;
             }
-            $.each(response.command, function(idx, val){            
+            $.each(response.command, function(idx, val){
                 if (val[0] in FormController) {
                     FormController[val[0]](val[1]);
                 }
@@ -288,8 +288,8 @@ var Osynapsy = new (function(){
             });
         }
     };
-    
-    pub.modal = 
+
+    pub.modal =
     {
         build : function(id, title, body, actionConfirm, actionCancel)
         {
@@ -330,9 +330,9 @@ var Osynapsy = new (function(){
         {
             $('.modal').remove();
         },
-        show : function(title, message, actionConfirm = null, actionCancel = null){
+        show : function(title, message, actionConfirm, actionCancel){
             if (!title) { title = 'Alert'; }
-            var modalId = actionConfirm !== null ? 'alert' : 'confirm';
+            var modalId = actionConfirm ? 'alert' : 'confirm';
             return this.build(modalId, title, message, actionConfirm, actionCancel);
         },
         confirm : function(object)
@@ -340,7 +340,7 @@ var Osynapsy = new (function(){
             return this.build('confirm','Confirm',object.data('confirm'), object.data('action'));
         }
     };
-    
+
     pub.page = {
         init : function()
         {
@@ -354,31 +354,31 @@ var Osynapsy = new (function(){
                 //alert('ci sono');
                 switch (event.keyCode) {
                     case 13 : //Enter
-                    case 9:                                
+                    case 9:
                         FormController.execute(this);
                         return false;
-                    break;                             
+                    break;
                 }
-            }).on('click','.cmd-back',function(){        
+            }).on('click','.cmd-back',function(){
                 Osynapsy.history.back();
             }).on('click','.save-history',function(){
                 Osynapsy.history.save();
             }).on('click','a.open-modal',function(e){
-                e.preventDefault();            
+                e.preventDefault();
                 FormController.modalWindow(
-                    'amodal', 
-                    $(this).attr('title'), 
-                    $(this).is('.postdata') ? [$(this).attr('href'), $(this).closest('form')] : $(this).attr('href'), 
+                    'amodal',
+                    $(this).attr('title'),
+                    $(this).is('.postdata') ? [$(this).attr('href'), $(this).closest('form')] : $(this).attr('href'),
                     $(this).attr('modal-width') ? $(this).attr('modal-width') : '75%',
                     $(this).attr('modal-height') ? $(this).attr('modal-height') : ($(window).innerHeight() - 250) + 'px'
                 );
-            }).on('keyup', '.typing-execute', function(){                
+            }).on('keyup', '.typing-execute', function(){
                Osynapsy.typingEvent(this);
             });
             FormController.fire('init');
         }
     };
-    
+
     pub.post = function(url, vars)
     {
         var form = $('<form method="post" action="'+url+'"></form>');
@@ -390,16 +390,16 @@ var Osynapsy = new (function(){
         $('body').append(form);
         form.submit();
     };
-    
+
     pub.refreshComponents = function(components)
-    {        
-        var cmps = Array.isArray(components) ? components : [components];       
+    {
+        var cmps = Array.isArray(components) ? components : [components];
         var data  = $('form').serialize();
             data += (arguments.length > 1 && arguments[1]) ? '&'+arguments[1] : '';
         var fncOnSuccess = arguments.length > 2 ? arguments[2] : null;
-        if (cmps.length === 1) {            
-            Osynapsy.waitMask.show($('#' + cmps[0]));            
-        } else if ($(components).is(':visible')) {           
+        if (cmps.length === 1) {
+            Osynapsy.waitMask.show($('#' + cmps[0]));
+        } else if ($(components).is(':visible')) {
             Osynapsy.waitMask.show();
         }
         for (var i in cmps) {
@@ -420,11 +420,11 @@ var Osynapsy = new (function(){
                     if (componentRemote) {
                         $(componentID).replaceWith(componentRemote);
                         successRefresh = true;
-                    }                    
+                    }
                 }
                 if (!successRefresh){
                     console.log(response);
-                } else if (typeof fncOnSuccess === 'function') {                    
+                } else if (typeof fncOnSuccess === 'function') {
                     fncOnSuccess();
                 }
             },
@@ -435,12 +435,12 @@ var Osynapsy = new (function(){
             }
         });
     };
-    
-    pub.waitMask = 
-    {    
+
+    pub.waitMask =
+    {
         build : function(message, parent, position)
-        {            
-            var mask = $('<div id="waitMask" class="wait"><div class="message">'+message+'</div></div>');            
+        {
+            var mask = $('<div id="waitMask" class="wait"><div class="message">'+message+'</div></div>');
             mask.width($(parent).outerWidth())
                 .height($(parent).outerHeight())
                 .css('position','absolute')
@@ -449,12 +449,12 @@ var Osynapsy = new (function(){
             $('body').append(mask);
         },
         show : function()
-        {        
+        {
             var message = 'PLEASE WAIT <span class="fa fa-refresh fa-spin"></span>';
             var position = {top : '0', left : '0'};
             var parent = document;
-            if (arguments.length > 0) {                
-                parent = arguments[0];                
+            if (arguments.length > 0) {
+                parent = arguments[0];
                 position = $(parent).offset();
             }
             this.build(message, parent, position);
@@ -467,8 +467,8 @@ var Osynapsy = new (function(){
             this.build(message, document, {top : '0px', left : '0px'})
         },
         remove : function()
-        {        
-            $('#waitMask').remove();     
+        {
+            $('#waitMask').remove();
         },
         uploadProgress : function(a){
             console.log(a);
@@ -481,13 +481,13 @@ var Osynapsy = new (function(){
             }
         }
     };
-    
+
     return pub;
 });
 
-var FormController = 
+var FormController =
 {
-    repo : 
+    repo :
     {
         event : { init : {} },
         componentInit : {}
@@ -499,14 +499,14 @@ var FormController =
     back : function()
     {
         Osynapsy.history.back();
-    },    
+    },
     fire : function(evt)
     {
         if (evt in this.repo['event']){
             for (var i in this.repo['event'][evt] ){
                 try{
                     this.repo['event'][evt][i]();
-                } catch(err) {                    
+                } catch(err) {
                     console.log(err);
                 }
             }
@@ -526,7 +526,7 @@ var FormController =
                 window.location = url;
                 break;
         }
-    },    
+    },
     execute  : function(object)
     {
         Osynapsy.action.execute(object);
@@ -545,48 +545,48 @@ var FormController =
         }
     },
     refreshComponent : function(component)
-    {        
+    {
         /*
         var data  = $('form').serialize();
             data += (arguments.length > 1 && arguments[1]) ? '&'+arguments[1] : '';
-        if (!(typeof component === 'object')) {            
-            Osynapsy.waitMask.show(component);            
-        } else if ($(component).is(':visible')) {           
+        if (!(typeof component === 'object')) {
+            Osynapsy.waitMask.show(component);
+        } else if ($(component).is(':visible')) {
             Osynapsy.waitMask.show();
-        }        
-        data += '&ajax[]=' + $(component).attr('id');        
+        }
+        data += '&ajax[]=' + $(component).attr('id');
         $.ajax({
             type : 'post',
             data : data,
-            success : function(rsp) {                      
+            success : function(rsp) {
                 Osynapsy.waitMask.remove();
                 var cid = '#'+$(component).attr('id');
-                var cmp = $(rsp).find(cid);                
-                $(cid).replaceWith(cmp);                
+                var cmp = $(rsp).find(cid);
+                $(cid).replaceWith(cmp);
             }
         });
         */
         var cmps = Array.isArray(component) ? component : [component];
         var data  = $('form').serialize();
             data += (arguments.length > 1 && arguments[1]) ? '&'+arguments[1] : '';
-        if (!(typeof component === 'object')) {            
-            Osynapsy.waitMask.show(component);            
-        } else if ($(component).is(':visible')) {           
+        if (!(typeof component === 'object')) {
+            Osynapsy.waitMask.show(component);
+        } else if ($(component).is(':visible')) {
             Osynapsy.waitMask.show();
         }
         for (var i in cmps) {
-            data += '&ajax[]=' + $(cmps[i]).attr('id');        
+            data += '&ajax[]=' + $(cmps[i]).attr('id');
         }
         $.ajax({
             url  : window.location.href,
             type : 'post',
             data : data,
-            success : function(rsp) {                      
+            success : function(rsp) {
                 Osynapsy.waitMask.remove();
                 for (var i in cmps) {
                    var cid = '#'+ $(cmps[i]).attr('id');
-                   var cmp = $(rsp).find(cid);                
-                   $(cid).replaceWith(cmp);                
+                   var cmp = $(rsp).find(cid);
+                   $(cid).replaceWith(cmp);
                 }
             }
         });
@@ -594,7 +594,7 @@ var FormController =
     register : function(evt,lbl,fnc)
     {
         this.repo['event'][evt][lbl] = fnc;
-    },    
+    },
     setValue : function(k,v)
     {
         if ($('#'+k).length > 0){
@@ -640,7 +640,7 @@ var FormController =
         if (!title) {
             title = 'Alert';
         }
-        var win = this.modal('alert', title, message, null, null);        
+        var win = this.modal('alert', title, message, null, null);
         return $(win);
     },
     modalConfirm : function(title, message, actionConfirm, actionCancel){
@@ -650,7 +650,7 @@ var FormController =
         return this.modal('confirm', title, message, actionConfirm, actionCancel);
     },
     modalWindow : function(id, title, url) {
-        var wdt = '90%';        
+        var wdt = '90%';
         var hgt = ($(window).innerHeight() - 250) + 'px';
         var form = null;
         if ($.isArray(url)) {
@@ -660,12 +660,12 @@ var FormController =
         }
         if (typeof arguments[3] !== 'undefined') {
             wdt = arguments[3];
-        }        
+        }
         if (typeof arguments[4] !== 'undefined') {
             hgt = arguments[4];
             console.log('height :' + hgt);
         }
-        
+
         $('.modal').remove();
         var win  = '<div id="' + id + '" class="modal fade" role="dialog">\n';
             win += '    <div class="modal-dialog modal-lg">\n';
@@ -685,12 +685,12 @@ var FormController =
             win += '    </div>';
             win += '</div>';
             win = $(win);
-        if (!Osynapsy.isEmpty(wdt) && window.screen.availWidth > 1000) {            
-            $('.modal-dialog', win).css('max-width', wdt);                            
+        if (!Osynapsy.isEmpty(wdt) && window.screen.availWidth > 1000) {
+            $('.modal-dialog', win).css('max-width', wdt);
         }
         $('body').append(win);
         $('iframe', '#'+id).on('load', function(){
-            
+
         });
         if (form) {
             var action = form.attr('action');
@@ -713,7 +713,7 @@ var FormController =
         $('#'+id).modal({
             keyboard : true
         });
-        
+
         return win;
     }
 };

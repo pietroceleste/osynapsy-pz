@@ -25,20 +25,20 @@ class ChartGoogle extends Component
     private $rows = array();
     private $type;
     private $options = array(
-        'title' => 'No title'        
+        'title' => 'No title'
     );
-    
+
     public function __construct($id,  $title = 'No title', $type='BarChart')
     {
         parent::__construct('div', $id);
         $this->type = $type;
         $this->att('class','OclChartGoogle');
         $this->setOption('title', $title);
-        $this->requireJs('//www.gstatic.com/charts/loader.js');        
+        $this->requireJs('//www.gstatic.com/charts/loader.js');
     }
-    
+
     public function __build_extra__()
-    {        
+    {
         $script = $this->add(new Tag('script'));
         $script->add("document.addEventListener('DOMContentLoaded',function() {".PHP_EOL);
         $script->add("google.charts.load('current', {'packages':['corechart']});".PHP_EOL);
@@ -50,36 +50,50 @@ class ChartGoogle extends Component
         foreach ($this->columns as $name => $type) {
             $script->add("data.addColumn('$type','$name');".PHP_EOL);
         }
-        $script->add('data.addRows(['.PHP_EOL.implode(','.PHP_EOL, $this->rows).']);'.PHP_EOL);        
+        $script->add('data.addRows(['.PHP_EOL.implode(','.PHP_EOL, $this->rows).']);'.PHP_EOL);
         $script->add("var chart = new google.visualization.{$this->type}(document.getElementById('{$this->id}'));".PHP_EOL);
-        $script->add("chart.draw(data, options);");        
+        $script->add("chart.draw(data, options);");
         $script->add("}".PHP_EOL);
-        
+
     }
-    
+
     private function buildJsObject(array $array)
     {
         $properties = array();
-        foreach ($array as $key => $value) {
-            $properties[] = $key." : '".(is_string($value) ? addslashes($value) : $value)."'".PHP_EOL;
+        foreach ($array as $key => $rawvalue) {
+            if (is_array($rawvalue)) {
+                $value = $this->buildJsArray($rawvalue);
+            } elseif (substr($rawvalue,0,1) === '{') {
+                $value = $rawvalue;
+            } elseif (is_string($rawvalue)) {
+                $value = "'".addslashes($rawvalue)."'";
+            }  else {
+                $value = $rawvalue;
+            }
+            $properties[] = sprintf('%s : %s', $key, $value).PHP_EOL;
         }
         return '{'.implode(','.PHP_EOL,$properties).'}';
     }
-    
+
+    protected function buildJsArray($value)
+    {
+        return "['".implode("','", $value)."']";
+    }
+
     public function addColumn($name, $type = 'string')
     {
-        $this->columns[$name] = $type;        
+        $this->columns[$name] = $type;
     }
-    
+
     public function addRow(array $raw)
-    {                    
+    {
         $row = array();
         foreach ($raw as $value) {
             $row[] = is_string($value) ? "'".addslashes(trim($value))."'" : trim($value);
         }
         $this->rows[] = "[".implode(',',$row)."]";
     }
-    
+
     public function setOption($key, $value)
     {
         $this->options[$key] = $value;

@@ -66,4 +66,9 @@ abstract class Base implements InterfaceAction
             $this->triggers[$event] = $function;
         }
     }
+
+    public function raiseException($message, $code = 501)
+	{
+		throw new \Exception($message, $code);
+	}
 }

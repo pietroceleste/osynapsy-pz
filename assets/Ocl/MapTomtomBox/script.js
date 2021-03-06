@@ -43,14 +43,15 @@ OclMapTomtomBox = {
 		}
 		self.inupdate = true;
 		self.autocenter = false;
-                self.setVertex(map);
+        self.setVertex(map);
 		if (OclMapTomtomBox.refreshGridTimeout) {
-                    clearTimeout(OclMapTomtomBox.refreshGridTimeout);
+            clearTimeout(OclMapTomtomBox.refreshGridTimeout);
 		}
-                OclMapTomtomBox.refreshGridTimeout = setTimeout(function(){
-                    OclMapTomtomBox.refreshDatagrid(false);
-                }, 3000);
-            });
+        OclMapTomtomBox.refreshGridTimeout = setTimeout(
+            function(){
+                OclMapTomtomBox.refreshDatagrid(false);
+            }, 3000);
+        });
             if (Osynapsy.isEmpty($(this).data('marker'))){
                 return true;
             }

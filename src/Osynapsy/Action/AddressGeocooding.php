@@ -16,14 +16,12 @@ namespace Osynapsy\Action;
  *
  * @author p.celeste@osynapsy.net
  */
-class AddressGeoocoding 
+class AddressGeocooding
 {
     //put your code here
     public static function getLatLng($address)
     {
-           $address = trim($address);
-           $geourl = "http://maps.googleapis.com/maps/api/geocode/json?address={$address}&sensor=false&region=it";
-           
+           $geourl = sprintf("http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false&region=it", trim($address));
            // Create cUrl object to grab XML content using $geourl
            $c = curl_init();
            curl_setopt($c, CURLOPT_URL, utf8_encode($geourl));
@@ -34,16 +32,17 @@ class AddressGeoocoding
            $resp = trim(curl_exec($c));
            //$r = curl_getinfo($c);
            curl_close($c);
-           // Create SimpleXML object from XML Content           
-           $obj = json_decode($resp);           
+           // Create SimpleXML object from XML Content
+           $obj = json_decode($resp);
            // Print out all of the XML Object
-           if ($obj->status && $obj->status == 'OK') {               
+           if ($obj->status && $obj->status == 'OK') {
                return array(
                    $obj->results[0]->geometry->location->lat,
                    $obj->results[0]->geometry->location->lng
                );
            }
-           return false;
+
+           throw new \Exception($obj->error_message);
     }
 }
 

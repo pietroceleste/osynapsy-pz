@@ -9,121 +9,146 @@ OclMapTomtomBox = {
     datasets : {},
     autocenter : true,
     startMarker : [],
-	inupdate : false,
+    inupdate : false,
     init : function()
     {
+        tomtom.setProductInfo('OclTomtomBox', '0.1');
         var self = this;
-        $('.osy-mapgrid-tomtom').each(function(){
-            var mapId = $(this).attr('id');
-            var zoom = 10;
-            tomtom.setProductInfo('OclTomtomBox', '0.1');
-            var map = tomtom.map(mapId, {
-                key: 'dXD9YwZw0BUAgA3VKh8YsOQKDEHcMbEO',
-                source: 'vector',
-                basePath: '/sdk'
-            });
-            map.mapId = mapId;
-            self.maplist[mapId] = map;
-            if (document.getElementById(mapId + '_zoom').value > 0){
-                zoom = document.getElementById(mapId + '_zoom').value;
-            }
-            if (!Osynapsy.isEmpty( $('#' + mapId + '_center').val())) {
-                var center = $('#' + mapId + '_center').val().split(',');
-                center[0] = parseFloat(center[0]);
-                center[1] = parseFloat(center[1]);
-                map.setView(center, zoom);
-            }
-            $('div[data-mapgrid=' + $(this).attr('id') +']').each(function(){
-                self.datagrid.push($(this).attr('id'));
-            });
+        $('.osy-mapgrid-tomtom').each(function() {                 
+            var map = self.initMap(this);
+            console.log(map);
+            self.initStartMarker(map, this);
+            self.initMapCenter(map, 10);                        
+            self.initDatagrids(map);
             self.setVertex(map);
-            map.on('moveend', function(e) {
-                if (self.inupdate) {
-                    return;
-		}
-		self.inupdate = true;
-		self.autocenter = false;
-        self.setVertex(map);
-		if (OclMapTomtomBox.refreshGridTimeout) {
-            clearTimeout(OclMapTomtomBox.refreshGridTimeout);
-		}
-        OclMapTomtomBox.refreshGridTimeout = setTimeout(
-            function(){
-                OclMapTomtomBox.refreshDatagrid(false);
-            }, 3000);
-        });
-            if (Osynapsy.isEmpty($(this).data('marker'))){
-                return true;
-            }
-            self.startMarker = $(this).data('marker').split(',');
-            self.setStartMarker(
-                mapId,
-                self.startMarker[0],
-                self.startMarker[1],
-                self.startMarker[2]
-            );
+            map.on('moveend', self.initMapMoveEvent);            
         });
 	this.refreshDatagrid(true);
     },
-    calc_dist : function(sta, end)
-    {
-	var a = L.latLng(sta);
-	var b = L.latLng(end);
-	return a.distanceTo(b);
+    initMap : function(mapBox)
+    {        
+        let mapId = $(mapBox).attr('id');        
+        let map = tomtom.map(mapId, {
+            key: 'dXD9YwZw0BUAgA3VKh8YsOQKDEHcMbEO',
+            source: 'vector',
+            basePath: '/sdk',
+            refreshDatagridOnMove: true,
+            centered: false
+        });
+        map.mapId = mapId;        
+        this.maplist[mapId] = map;
+        return map;
     },
-    calc_next : function(sta,dat)
+    initStartMarker : function(map, mapBox)
     {
-        //console.log(dat);
-	//Alert impostando una distanza troppo bassa va in errore;
-  	var dst_min = parseFloat(100000000);
-	var coo_min = null;
-	for (i in dat) {
-            var dst_cur = this.calc_dist(sta, dat[i]);
-            dst_min = Math.min(dst_min,dst_cur);
-            if (dst_min == dst_cur){
-		coo_min = dat[i];
-            }
-	}
-	return coo_min;
+        if (!Osynapsy.isEmpty($(mapBox).data('marker'))){
+            this.startMarker = $(mapBox).data('marker').split(',');
+            this.setStartMarker(map.mapId, this.startMarker[0], this.startMarker[1], this.startMarker[2]);
+        }        
     },
-    calc_perc : function(mapid, dat)
+    initMapCenter : function(map, zoom)
     {
-        var polid = 'prova';
-   	var prc = [];
-        var arr = [];
-        var nxt = dat.shift();
-        arr.push([parseFloat(nxt.lat),parseFloat(nxt.lng)]);
-	var i = 0;
-	while ((dat.length > 0) && (i < 1000)){
-            nxt = this.calc_next(nxt,dat);
-            try{
-                arr.push([parseFloat(nxt.lat),parseFloat(nxt.lng)]);
-                dat.splice( dat.indexOf(nxt),1);
-            } catch (err){
-                i = 100;
-            }
-	}
-	if (mapid in this.maplist){
-	    if (polid in this.polylinelist){
-                this.maplist[mapid].removeLayer(this.polylinelist[polid]);
-            }
-            this.polylinelist[polid] = new L.polyline(arr,{color : 'red'});
-            this.polylinelist[polid].addTo(this.maplist[mapid]);
-            //this.layerlist[map].addLayer(pol);
-	}
+        if (document.getElementById(map.mapId + '_zoom').value > 0){
+            zoom = document.getElementById(map.mapId + '_zoom').value;
+        }
+        if (!Osynapsy.isEmpty( $('#' + map.mapId + '_center').val())) {
+            var center = $('#' + map.mapId + '_center').val().split(',');
+            center[0] = parseFloat(center[0]);
+            center[1] = parseFloat(center[1]);
+            map.setView(center, zoom);
+        }
     },
-    dataset_add : function(datid,dats)
+    initDatagrids : function(map)
+    {
+        var self = this;
+        $('div[data-mapgrid=' + map.mapId +']').each(function(){
+            self.datagrid.push($(this).attr('id'));
+        });
+    },
+    initMapMoveEvent : function(evt)
+    {
+        let map = evt.target;        
+        if (!map.options.refreshDatagridOnMove) {
+            map.options.refreshDatagridOnMove = true;
+            return;
+        }
+        OclMapTomtomBox.setVertex(map);
+        if (map.refreshGridTimeout) {
+            clearTimeout(map.refreshGridTimeout);            
+        }
+        map.refreshGridTimeout = setTimeout(function(){            
+            OclMapTomtomBox.refreshDatagrid(false);
+        }, 1000);
+    }, 
+    addDataset : function(datid,dats)
     {
    	this.datasets[datid] = dats;
     },
-    dataset_calc_route : function(mapid, datid, sta)
+    computeDistance : function(start, end)
     {
-        if (datid in this.datasets) {
-            var data = this.datasets[datid].slice();
-            if (sta){
-                data.unshift(sta);
+	var a = L.latLng(start);
+	var b = L.latLng(end);        
+	return a.distanceTo(b);
+    },
+    computeNextStep : function(startPoint, markersDataset)
+    {
+	//Alert impostando una distanza troppo bassa va in errore;
+  	var minimumDistance = parseFloat(100000000);
+	var result = null;
+	for (let i in markersDataset) {
+            let currentPoint = markersDataset[i];  
+            try {
+                let currentDistance = this.computeDistance(
+                    [startPoint[1], startPoint[2]],
+                    [currentPoint[1], currentPoint[2]]
+                );                
+                minimumDistance = Math.min(minimumDistance, currentDistance);
+                if (minimumDistance >= currentDistance){
+                    result = currentPoint;
+                }
+            } catch (e) {
+                console.log(startPoint, currentPoint, e);
             }
-            this.calc_perc(mapid,data);
+	}
+	return result;
+    },    
+    traceRoute : function(mapid, markerDataset)
+    {
+        if (!(mapid in this.maplist)) {
+            throw mapid + ' not found';
+        }
+        var polylineId = 'plottedRoute';   	
+        var route = [];
+        var nextStep = markerDataset.shift();
+        route.push([parseFloat(nextStep[1]), parseFloat(nextStep[2])]);
+	var i = 0;
+	while ((markerDataset.length > 0) && (i < 1000)){            
+            nextStep = this.computeNextStep(nextStep, markerDataset);
+            try{
+                if (!isNam(nextStep[1]) && !isNan(nextStep[2])) {
+                    route.push([parseFloat(nextStep[1]),parseFloat(nextStep[2])]);
+                }
+                markerDataset.splice( markerDataset.indexOf(nextStep), 1);
+            } catch (err){
+                i = 100;
+            }
+	}	
+        if (polylineId in this.polylinelist){
+            this.maplist[mapid].removeLayer(this.polylinelist[polylineId]);
+        }
+        console.log(route);
+        this.polylinelist[polylineId] = new L.polyline(route, {color : 'red'});
+        this.polylinelist[polylineId].addTo(this.maplist[mapid]);
+        //this.layerlist[map].addLayer(pol);	
+    },
+    traceRuoteWithDataset : function(mapId, datasetId, startPoint)
+    {
+        if (datasetId in this.datasets) {
+            let dataset = this.datasets[datasetId].slice();
+            if (startPoint){
+                dataset.unshift(startPoint);
+            }
+            this.traceRoute(mapId, dataset);
         }
     },
     getLayer : function(mapId, layerId, clean)
@@ -332,16 +357,15 @@ OclMapTomtomBox = {
                 dataset.push(marker);
             }
         });
+        this.maplist[mapId].options.refreshDatagridOnMove = false;
         this.markersAdd(mapId, dataGridId, dataset);
-        if (this.autocenter) {
-           this.computeCenter(mapId, dataset);
+        if (!this.maplist[mapId].options.centered) {
+            this.setCenter(mapId, this.computeCenter(dataset));
         }
         if (!Osynapsy.isEmpty($(dataGrid).data('mapgrid-routing'))) {
             this.routing(mapId, dataset);
         }
-        this.dataset_add(dataGridId, dataset);
-        this.autocenter = true;
-        this.inupdate = false;
+        this.dataset_add(dataGridId, dataset);        
     },
     routing : function(mapId, dataset, layerId, colorLayer)
     {
@@ -384,7 +408,7 @@ OclMapTomtomBox = {
                     layer.addData(routeJson);
                });
     },
-    computeCenter : function(mapId, dataset)
+    computeCenter : function(dataset)
     {
         if (dataset.length === 0) {
             return;
@@ -397,32 +421,33 @@ OclMapTomtomBox = {
         }
         center.lat = center.lat / (parseInt(i) + 1);
         center.lng = center.lng / (parseInt(i) + 1);
-        this.setCenter(mapId, center);
+        return center;
     },
-    setVertex : function(map){
-		var mapId = map.mapId;
-		var bounds = map.getBounds();
+    setVertex : function(map)
+    {
+        var mapId = map.mapId;
+        var bounds = map.getBounds();
 
-		var ne = bounds.getNorthEast();
-		var sw = bounds.getSouthWest();
-		var center = map.getCenter();
-		//console.log(ne,sw,center.toString(), map.getContainer().getAttribute('id'));
+        var ne = bounds.getNorthEast();
+        var sw = bounds.getSouthWest();
+        var center = map.getCenter();
+        //console.log(ne,sw,center.toString(), map.getContainer().getAttribute('id'));
 
-		$('#'+mapId+'_ne_lat').val(ne.lat);
-		$('#'+mapId+'_ne_lng').val(ne.lng);
-		$('#'+mapId+'_sw_lat').val(sw.lat);
-		$('#'+mapId+'_sw_lng').val(sw.lng);
-			//return;
-		//$('#'+mapId+'_center').val(map.getCenter().toString().replace('LatLng(','').replace(')',''));
-		$('#'+mapId+'_cnt_lat').val((sw.lat + ne.lat) / 2);
-		$('#'+mapId+'_cnt_lng').val((sw.lng + ne.lng) / 2);
+        $('#'+mapId+'_ne_lat').val(ne.lat);
+        $('#'+mapId+'_ne_lng').val(ne.lng);
+        $('#'+mapId+'_sw_lat').val(sw.lat);
+        $('#'+mapId+'_sw_lng').val(sw.lng);
+                //return;
+        //$('#'+mapId+'_center').val(map.getCenter().toString().replace('LatLng(','').replace(')',''));
+        $('#'+mapId+'_cnt_lat').val((sw.lat + ne.lat) / 2);
+        $('#'+mapId+'_cnt_lng').val((sw.lng + ne.lng) / 2);
     },
     openId : function(markerId, layerId)
     {
-		if (Osynapsy.isEmpty(layerId)){
-				this.markerlist[markerId].openPopup();
-				return;
-		}
+        if (Osynapsy.isEmpty(layerId)){
+            this.markerlist[markerId].openPopup();
+            return;
+        }
         if ((layerId in this.layermarker) && (markerId in this.layermarker[layerId])){
             this.layermarker[layerId][markerId].openPopup();
         }
@@ -435,7 +460,8 @@ OclMapTomtomBox = {
     },
     setCenter: function(mapId, position ,zoomLevel)
     {
-	this.maplist[mapId].setView(position, zoomLevel);
+	this.maplist[mapId].options.centered = true;
+        this.maplist[mapId].setView(position, zoomLevel);        
     },
     setStartMarker : function(mapId, latitude, longitude, iconClass)
     {
@@ -447,7 +473,7 @@ OclMapTomtomBox = {
             popup : 'MAIN'
         }]);
     }
-}
+};
 
 if (window.FormController){
     FormController.register('init','OclMapTomtomBox',function(){

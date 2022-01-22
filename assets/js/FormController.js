@@ -21,7 +21,9 @@ var Osynapsy = new (function(){
                     return;
                 }
             }
-            this.remoteExecute(action, form, this.grabActionParameters(object));
+            var showMask = $(object).hasClass('no-mask') ? false : true;
+            var callParameters = this.grabActionParameters(object);
+            this.remoteExecute(action, form, callParameters, showMask);
         },
         grabActionParameters : function(object)
         {
@@ -44,6 +46,7 @@ var Osynapsy = new (function(){
         remoteExecute : function(action, form, actionParameters)
         {
             var extraData = Osynapsy.isEmpty(actionParameters) ? '' : actionParameters;
+            var showMask = (arguments.length > 3) ? arguments[3] : true;
             $('.field-in-error').removeClass('field-in-error');
             var callParameters = {
                 url  : $(form).attr('action'),
@@ -67,7 +70,9 @@ var Osynapsy = new (function(){
             if (!this.checkForUpload()) {
                 var options = {
                     beforeSend : function() {
-                        Osynapsy.waitMask.show();
+                        if (showMask) {
+                           Osynapsy.waitMask.show();
+                        }
                     },
                     data : $(form).serialize()+'&'+extraData
                 };

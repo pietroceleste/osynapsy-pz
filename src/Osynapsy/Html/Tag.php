@@ -15,11 +15,11 @@ class Tag
 {
     private $att = [];
     private $cnt = [];
-    
-    public $ref = array(); 
+
+    public $ref = array();
     public $tagdep = 0;
     public $parent = null;
-    
+
     public function __construct($tag = 'dummy', $id = null, $class = null)
     {
         $this->att(0,$tag);
@@ -30,7 +30,7 @@ class Tag
             $this->att('class', $class);
         }
     }
-    
+
     public function __get($a)
     {
         if ($a == 'tag') {
@@ -38,12 +38,12 @@ class Tag
         }
         return array_key_exists($a,$this->att) ? $this->att[$a] : null;
     }
-    
+
     public function __set($p,$v)
     {
        $this->att[$p] = $v;
     }
-    
+
     public function add($a, $d='last')
     {
         if (is_object($a)) {
@@ -62,14 +62,20 @@ class Tag
         if ($d=='last') {
             if (is_array($this->cnt)) {
                 array_push($this->cnt,$a);
-            } 
+            }
         } else {
             array_unshift($this->cnt,$a);
             ksort($this->cnt);
         }
         return $a;
     }
-    
+
+    public function prepend($element)
+    {
+        array_unshift($this->cnt, $element);
+        ksort($this->cnt);
+    }
+
     public function addFromArray($a)
     {
         if (!is_array($a)) {
@@ -80,7 +86,7 @@ class Tag
         }
         return $t;
     }
-    
+
     public function att($p, $v='', $concat=false)
     {
         if (is_array($p)) {
@@ -88,7 +94,7 @@ class Tag
                 $this->att[$k] = $v;
             }
             return $this;
-        } 
+        }
         if ($concat && !empty($this->att[$p])) {
             $concat_car = ($concat===true) ? ' ' : $concat;
             $this->att[$p] .= "{$concat_car}{$v}";
@@ -97,7 +103,7 @@ class Tag
         }
         return $this;
     }
-    
+
     protected function build()
     {
         $strContent = '';
@@ -126,28 +132,28 @@ class Tag
         }
         return $strTag;
     }
-    
+
     public static function create($tag,$id=null)
     {
         return new tag($tag,$id);
     }
-    
+
     public function get()
     {
         return $this->build();
     }
-    
+
     public function child($i=0)
     {
         if (is_null($i)) {
-            return $this->cnt;   
+            return $this->cnt;
         }
         if (array_key_exists($i, $this->cnt)) {
             return $this->cnt[$i];
         }
         return false;
     }
-    
+
     public function isEmpty()
     {
         return count($this->cnt) > 0 ? false : true;
@@ -166,7 +172,7 @@ class Tag
             return $this->id;
         }
     }
-    
+
     public function set($content)
     {
         $this->cnt = array($content);

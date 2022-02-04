@@ -26,6 +26,7 @@ class DataGrid extends Component
     private $extra;
     private $functionRow;
     private $defaultOrderBy;
+    private $emptyMessage = 'Nessun dato presente';
 
     public function __construct($name)
     {
@@ -112,7 +113,7 @@ class DataGrid extends Component
                 ($this->getParameter('type') == 'datagrid' ? null : 0)
             );
         } else {
-            $table->add(new Tag('td'))->att('class','no-data text-center')->att('colspan', $this->getParameter('cols_vis'))->add('Nessun dato presente');
+            $table->add(new Tag('td'))->att('class','no-data text-center')->att('colspan', $this->getParameter('cols_vis'))->add($this->emptyMessage);
         }
         //Setto il tipo di componente come classe css in modo da poterlo testare via js.
         $this->att('class', $this->getParameter('type'), true);
@@ -734,5 +735,10 @@ class DataGrid extends Component
     public function setFuncionRow($function)
     {
         $this->functionRow = $function;
+    }
+
+    public function setEmptyMessage($message)
+    {
+        $this->emptyMessage = $message;
     }
 }

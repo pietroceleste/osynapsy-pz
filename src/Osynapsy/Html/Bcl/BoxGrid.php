@@ -25,6 +25,9 @@ class BoxGrid extends Component
             if (!empty($this->emptyMessage)) {
                 $this->appendCell($this->emptyMessage, 12)->setClass('text-center');
             }
+            if ($this->addComand) {
+               $this->appendCell($this->addComand, $this->boxWidth, '1px dashed silver')->setClass('text-center');
+            }
             return;
         }
         $i = 0;

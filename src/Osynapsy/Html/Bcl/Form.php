@@ -23,7 +23,7 @@ use Osynapsy\Html\Bcl\Alert;
  * @author Pietro Celeste <p.celeste@osynapsy.org>
  */
 class Form extends Component
-{    
+{
     private $head;
     public  $headClass = 'row';
     private $alert;
@@ -32,13 +32,13 @@ class Form extends Component
     private $foot;
     private $repo;
     private $appendFootToMain = false;
-    
+
     public function __construct($name, $mainComponent = 'Panel', $tag = 'form')
     {
         parent::__construct($tag, $name);
         $this->repo = new Dictionary(array(
            'foot' => array(
-                'offset' => 1,            
+                'offset' => 1,
                 'width' => 10
             )
         ));
@@ -51,9 +51,9 @@ class Form extends Component
         //Body setting
         $this->body = new $mainComponent($name.'_panel', 'div');
         $this->body->setParameter('label-position','inside');
-        $this->body->tagdep =& $this->tagdep;         
+        $this->body->tagdep =& $this->tagdep;
     }
-    
+
     protected function __build_extra__()
     {
         if ($this->head) {
@@ -63,7 +63,7 @@ class Form extends Component
                  ->att('class', $this->headClass)
                  ->add($this->head);
         }
-        
+
         if ($this->alert) {
             $this->add($this->alert);
         }
@@ -76,9 +76,9 @@ class Form extends Component
         if ($this->appendFootToMain) {
             $this->body->put(
                 '',
-                $this->foot->get(), 
-                10000, 
-                10, 
+                $this->foot->get(),
+                10000,
+                10,
                 $this->repo->get('foot.width'),
                 $this->repo->get('foot.offset')
             );
@@ -86,22 +86,22 @@ class Form extends Component
         }
         $this->add($this->foot->get());
     }
-    
+
     public function addCard($title)
     {
         $this->body->addCard($title);
     }
-    
+
     public function head($width=12, $offset = 0)
     {
         //Head setting
         if (empty($this->head)) {
             $this->head = new Tag('dummy');
-        } 
+        }
         $column = $this->head->add(new Column($width, $offset));
         return $column;
     }
-    
+
     public function alert($label, $type='danger')
     {
         if (empty($this->alert)) {
@@ -121,7 +121,7 @@ class Form extends Component
         $this->alertCount++;
         return $this->alert;
     }
-    
+
     public function foot($obj)
     {
         if (empty($this->foot)) {
@@ -131,19 +131,19 @@ class Form extends Component
         $this->foot->add($obj);
         return is_object($obj) ? $obj : $this->foot;
     }
-    
+
     public function getPanel()
     {
         return $this->body;
     }
-    
+
     public function put($lbl, $obj, $x=0, $y=0, $width=1, $offset=null, $class='')
     {
         $this->body->put($lbl, $obj, $x, $y, $width, $offset, $class);
         return $this->body;
     }
-    
-    public function setCommand($delete = false, $save = true, $back = true)
+
+    public function setCommand($delete = false, $save = true, $back = true, $modalClose = false, $footOnBottom = false)
     {
         if ($save) {
             $this->foot(new Button('btn_save', 'button', 'btn-primary pull-right'))
@@ -151,11 +151,11 @@ class Form extends Component
                  ->att('style','min-width: 100px; margin-right: 10px;')
                  ->add($save === true ? '<span class="glyphicon glyphicon-floppy-disk"></span> Salva' : $save);
         }
-        
+
         if ($delete) {
             $this->foot(new Button('btn_delete', 'button', 'btn-danger pull-right'))
                  ->setAction('delete')
-                 ->att('data-confirm', 'Sei sicuro di voler eliminare il record corrente?')                 
+                 ->att('data-confirm', 'Sei sicuro di voler eliminare il record corrente?')
                  ->att('style','min-width: 100px; margin-right: 10px;')
                  ->add('<span class="glyphicon glyphicon-trash"></span> Elimina');
         }
@@ -166,8 +166,16 @@ class Form extends Component
                  ->att('style','margin-right: 10px; min-width: 100px;')
                  ->add('<span class="glyphicon glyphicon-chevron-left"></span> Indietro');
         }
+        if ($modalClose) {
+            $this->foot(new Button('btn_modal_close', 'button', 'btn btn-default pull-left float-left', '<i class="fa fa-times"></i> Chiudi'))
+                 ->att('style','margin-right: 10px; min-width: 100px;')
+                 ->att('onclick',"parent.$('#amodal').modal('hide');");
+        }
+        if (!empty($this->foot) && !empty($footOnBottom)) {
+            $this->foot->addClass('osy-fixed-bottom');
+        }
     }
-    
+
     public function setType($type)
     {
         if ($type == 'horizontal') {
@@ -175,7 +183,7 @@ class Form extends Component
         }
         $this->body->setType($type);
     }
-    
+
     public function setTitle($title, $subTitle = null, $size = 6)
     {
         $objTitle = new Tag('h2');
@@ -183,13 +191,13 @@ class Form extends Component
                  ->add($title);
         $column = $this->head($size);
         $column->push(false, $objTitle, false);
-        
+
         if (!empty($subTitle)) {
             $column->push(false,'<h4><i>'.$subTitle.'</i></h4>',false);
         }
         return $column;
     }
-    
+
     public function parameter($key, $value=null)
     {
         if (is_null($value)){

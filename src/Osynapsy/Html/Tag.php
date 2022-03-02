@@ -154,6 +154,11 @@ class Tag
         return false;
     }
 
+    public function addClass($class)
+    {
+        return empty($class) ? $this : $this->att('class', $class, true);
+    }
+
     public function isEmpty()
     {
         return count($this->cnt) > 0 ? false : true;

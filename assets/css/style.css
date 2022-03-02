@@ -189,3 +189,9 @@ div.sticky {
   position: sticky;
   top: 0;
 }
+
+.osy-fixed-bottom {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+}

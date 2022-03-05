@@ -238,7 +238,10 @@ abstract class Model
     public function save()
     {
         //Recall before exec method with arbirtary code
-        $this->beforeExec();
+        $beforeError = $this->beforeExec();
+        if (!empty($beforeError)) {
+            $this->getController()->getResponse()->error('alert',$beforeError);
+        }
 
         //Init arrays
         $values = array();

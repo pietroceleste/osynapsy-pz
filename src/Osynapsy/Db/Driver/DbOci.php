@@ -41,12 +41,12 @@ class DbOci implements InterfaceDbo
         $this->__par['pwd'] = trim($par[4]);
         $this->__par['query-parameter-dummy'] = 'pos';
     }
-    
+
     public function begin()
     {
         $this->beginTransaction();
     }
-    
+
     public function beginTransaction()
     {
         $this->__transaction = true;
@@ -142,19 +142,19 @@ class DbOci implements InterfaceDbo
                 oci_bind_by_name($rs, ':'.$k, $$k, $l);
             }
         }
-        
+
         $ok = $this->__transaction ? @oci_execute($rs, OCI_NO_AUTO_COMMIT) : @oci_execute($rs);
-        
+
         if (!$ok) {
             $e = oci_error($rs);  // For oci_parse errors pass the connection handle
             throw new \Exception($e['message'].PHP_EOL.$e['sqltext'].PHP_EOL.print_r($par,true));
             return;
-        } 
-        
+        }
+
         if ($rs_return) {
             return $rs;
-        } 
-        
+        }
+
         foreach ($par as $k=>$v) {
             $par[$k] = $$k;
         }
@@ -209,7 +209,7 @@ class DbOci implements InterfaceDbo
 	    }
 	    $this->freeRs($rs);
     }
-    
+
     public function query($sql)
     {
         return $this->execCommand($sql);
@@ -237,7 +237,7 @@ class DbOci implements InterfaceDbo
 	    $this->freeRs($rs);
 	    return $record;
     }
-    
+
     public function fetchAll2($rs)
     {
         oci_fetch_all($rs, $res, null, null, OCI_FETCHSTATEMENT_BY_ROW|OCI_ASSOC|OCI_RETURN_NULLS|OCI_RETURN_LOBS);
@@ -332,7 +332,7 @@ class DbOci implements InterfaceDbo
     public function delete($table, array $keys)
     {
         $where = array();
-        if (!is_array($keys)){ 
+        if (!is_array($keys)){
             $keys = array('id'=>$cnd);
         }
         foreach($keys as $k=>$v){
@@ -344,18 +344,18 @@ class DbOci implements InterfaceDbo
     }
 
     public function replace($table, array $args, array $conditions)
-    {                        
+    {
         $result = $this->select($table, ['count(*) AS NUMROWS'], $conditions);
         if (!empty($result) && !empty($result[0]) && !empty($result[0]['NUMROWS'])) {
             $this->update($table, $args, $conditions);
             return;
-        } 
+        }
         $this->insert($table, array_merge($args, $conditions));
     }
-    
+
     public function select($table, array $fields, array $condition)
     {
-        $where = array();   
+        $where = array();
         foreach ($condition as $field => $value) {
             if (is_null($value)) {
                 $where[] = "$field is null";
@@ -370,7 +370,7 @@ class DbOci implements InterfaceDbo
         $cmd .= implode(' AND ',$where);
         return $this->execQuery($cmd, $values, 'ASSOC');
     }
-    
+
     public function par($p)
     {
         return array_key_exists($p,$this->__par) ? $this->__par[$p] : null;
@@ -390,7 +390,7 @@ class DbOci implements InterfaceDbo
     {
         oci_close($this->cn);
     }
-    
+
     public function dateToSql($date)
     {
         $app = explode('/',$date);
@@ -399,7 +399,7 @@ class DbOci implements InterfaceDbo
         }
         return $date;
     }
-    
+
     public function setDateFormat($format = 'YYYY-MM-DD')
     {
         $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = '{$format}'");

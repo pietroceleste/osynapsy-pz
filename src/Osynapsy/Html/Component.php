@@ -25,10 +25,11 @@ class Component extends Tag
 
     public function __construct($tag, $id = null)
     {
-        parent::__construct($tag, $id);
         if (!empty($id)) {
+            $id = str_replace(['[',']'], ['_',''], $id);
             self::$ids[$id] = $this;
         }
+        parent::__construct($tag, $id);
     }
 
     protected function build()

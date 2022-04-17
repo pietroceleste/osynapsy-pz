@@ -122,7 +122,6 @@ class DbOci implements InterfaceDbo
         if (!$rs) {
             $e = oci_error($this->cn);  // For oci_parse errors pass the connection handle
             throw new \Exception($e['message']);
-            return;
         }
         if (!empty($par) && is_array($par)) {
             foreach ($par as $k => $v) {
@@ -134,19 +133,14 @@ class DbOci implements InterfaceDbo
                 oci_bind_by_name($rs, ':'.$k, $$k, $l);
             }
         }
-
         $ok = $this->__transaction ? @oci_execute($rs, OCI_NO_AUTO_COMMIT) : @oci_execute($rs);
-
         if (!$ok) {
             $e = oci_error($rs);  // For oci_parse errors pass the connection handle
             throw new \Exception($e['message'].PHP_EOL.$e['sqltext'].PHP_EOL.print_r($par,true));
-            return;
         }
-
         if ($rs_return) {
             return $rs;
         }
-
         foreach ($par as $k=>$v) {
             $par[$k] = $$k;
         }

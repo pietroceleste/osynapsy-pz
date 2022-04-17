@@ -39,7 +39,7 @@ class DbOci implements InterfaceDbo
         $this->setParameter('db', $parameters[2]);
         $this->setParameter('username', $parameters[3]);
         $this->setParameter('password', $parameters[4]);
-        $this->setParameter('port', empty($par[5]) ? 1521 : trim($par[5]);
+        $this->setParameter('port', empty($par[5]) ? 1521 : trim($par[5]));
         $this->setParameter('query-parameter-dummy', 'pos');
     }
 
@@ -83,6 +83,11 @@ class DbOci implements InterfaceDbo
         }
         $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
         $this->execCommand('alter session set NLS_NUMERIC_CHARACTERS = ". "');
+    }
+
+    public function getParameter($key)
+    {
+        return array_key_exists($key, $this->parameters) ? $this->parameters[$key] : null;
     }
 
     function getType()
@@ -353,11 +358,6 @@ class DbOci implements InterfaceDbo
         $cmd .= ' WHERE ';
         $cmd .= implode(' AND ',$where);
         return $this->execQuery($cmd, $values, 'ASSOC');
-    }
-
-    public function getParameters($key)
-    {
-        return array_key_exists($key, $this->parameters) ? $this->parameters[$key] : null;
     }
 
     public function freeRs($rs = null)

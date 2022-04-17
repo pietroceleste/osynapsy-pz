@@ -24,22 +24,23 @@ namespace Osynapsy\Db\Driver;
  */
 class DbOci implements InterfaceDbo
 {
-    private $__par = array();
+    private $parameters = array();
     private $__cur = null;
     public  $backticks = '"';
     public  $cn = null;
     private $__transaction = false;
     //private $rs;
 
-    public function __construct($str)
+    public function __construct($osyConnectionStringFormat)
     {
-        $par = explode(':',$str);
-        $this->__par['typ'] = trim($par[0]);
-        $this->__par['hst'] = trim($par[1]);
-        $this->__par['db']  = trim($par[2]);
-        $this->__par['usr'] = trim($par[3]);
-        $this->__par['pwd'] = trim($par[4]);
-        $this->__par['query-parameter-dummy'] = 'pos';
+        $parameters = explode(':',$osyConnectionStringFormat);
+        $this->setParameter('type', $parameters[0]);
+        $this->setParameter('host', $parameters[1]);
+        $this->setParameter('db', $parameters[2]);
+        $this->setParameter('username', $parameters[3]);
+        $this->setParameter('password', $parameters[4]);
+        $this->setParameter('port', empty($par[5]) ? 1521 : trim($par[5]);
+        $this->setParameter('query-parameter-dummy', 'pos');
     }
 
     public function begin()
@@ -66,25 +67,22 @@ class DbOci implements InterfaceDbo
     {
         oci_rollback($this->cn );
     }
+
     public function quote($value)
     {
         return "'".str_replace("'", "''", $value)."'";
     }
+
     public function connect()
     {
-        $this->cn = oci_connect(
-            $this->__par['usr'],
-            $this->__par['pwd'],
-            "{$this->__par['hst']}/{$this->__par['db']}",
-            'AL32UTF8'
-        );
+        $connectionString = sprintf("//%s:%s/%s", $this->getParameter('host'), $this->getParameter('port'), $this->getParameter('db'));
+        $this->cn = oci_connect($this->getParameter('username'), $this->getParameter('password'), $connectionString, 'AL32UTF8');
         if (!$this->cn) {
             $e = oci_error();
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-        } else {
-            $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
-            $this->execCommand('alter session set NLS_NUMERIC_CHARACTERS = ". "');
         }
+        $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
+        $this->execCommand('alter session set NLS_NUMERIC_CHARACTERS = ". "');
     }
 
     function getType()
@@ -93,9 +91,9 @@ class DbOci implements InterfaceDbo
     }
 
     //Metodo che setta il parametri della connessione
-    function setParam($p,$v)
+    function setParameter($name, $value)
     {
-      $this->__par[$p] = $v;
+        $this->parameters[$name] = trim($value);
     }
 
     //Prendo l'ultimo valore di un campo autoincrement dopo l'inserimento
@@ -113,13 +111,7 @@ class DbOci implements InterfaceDbo
         $this->beginTransaction();
         $s = $this->prepare($cmd);
         foreach ($par as $rec) {
-            try {
-                $s->execute($rec);
-            } catch (Exception $e){
-                echo $e;
-                var_dump($rec);
-                return;
-            }
+            $s->execute($rec);
         }
         $this->commit();
     }
@@ -329,18 +321,16 @@ class DbOci implements InterfaceDbo
         return $this->execCommand($cmd, $values);
     }
 
-    public function delete($table, array $keys)
+    public function delete($table, array $conditions)
     {
-        $where = array();
-        if (!is_array($keys)){
-            $keys = array('id'=>$cnd);
-        }
-        foreach($keys as $k=>$v){
+        $where = [];
+        foreach($conditions as $k => $v){
             $where[] = "{$k} = :{$k}";
         }
-        $cmd  = 'DELETE FROM '.$table;
-        $cmd .= ' WHERE '.implode(' AND ',$where);
-        $this->execCommand($cmd, $keys);
+        $this->execCommand(
+            sprintf('DELETE FROM %s WHERE %s', $table, implode(' AND ', $where)),
+            $conditions
+        );
     }
 
     public function replace($table, array $args, array $conditions)
@@ -371,9 +361,9 @@ class DbOci implements InterfaceDbo
         return $this->execQuery($cmd, $values, 'ASSOC');
     }
 
-    public function par($p)
+    public function getParameters($key)
     {
-        return array_key_exists($p,$this->__par) ? $this->__par[$p] : null;
+        return array_key_exists($key, $this->parameters) ? $this->parameters[$key] : null;
     }
 
     public function freeRs($rs = null)

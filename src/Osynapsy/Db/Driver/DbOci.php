@@ -39,7 +39,7 @@ class DbOci implements InterfaceDbo
         $this->setParameter('db', $parameters[2]);
         $this->setParameter('username', $parameters[3]);
         $this->setParameter('password', $parameters[4]);
-        $this->setParameter('port', empty($par[5]) ? 1521 : trim($par[5]));
+        $this->setParameter('port', empty($parameters[5]) ? 1521 : trim($parameters[5]));
         $this->setParameter('query-parameter-dummy', 'pos');
     }
 

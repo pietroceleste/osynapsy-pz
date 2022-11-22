@@ -60,12 +60,12 @@ class DbOci implements InterfaceDbo
 
     public function commit()
     {
-        oci_commit($this->cn );
+        oci_commit($this->cn);
     }
 
     public function rollback()
     {
-        oci_rollback($this->cn );
+        oci_rollback($this->cn);
     }
 
     public function quote($value)
@@ -81,8 +81,15 @@ class DbOci implements InterfaceDbo
             $e = oci_error();
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
-        $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
-        $this->execCommand('alter session set NLS_NUMERIC_CHARACTERS = ". "');
+        $this->alterSession('NLS_DATE_FORMAT', 'YYYY-MM-DD');
+        $this->alterSession('NLS_NUMERIC_CHARACTERS', '. ');
+        //$this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
+        //$this->execCommand('ALTER SESSION SET NLS_NUMERIC_CHARACTERS = ". "');
+    }
+
+    public function alterSession($parameter, $value)
+    {
+        $this->execCommand(sprintf('ALTER SESSION SET %s = \'%s\'', $parameter, $value));
     }
 
     public function getParameter($key)

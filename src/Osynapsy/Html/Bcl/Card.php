@@ -61,4 +61,9 @@ class Card extends Component
         }
         return $this->body;
     }
+
+    public function addColumn($lg = 12, $md = 12, $sm = 12, $xs = 12)
+    {
+        $this->getBody()->AddColumn($lg, $md, $sm, $xs);
+    }
 }

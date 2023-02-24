@@ -97,7 +97,7 @@ class NavBar extends Component
             return $ul;
         }
         foreach($data as $label => $menu){
-            $ul->add($this->listItemFactory($label, $menu, $level));
+            $ul->add($this->listItemFactory(empty($menu['LABEL']) ? $label : $menu['LABEL'], $menu, $level));
         }
         return $ul;
     }

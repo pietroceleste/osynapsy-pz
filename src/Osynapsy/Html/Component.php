@@ -67,6 +67,9 @@ class Component extends Tag
      */
     public function getGlobal($nam, $array)
     {
+        if (!is_array($array)) {
+            return null;
+        }
         if (strpos($nam,'[') === false){
             return array_key_exists($nam,$array) ? $array[$nam] : '';
         }

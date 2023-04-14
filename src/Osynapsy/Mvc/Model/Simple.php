@@ -9,7 +9,7 @@ use Osynapsy\Mvc\Controller;
  *
  * @author Pietro
  */
-abstract class Simple
+abstract class Simple implements InterfaceModel
 {
     protected $controller;
 
@@ -17,6 +17,10 @@ abstract class Simple
     {
         $this->controller = $controller;
         $this->init();
+    }
+
+    public function init()
+    {
     }
 
     public function getController()
@@ -34,10 +38,6 @@ abstract class Simple
     }
 
     public function save()
-    {
-    }
-
-    public function init()
     {
     }
 

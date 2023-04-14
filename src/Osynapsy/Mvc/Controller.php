@@ -221,4 +221,9 @@ abstract class Controller implements InterfaceController, InterfaceSubject
     {
         $this->response = $response;
     }
+
+    public function setModel($model)
+    {
+        $this->model = $model;
+    }
 }

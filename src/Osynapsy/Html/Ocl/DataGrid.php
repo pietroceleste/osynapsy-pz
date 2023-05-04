@@ -465,7 +465,7 @@ class DataGrid extends Component
                 break;
             case '_rad':
                 if (!empty($opt['cell']['rawvalue'])){
-                    $opt['cell']['value'] = "<input type=\"radio\" class=\"rad_{$this->id}\" name=\"rad_{$this->id}\" value=\"{$opt['cell']['rawvalue']}\"".($opt['cell']['rawvalue'] == $_REQUEST['rad_'.$this->id] ? ' checked="checked"' : '').">";
+                    $opt['cell']['value'] = "<input type=\"radio\" class=\"rad_{$this->id}\" name=\"rad_{$this->id}\" value=\"{$opt['cell']['rawvalue']}\"".($opt['cell']['rawvalue'] == !empty($_REQUEST['rad_'.$this->id]) ? ' checked="checked"' : '').">";
                     $opt['cell']['class'][] = 'center';
                 }
                 $opt['cell']['print'] = true;

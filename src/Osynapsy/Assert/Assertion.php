@@ -43,6 +43,14 @@ class Assertion
         return true;
     }
 
+    public static function isNumeric($value, $message)
+    {
+        if (!is_numeric($value)) {
+            self::raiseException($message);
+        }
+        return true;
+    }
+    
     public static function isValidEmailAddress($value, $message)
     {
         if (!filter_var($value, \FILTER_VALIDATE_EMAIL)) {

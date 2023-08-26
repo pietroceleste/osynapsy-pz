@@ -312,7 +312,7 @@ class DataGrid extends Component
             'cell' => array()
         );
 
-        if (!empty($this->functionRow) &&is_callable($this->functionRow)) {
+        if (!empty($this->functionRow) && is_callable($this->functionRow)) {
             $function = $this->functionRow;
             $function($grd, $row, $orw);
         }
@@ -326,14 +326,13 @@ class DataGrid extends Component
                 $orw = new Tag('tr');
             }
             $cel = new Tag('td');
-
             $opt['cell'] = array(
                 'alignment'=> '',
                 'class'    => array($this->getColumnProperty($i, 'class')),
                 'color'    => '',
                 'command'  => '',
                 'format'   => '',
-                'function' => $this->getColumnProperty($t, 'function'),
+                'function' => $this->getColumnProperty($i, 'function'),
                 'hidden'   => false,
                 'parameter'=> '',
                 'print'    => true,
@@ -367,6 +366,7 @@ class DataGrid extends Component
                 list($opt, $lev, $pos, $ico_arr) = $this->formatCellValue($opt, $lev, $pos, $ico_arr, $row);
                 //var_dump($opt['row']);
             }
+             //var_dump($opt['cell']);
             if (!empty($opt['cell']['function'])) {
                 $opt['cell']['value'] = $opt['cell']['function']($opt['cell']['value'], $row);
             }

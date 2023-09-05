@@ -535,7 +535,7 @@ class DataGrid extends Component
             case 'percentage':
                 $opt['cell']['print'] = true;
                 if (is_numeric($opt['cell']['rawvalue'])) {
-                    $opt['cell']['value'] = sprintf('%+.2f', $opt['cell']['rawvalue']);
+                    $opt['cell']['value'] = sprintf('%+.2f%%', $opt['cell']['rawvalue']);
                 }
                 $opt['cell']['class'][] = 'text-right';
                 break;

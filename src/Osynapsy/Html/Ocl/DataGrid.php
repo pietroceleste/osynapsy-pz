@@ -255,10 +255,11 @@ class DataGrid extends Component
                             break;
                     }
                     break;
-               case '!':
+                case '!':
                     $opt['class'] .= ' text-center';
-               case '$':
-                    $opt['title'] = str_replace(array('$','?','#','!'),array('','','',''),$opt['title']);
+                case '%':
+                case '$':
+                    $opt['title'] = str_replace(array('$','?','#','!','%'),array('','','','',''),$opt['title']);
                     break;
             }
 
@@ -354,6 +355,9 @@ class DataGrid extends Component
                 case '$':
                 case '€':
                     $opt['cell']['format'] = 'money';
+                    break;
+                case '%':
+                    $opt['cell']['format'] = 'percentage';
                     break;
                 case '!':
                     $opt['cell']['class'][] = 'center';
@@ -525,6 +529,13 @@ class DataGrid extends Component
                 $opt['cell']['print'] = true;
                 if (is_numeric($opt['cell']['rawvalue'])) {
                     $opt['cell']['value'] = number_format($opt['cell']['rawvalue'],2,',','.');
+                }
+                $opt['cell']['class'][] = 'text-right';
+                break;
+            case 'percentage':
+                $opt['cell']['print'] = true;
+                if (is_numeric($opt['cell']['rawvalue'])) {
+                    $opt['cell']['value'] = sprintf('%+.2f', $opt['cell']['rawvalue']);
                 }
                 $opt['cell']['class'][] = 'text-right';
                 break;

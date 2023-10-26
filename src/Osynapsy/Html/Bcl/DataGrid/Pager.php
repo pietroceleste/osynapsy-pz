@@ -11,8 +11,7 @@ use Osynapsy\Html\Tag;
  * @author pietr
  */
 class Pager extends Component
-{
-    protected $columns = array();
+{    
     protected $data = array();
     protected $entity = 'Record';
     public $errors = [];
@@ -194,9 +193,7 @@ class Pager extends Component
         $this->sql = $this->pagingQueryFactory($this->sql, $where);
         try {
             $this->data = $this->db->execQuery($this->sql, $this->par, 'ASSOC');
-            //die(print_r($this->data,true));
-            //Salvo le colonne in un option
-            $this->columns = $this->db->getColumns();
+            //die(print_r($this->data,true));            
             return empty($this->data) ? [] : $this->data;
         } catch (\Exception $e) {
             die($this->formatSqlErrorMessage($rawQuery, $e->getMessage()));

@@ -13,12 +13,13 @@ class DataGrid extends Component
     private $showHead = true;
     protected $pagination;
 
-    public function __construct($name)
+    public function __construct($name, $debugQuery = false)
     {
         parent::__construct('div', $name);
         $this->addClass('container-fluid bcl-datagrid');
         $this->requireCss('Bcl3/DataGrid/style.css');
         $this->requireJs('Bcl3/DataGrid/script.js');
+        $this->debug = $debugQuery;
     }
 
     public function __build_extra__()
@@ -38,6 +39,9 @@ class DataGrid extends Component
             $this->add($this->theadFactory());
         }
         $this->add($this->tbodyFactory());
+        if ($this->debug) {
+            $this->footer = [sprintf('<pre style="margin: 5px 0px; border:1px solid #ddd;">%s</pre>', $this->pagination->getSql())];
+        }
         if (!empty($this->footer)) {
             $this->add($this->buildFooter($this->footer));
         }

@@ -37,14 +37,11 @@ class Pager extends Component
     ];
 
     //put your code here
-    public function __construct($id, $pageDimension = 10, $tag = 'div', $infiniteContainer = false)
+    public function __construct($id, $pageDimension = 10, $tag = 'div')
     {
-        parent::__construct($tag, $id);
-        if (!empty($infiniteContainer)) {
-            $this->setInfiniteScroll($infiniteContainer);
-        }
+        parent::__construct($tag, $id);        
         $this->requireJs('Bcl3/Pager/script.js');
-        $this->att('class','BclPager',true);
+        $this->addClass('BclPager');
         if ($tag == 'form') {
             $this->att('method','post');
         }
@@ -52,50 +49,62 @@ class Pager extends Component
     }
 
     public function __build_extra__()
-    {
-        if (!$this->loaded) {
-            $this->loadData;
-        }
+    {       
         $this->add(new HiddenBox($this->id));
         $this->add(new HiddenBox($this->id.'OrderBy'))->addClass('BclPaginationOrderBy');
         $ul = $this->add(new Tag('ul', null, 'pagination'));
         $ul->att('class','pagination');
-        $liFirst = $ul->add(new Tag('li'));
-        if ($this->page['current'] < 2) {
-            $liFirst->att('class','disabled');
-        }
-        $liFirst->add(new Tag('a', null, 'page-link'))
-                ->att('data-value','first')
-                ->att('href','#')
-                ->add('&laquo;');
+        $ul->add($this->firstItemFactory($this->page['current']));
         $dim = min($this->boxLength, $this->page['total']);
         $app = floor($dim / 2);
         $pageMin = max(1, $this->page['current'] - $app);
         $pageMax = max($dim, min($this->page['current'] + $app, $this->page['total']));
         $pageMin = min($pageMin,$this->page['total'] - $dim + 1);
         for ($i = $pageMin; $i <= $pageMax; $i++) {
-            $liCurrent = $ul->add(new Tag('li', null, 'page-item'));
-            if ($i == $this->page['current']) {
-                $liCurrent->att('class','active', true);
-            }
-            $iGet = '#';
-            if ($this->paginationType == 'GET') {
-                $iGet = ($i > 1) ? './'.$i : './';
-            }
-            $liCurrent->att('class','text-center',true)
-                      ->add(new Tag('a', null, 'page-link'))
-                      ->att('data-value',$i)
-                      ->att('href', $iGet)
-                      ->add($i);
+            $ul->add($this->pageItemFactory($this->page['current'], $i));
         }
-        $liLast = $ul->add(new Tag('li'));
-        if ($this->page['current'] >= $this->page['total']) {
+        $ul->add($this->lastItemFactory($this->page['current'], $this->page['total']));
+    }
+
+    protected function firstItemFactory($currentPageIdx)
+    {
+        $li = new Tag('li');
+        if ($currentPageIdx < 2) {
+            $li->att('class','disabled');
+        }
+        $li->add(new Tag('a', null, 'page-item'))
+                ->att('data-value','first')
+                ->att('href','#')
+                ->add('&laquo;');
+        return $li;
+    }
+
+    protected function pageItemFactory($currentPageIdx, $itemIdx)
+    {
+        $li = new Tag('li', null, 'page-item');
+        if ($itemIdx == $currentPageIdx) {
+            $li->att('class','active', true);
+        }
+        $iGet = $this->paginationType != 'GET' ? '#' : ($itemIdx > 1 ? './'.$itemIdx : './');
+        $li->addClass('text-center');
+        $li->add(new Tag('a', null, 'page-link'))
+           ->att('data-value', $itemIdx)
+           ->att('href', $iGet)
+           ->add($itemIdx);
+        return $li;
+    }
+
+    protected function lastItemFactory($currentPageIdx, $lastPageIdx)
+    {
+        $liLast = new Tag('li');
+        if ($currentPageIdx >= $lastPageIdx) {
             $liLast->att('class','disabled');
         }
         $liLast->add(new Tag('a', null, 'page-link'))
                ->att('href','#')
                ->att('data-value','last')
                ->add('&raquo;');
+        return $liLast;
     }
 
     public function addFilter($field, $value = null)
@@ -135,30 +144,6 @@ class Pager extends Component
         }
     }
 
-    private function calcStatistics()
-    {
-        //Calcolo statistiche
-        if (!$this->sqlStat) {
-            return;
-        }
-        try {
-            $sql_stat = Kernel::replaceVariable(str_replace('<[datasource-sql]>',$sql,$sql_stat).$whr);
-            $stat = $this->db->execUnique($sql_stat,null,'ASSOC');
-            if (!is_array($stat)) $stat = array($stat);
-            $dstat = tag::create('div')->att('class',"osy-datagrid-stat");
-            $tr = $dstat->add(tag::create('table'))->att('align','right')->add(tag::create('tr'));
-            foreach ($stat as $k=>$v) {
-                $v = ($v > 1000) ? number_format($v,2,',','.') : $v;
-                $tr->add(Tag::create('td'))->add('&nbsp;');
-                $tr->add(Tag::create('td'))->att('title',$k)->add($k);
-                $tr->add(Tag::create('td'))->add($v);
-            }
-            $this->__par['div-stat'] = $dstat;
-        } catch(\Exception $e) {
-                $this->setParameter('error-in-sql-stat','<pre>'.$sql_stat."\n".$e->getMessage().'</pre>');
-        }
-    }
-
     public function getInfo()
     {
         $end = min($this->page['current'] * $this->page['dimension'], $this->total['rows']);
@@ -171,7 +156,6 @@ class Pager extends Component
         $info .= $this->total['rows'];
         $info .= ' ';
         $info .= $this->entity;
-
         return $info;
     }
 
@@ -186,55 +170,82 @@ class Pager extends Component
         $Combo->setPlaceholder($this->pageDimensionPalceholder);
         $Combo->att('onchange',"FormController.refreshComponent(['#{$this->parentComponent}'])")
               ->att('style','margin-top: 20px;')
-              ->setArray($this->pageDimensions);
+              ->setData($this->pageDimensions);
         return $Combo;
     }
 
+    public function getSql()
+    {
+        return $this->sql;
+    }
+    
     public function loadData($requestPage = null)
     {
         if (empty($this->sql)) {
-            return array();
+            return [];
         }
         if (is_null($requestPage) && filter_input(\INPUT_POST, $this->id)) {
             $requestPage = filter_input(\INPUT_POST, $this->id);
         }
-        $where = $this->buildFilter();
-        $count = "SELECT COUNT(*) FROM (\n{$this->sql}\n) a " . $where;
-        $orderByClause = $this->orderByClauseFactory();
-        try {
-            $this->total['rows'] = $this->db->execUnique($count, $this->par);
-            $this->att('data-total-rows',$this->total['rows']);
-        } catch(\Exception $e) {
-            $this->errors[] = '<pre>'.$count."\n".$e->getMessage().'</pre>';            
-        }
+        $rawQuery = $this->sql;
+        $where = empty($this->filters) ? '' : $this->whereClauseFactory($this->filters);
+        $this->total['rows'] = $this->countRecord($rawQuery,  $this->par, $where);
         $this->calcPage($requestPage);
-        switch ($this->db->getType()) {
-            case 'oracle':
-                $sql = $this->buildOracleQuery($where, $orderByClause);
-                break;
-            case 'pgsql':
-                $sql = $this->buildPgSqlQuery($where);
-                break;
-            default:
-                $sql = $this->buildMySqlQuery($where);
-                break;
-        }
-        //echo "<pre>$sql</pre>{$this->orderBy}";
-        //Eseguo la query
+        $this->sql = $this->pagingQueryFactory($this->sql, $where);
         try {
-            $this->data = $this->db->execQuery($sql, $this->par, 'ASSOC');
+            $this->data = $this->db->execQuery($this->sql, $this->par, 'ASSOC');
+            //die(print_r($this->data,true));
+            //Salvo le colonne in un option
+            $this->columns = $this->db->getColumns();
+            return empty($this->data) ? [] : $this->data;
         } catch (\Exception $e) {
-            die($this->formatSqlErrorMessage($sql, $e->getMessage()));
-        }
-        //die(print_r($this->data,true));
-        //Salvo le colonne in un option
-        $this->columns = $this->db->getColumns();        
-        return empty($this->data) ? [] : $this->data;
+            die($this->formatSqlErrorMessage($rawQuery, $e->getMessage()));
+        }        
     }
 
-    private function buildMySqlQuery($where, $orderBy)
+    private function whereClauseFactory($filters)
+    {        
+        $filter = [];
+        $i = 0;
+        foreach ($filters as $field => $value) {
+            if (is_null($value)) {
+                $filter[] = $field;
+                continue;
+            }
+            $filter[] = sprintf("%s = %s", $field, $this->db->getType() == 'oracle' ? ':'.$i : '?');
+            $this->par[] = $value;
+            $i++;
+        }
+        return sprintf(" WHERE %s", implode(' AND ',$filter));
+    }
+
+    protected function countRecord($sql, $sqlParameters, $where)
+    {        
+        $sqlQuery = sprintf("SELECT COUNT(*) FROM (%s) a %s", $sql, $where);
+        try {
+            return $this->db->execUnique($sqlQuery, $sqlParameters);
+        } catch(\Exception $e) {
+            $this->errors[] = sprintf('<pre>%s\n%s</pre>', $sqlQuery, $e->getMessage());
+        }
+        return 0;
+    }
+
+    protected function pagingQueryFactory($sql, $where)
     {
-        $sql = sprintf("SELECT a.* FROM (%s) a %s %s", $this->sql, $where, $orderBy);
+        $orderByClause = $this->orderByClauseFactory();
+        switch ($this->db->getType()) {
+            case 'oracle':
+                return $this->pagingQueryOracleFactory($sql, $where, $orderByClause);
+            case 'pgsql':
+                return $this->pagingQueryPgSqlFactory($sql, $where, $orderByClause);
+            default:
+                return $this->pagingQueryMySqlFactory($sql, $where, $orderByClause);
+        }
+    }
+
+    private function pagingQueryMySqlFactory($query, $where, $orderBy)
+    {
+        $sql = sprintf("SELECT a.* FROM (%s) a %s %s", $query, $where, $orderBy);
         if (empty($this->page['dimension'])) {
             return $sql;
         }
@@ -243,9 +254,9 @@ class Pager extends Component
         return $sql;
     }
 
-    private function buildPgSqlQuery($where, $orderBy)
+    private function pagingQueryPgSqlFactory($rawQuery, $where, $orderBy)
     {
-        $sql = sprintf("SELECT a.* FROM (%s) a %s %s", $this->sql, $where, $orderBy);
+        $sql = sprintf("SELECT a.* FROM (%s) a %s %s", $rawQuery, $where, $orderBy);
         if (!empty($this->page['dimension'])) {
             $startFrom = max(0, ($this->page['current'] - 1) * $this->page['dimension']);
             $sql .= sprintf("\nLIMIT %s OFFSET %s", $this->page['dimension'], $startFrom);
@@ -253,7 +264,7 @@ class Pager extends Component
         return $sql;
     }
 
-    private function buildOracleQuery($where, $orderBy)
+    private function pagingQueryOracleFactory($rawQuery, $where, $orderBy)
     {        
         $sql = sprintf(
             'SELECT a.*
@@ -265,16 +276,15 @@ class Pager extends Component
                         %s
                     ) b
                 ) a ',
-            $this->sql,
+            $rawQuery,
             $where,
-            strtoupper($orderBy)
+            $orderBy
         );
-        if (empty($this->page['dimension'])) {
-            return $sql;
-        }
-        $startFrom = (($this->page['current'] - 1) * $this->page['dimension']) + 1 ;
-        $endTo = ($this->page['current'] * $this->page['dimension']);
-        $sql .=  "WHERE \"_rnum\" BETWEEN $startFrom AND $endTo";
+        if (!empty($this->page['dimension'])) {
+            $startFrom = (($this->page['current'] - 1) * $this->page['dimension']) + 1 ;
+            $endTo = ($this->page['current'] * $this->page['dimension']);
+            $sql .=  sprintf('WHERE "_rnum" BETWEEN %s AND %s', $startFrom, $endTo);
+        }        
         return $sql;
     }
 
@@ -283,27 +293,8 @@ class Pager extends Component
         if (!empty($_REQUEST[$this->id.'OrderBy'])) {
             $this->setOrder($_REQUEST[$this->id.'OrderBy']);
         }         
-        return !empty($this->orderBy) ? sprintf('ORDER BY %s', $this->orderBy) : '';
-    }
-
-    private function buildFilter()
-    {
-        if (empty($this->filters)) {
-            return;
-        }
-        $filter = array();
-        $i = 0;
-        foreach ($this->filters as $field => $value) {
-            if (is_null($value)) {
-                $filter[] = $field;
-                continue;
-            }
-            $filter[] = "$field = ".($this->db->getType() == 'oracle' ? ':'.$i : '?');
-            $this->par[] = $value;
-            $i++;
-        }
-        return " WHERE " .implode(' AND ',$filter);
-    }
+        return !empty($this->orderBy) ? sprintf('ORDER BY %s', $this->orderBy) : '1 DESC';
+    }   
 
     public function setSql($db, $cmd, array $par = array())
     {
@@ -348,18 +339,6 @@ class Pager extends Component
     {
         $this->entity = $entity;
         return $this;
-    }
-
-    public function setInfiniteScroll($container)
-    {
-        $this->requireJs('/vendor/osynapsy/Bcl/Pager/imagesloaded.js');
-        $this->requireJs('/vendor/osynapsy/Bcl/Pager/wookmark.js');
-        $this->paginationType = 'GET';
-        $this->att('class','infinitescroll',true)->att('style','display: none');
-        if ($container[0] != '#' ||  $container[0] != '#') {
-            $container = '#'.$container;
-        }
-        return $this->att('data-container',$container);
     }
 
     public function setRefreshComponent($componentId)

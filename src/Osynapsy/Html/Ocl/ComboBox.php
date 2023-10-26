@@ -131,4 +131,9 @@ class ComboBox extends Component
         }
         return $this->data[$key];
     }
+
+    public function setPlaceholder($placeholder)
+    {
+        $this->placeholder = $placeholder;
+    }
 }

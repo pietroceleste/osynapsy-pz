@@ -164,11 +164,15 @@ var Osynapsy = new (function(){
                         break;
                 }
                 if ($(this).attr('name')) {
-                    arr.push([$(this).attr('name'), $(this).val()]);
+                    let fieldId = $(this).attr('name');
+                    let fieldVal = $(this).val();
+                    if(!fieldId.includes('[]') || fieldVal !== null) {
+                        arr.push([fieldId, fieldVal === null ? '' : fieldVal]);
+                    }
                 }
             });
             hst.push({url : window.location.href, parameters : arr});
-            sessionStorage.history = JSON.stringify(hst);
+            sessionStorage.history = JSON.stringify(hst);                        
         },
         back : function()
         {
@@ -387,11 +391,18 @@ var Osynapsy = new (function(){
     pub.post = function(url, vars)
     {
         var form = $('<form method="post" action="'+url+'"></form>');
-        if (!Osynapsy.isEmpty(vars)) {
-            for (var i in vars) {
-                $('<input type="hidden" name="'+vars[i][0]+'" value="'+vars[i][1]+'">').appendTo(form);
+        if (!Osynapsy.isEmpty(vars)) {            
+            for (var varIdx in vars) {
+                let field = vars[varIdx];
+                let fieldId = field[0];
+                let fieldVals = Array.isArray(field[1]) ? field[1] : [field[1]];
+                for(let valIdx in fieldVals) {
+                    let fieldVal = fieldVals[valIdx];
+                    let hdnField = '<input type="hidden" name="'+fieldId+'" value="'+fieldVal+'">';                    
+                    $(hdnField).appendTo(form);
+                }
             }
-        }
+        }        
         $('body').append(form);
         form.submit();
     };

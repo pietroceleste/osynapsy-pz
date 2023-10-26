@@ -8,7 +8,7 @@ use Osynapsy\Html\Tag;
 /**
  * Description of Pager
  *
- * @author pietr
+ * @author Pietro Celeste <p.celeste@osynapsy.net>
  */
 class Pager extends Component
 {    

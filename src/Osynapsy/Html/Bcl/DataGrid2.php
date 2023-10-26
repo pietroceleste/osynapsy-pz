@@ -17,7 +17,7 @@ use Osynapsy\Html\Tag;
 class DataGrid2 extends Component
 {
     private $columns = [];
-    private $title;
+    private $title;    
     private $emptyMessage = 'No data found';
     private $showHeader = true;
     
@@ -30,7 +30,7 @@ class DataGrid2 extends Component
     }
     
     public function __build_extra__()
-    {
+    {        
         if (!empty($this->title)) {
             $this->add(
                 $this->buildTitle($this->title)
@@ -43,7 +43,7 @@ class DataGrid2 extends Component
         }
         $this->add(
             $this->buildBody()
-        );
+        );     
     }
     
     private function buildTitle($title)
@@ -95,7 +95,7 @@ class DataGrid2 extends Component
         }        
         return $body;
     }
-    
+
     private function buildRow($row)
     {
         $tr = new Tag('div');
@@ -119,7 +119,7 @@ class DataGrid2 extends Component
         }
         return $tr;
     }
-    
+
     private function valueFormatting($value, &$cell, $properties, $rec, &$tr)
     {        
         switch($properties['type']) {            

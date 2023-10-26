@@ -23,6 +23,7 @@ class Pager extends Component
 {
     private $columns = array();
     protected $data = array();
+    protected $parentComponent;
     private $db;
     private $filters = array();
     private $fields = array();
@@ -38,6 +39,14 @@ class Pager extends Component
     private $total = array(
         'rows' => 0        
     );
+
+    public $pageDimensions = [
+        1 => ['10', '10 righe'],
+        2 => ['20', '20 righe'],
+        5 => ['50', '50 righe'],
+        10 => ['100', '100 righe'],
+        20 => ['200', '200 righe']
+    ];
     //put your code here
     public function __construct($id, $dim = 10, $tag = 'div', $infiniteContainer = false)
     {        
@@ -224,8 +233,34 @@ class Pager extends Component
     {
         return array_key_exists($key, $this->total) ? $this->total[$key] : null;
     }
-    
-    public function loadData($requestPage)
+
+    public function getPageDimensionsCombo()
+    {
+        $Combo = new ComboBox($this->id.(strpos($this->id, '_') ? '_page_dimension' : 'PageDimension'));
+        $Combo->setPlaceholder($this->pageDimensionPalceholder);
+        $Combo->att('onchange',"FormController.refreshComponent(['#{$this->parentComponent}'])")
+              ->att('style','margin-top: 20px;')
+              ->setArray($this->pageDimensions);
+        return $Combo;
+    }
+
+    public function getInfo()
+    {
+        $end = min($this->page['current'] * $this->page['dimension'], $this->total['rows']);
+        $start = ($this->page['current'] - 1) * $this->page['dimension'] + 1;
+        $info = 'da ';
+        $info .= $start;
+        $info .= ' a ';
+        $info .= $end;
+        $info .= ' di ';
+        $info .= $this->total['rows'];
+        $info .= ' ';
+        $info .= $this->entity;
+
+        return $info;
+    }
+
+    public function loadData($requestPage = null)
     {        
         if (empty($this->sql)) {
             return array();
@@ -290,5 +325,12 @@ class Pager extends Component
             $container = '#'.$container;
         }
         return $this->att('data-container',$container);
+    }
+
+    public function setParentComponent($componentId)
+    {
+        $this->parentComponent = $componentId;
+        $this->att('data-parent', $componentId);
+        return $this;
     }
 }

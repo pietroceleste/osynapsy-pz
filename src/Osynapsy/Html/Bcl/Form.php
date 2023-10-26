@@ -57,10 +57,9 @@ class Form extends Component
     protected function __build_extra__()
     {
         if ($this->head) {
-            $this->add(new Tag('div'))
-                 ->att('class','block-header m-b')
-                 ->add(new Tag('div'))
-                 ->att('class', $this->headClass)
+            $this->add(new Tag('div', null, 'm-b'))
+                 ->att('style', 'margin-bottom: 15px')
+                 ->add(new Tag('div', null, $this->headClass))
                  ->add($this->head);
         }
 
@@ -186,12 +185,10 @@ class Form extends Component
 
     public function setTitle($title, $subTitle = null, $size = 6)
     {
-        $objTitle = new Tag('h2');
-        $objTitle->att('class','font-light m-t-2')
-                 ->add($title);
+        $objTitle = new Tag('h2', null, 'font-light m-t-2');
+        $objTitle->add($title);
         $column = $this->head($size);
         $column->push(false, $objTitle, false);
-
         if (!empty($subTitle)) {
             $column->push(false,'<h4><i>'.$subTitle.'</i></h4>',false);
         }

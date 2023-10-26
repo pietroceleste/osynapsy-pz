@@ -58,7 +58,9 @@ class Runner
             return $this->dispatchKernelException($e);
         } catch(\Exception $e) {
             return $this->pageOops($e->getMessage(), $e->getTrace()); 
-        }   
+        } catch(\Error $e) {
+            return $this->pageOops($e->getMessage(), $e->getTrace());
+        }
     }
     
     private function dispatchKernelException(KernelException $e)
@@ -131,9 +133,13 @@ class Runner
                 * {font-family: Arial;} 
                 div.container {margin: auto;} 
                 td,th {font-size: 12px; font-family: Arial; padding: 3px; border: 0.5px solid silver}
+                .error-box {border:1px solid #ddd; padding: 10px; background-color: #fefefe; margin: 10px 0px; font-size: 0.85em}
             </style>
             <div class="container">       
+                Si è verificato il seguente errore:
+                <div class="error-box">
                 {$message}
+                </div>
                 <table style="border-collapse: collapse; max-width: 1200px;">
                     <tr>
                         <th>Class</th>

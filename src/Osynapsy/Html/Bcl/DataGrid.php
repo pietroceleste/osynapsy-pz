@@ -128,4 +128,23 @@ class DataGrid extends Component
         }
         return $columnTitle;
     }
+
+    /**
+     * Set a pagination object
+     *      *
+     * @param type $db Handler db connection
+     * @param string $sqlQuery Sql query
+     * @param array $sqlParameters Parameters of sql query
+     * @param integer $pageDimension Page dimension (in row)
+     */
+    public function setPagination($db, $sqlQuery, $sqlParameters, $pageDimension = 10)
+    {
+        $this->pagination = new Pager(
+            $this->id.(strpos($this->id, '_') ? '_pagination' : 'Pagination'),
+            empty($pageDimension) ? 10 : $pageDimension
+        );
+        $this->pagination->setSql($db, $sqlQuery, $sqlParameters);
+        $this->pagination->setParentComponent($this->id);
+        return $this->pagination;
+    }
 }

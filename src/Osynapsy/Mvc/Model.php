@@ -180,7 +180,9 @@ abstract class Model
         } catch (\Exception $e) {
             $this->controller->response->addContent('MODEL FIND ERROR: <pre>'.$e->getMessage()."\n".$sql.'</pre>');
         }
-        $this->assocData();
+        if (is_array($this->values)) {
+            $this->assocData($this->values);
+        }
     }
 
     protected function addError($errorId, $field, $postfix = '')
@@ -193,14 +195,11 @@ abstract class Model
         $this->controller->response->error($field->html, $error);
     }
 
-    public function assocData()
-    {
-        if (!is_array($this->values)) {
-            return;
-        }
+    public function assocData($values)
+    {                
         foreach ($this->repo->get('fields') as $f) {
-            if (!array_key_exists($f->html, $_REQUEST) && array_key_exists($f->name, $this->values)) {
-                $_REQUEST[ $f->html ] = $this->values[ $f->name ];
+            if (!array_key_exists($f->html, $_REQUEST) && array_key_exists($f->name, $values)) {
+                $_REQUEST[ $f->html ] = $values[ $f->name ];
             }
         }
     }

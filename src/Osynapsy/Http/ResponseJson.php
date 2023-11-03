@@ -109,4 +109,9 @@ class ResponseJson extends Response
     {
         $this->message('command','execCode', str_replace(PHP_EOL,'\n',$cmd));
     }
+
+    public function historyPushState($id)
+    {
+        $this->js(sprintf("history.pushState(null,null,'%s');", $id));
+    }
 }

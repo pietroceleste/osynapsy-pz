@@ -12,6 +12,8 @@
 namespace Osynapsy\Html\Ocl;
 
 use Osynapsy\Mvc\Controller;
+use Osynapsy\Html\Tag;
+use Osynapsy\Html\Component;
 
 abstract class BaseView
 {
@@ -40,8 +42,8 @@ abstract class BaseView
     
     public function get()
     {
-        $this->init();
-        return;        
+        $view = $this->init();
+        return empty($_REQUEST['ajax']) || !is_array($_REQUEST['ajax']) ? $this->viewFactory($view) : $this->componentFactory($_REQUEST['ajax']);
     }
 
     public function getController()
@@ -90,4 +92,43 @@ abstract class BaseView
     }
     
     abstract public function init();
+    
+    protected function componentFactory(array $componentIds)
+    {
+        $this->getController()->getResponse()->resetTemplate();
+        $this->getController()->getResponse()->resetContent();
+        $response = new Tag('div', 'response');
+        foreach ($componentIds as $id) {
+            $response->add(Component::getById($id));
+        }
+        return $response;
+    }
+
+    protected function viewFactory($view)
+    {
+        $requires = Component::getRequire();
+        if (!empty($requires)) {
+            $this->appendLibToResponse($requires);
+        }
+        return $view;
+    }
+
+    protected function appendLibToResponse($libRequires)
+    {
+        foreach ($libRequires as $type => $urls) {
+            foreach ($urls as $url){
+                switch($type) {
+                    case 'js':
+                        $this->addJs($url);
+                        break;
+                    case 'jscode':
+                        $this->addJsCode($url);
+                        break;
+                    case 'css':
+                        $this->addCss($url);
+                        break;
+                }
+            }
+        }
+    }
 }

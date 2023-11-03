@@ -105,12 +105,14 @@ class Tag
     }
 
     protected function build()
-    {
+    {      
         $strContent = '';
         foreach ($this->cnt as $content) {
             $strContent .= $content;
         }
-        $tag = array_shift($this->att);
+        //Bugfix necessario per evitare che in caso di richimata del metodo build l'elemento 0 venga eliminato da array_shift
+        $attributes = $this->att;
+        $tag = array_shift($attributes);
         if ($tag == 'dummy') {
             return $strContent;
         }
@@ -118,7 +120,7 @@ class Tag
         if (!empty($tag)){
             $spaces = $this->tagdep != 0 ? "\n".str_repeat("  ",abs($this->tagdep)) : '';
             $strTag = $spaces.'<'.$tag;
-            foreach ($this->att as $key => $val) {
+            foreach ($attributes as $key => $val) {
                 $strTag .= ' '.$key.'="'.htmlspecialchars($val, ENT_QUOTES).'"';
                 // la conversione del contentuto degli attributi viene fornita da Tag in modo
                 // tale che non debba essere gestito dai suoi figli
@@ -167,7 +169,7 @@ class Tag
     public function __toString()
     {
         try {
-            return $this->get();
+            return $this->build();
         } catch (\Exception $e) {
             //var_dump($str);
             trigger_error($e->getMessage());

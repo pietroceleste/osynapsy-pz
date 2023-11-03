@@ -59,7 +59,7 @@ class Runner
         } catch(\Exception $e) {
             return $this->pageOops($e->getMessage(), $e->getTrace()); 
         } catch(\Error $e) {
-            return $this->pageOops($e->getMessage(), $e->getTrace());
+            return $this->pageOops(sprintf('%s at row %s file %s', $e->getMessage(), $e->getLine(), $e->getFile()), $e->getTrace());
         }
     }
     
@@ -69,7 +69,7 @@ class Runner
             case '404':
                 return $this->pageNotFound($e->getMessage());
             default :
-                return $this->pageOops($e->getMessage(), $e->getTrace());                 
+                return $this->pageOops($e->getMessage(), $e->getTrace());
         }
     }
     
@@ -117,40 +117,55 @@ class Runner
     }
     
     public function pageOops($message, $trace)
-    {
+    {        
         ob_clean();
+        return strpos($_SERVER['HTTP_ACCEPT'], 'json') === false ? 
+               $this->pageOopsHtml($message, $trace) :
+               $this->pageOopsText($message, $trace);
+    }
+
+    public function pageOopsText($message, $trace)
+    {
+
+        $page = <<<PAGE
+            Si è verificato il seguente errore:
+
+            %s
+            
+            riga funzione %s del file %s
+PAGE;
+        return sprintf($page, $message, $trace[0]['line'], $trace[0]['function'], $trace[0]['file']);
+    }
+
+    public function pageOopsHtml($message, $trace)
+    {
         $body = '';
         foreach ($trace as $step) {
             $body .= '<tr>';
             $body .= '<td>'.(!empty($step['class']) ? $step['class'] : '&nbsp;').'</td>';
             $body .= '<td>'.(!empty($step['function']) ? $step['function'] : '&nbsp;').'</td>';
             $body .= '<td>'.(!empty($step['file']) ? $step['file'] : '&nbsp;').'</td>';
-            $body .= '<td>'.(!empty($step['line']) ? $step['line'] : '&nbsp;').'</td>';            
-            $body .= '</tr>';            
+            $body .= '<td>'.(!empty($step['line']) ? $step['line'] : '&nbsp;').'</td>';
+            $body .= '</tr>';
         }
         return <<<PAGE
-            <style>
-                * {font-family: Arial;} 
-                div.container {margin: auto;} 
-                td,th {font-size: 12px; font-family: Arial; padding: 3px; border: 0.5px solid silver}
-                .error-box {border:1px solid #ddd; padding: 10px; background-color: #fefefe; margin: 10px 0px; font-size: 0.85em}
-            </style>
-            <div class="container">       
+
+            <div class="container">
                 Si è verificato il seguente errore:
                 <div class="error-box">
                 {$message}
                 </div>
                 <table style="border-collapse: collapse; max-width: 1200px;">
-                    <tr>
-                        <th>Class</th>
-                        <th>Function</th>
-                        <th>File</th>
-                        <th>Line</th>
-                    </tr>
+                    <tr><th>Class</th><th>Function</th><th>File</th><th>Line</th></tr>
                     {$body}
                 </table>
             </div>
+            <style>
+                * {font-family: Arial;}
+                div.container {margin: auto;}
+                td,th {font-size: 12px; font-family: Arial; padding: 3px; border: 0.5px solid silver}
+                .error-box {border:1px solid #ddd; padding: 10px; background-color: #fefefe; margin: 10px 0px; font-size: 0.85em}
+            </style>
 PAGE;
-                    
     }
 }

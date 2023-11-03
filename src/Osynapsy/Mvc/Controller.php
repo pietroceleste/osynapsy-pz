@@ -187,7 +187,7 @@ abstract class Controller implements InterfaceController, InterfaceSubject
         }
         $resp = $this->indexAction();
         if ($resp) {
-            $this->response->addContent($resp);
+            $this->response->addContent(strval($resp));
         }
         return $this->response;
     }
@@ -225,5 +225,10 @@ abstract class Controller implements InterfaceController, InterfaceSubject
     public function setModel($model)
     {
         $this->model = $model;
+    }
+
+    public function refreshComponents(array $components)
+    {
+        $this->getResponse()->js(sprintf("Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
     }
 }

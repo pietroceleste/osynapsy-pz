@@ -22,6 +22,7 @@ class Component extends Tag
     protected static $ids = [];
     protected $data = [];
     protected $__par = [];
+    protected $count = 0;
 
     public function __construct($tag, $id = null)
     {
@@ -33,7 +34,7 @@ class Component extends Tag
     }
 
     protected function build()
-    {
+    {        
         $this->__build_extra__();
         return parent::build(-1);
     }

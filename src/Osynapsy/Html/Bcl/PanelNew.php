@@ -60,7 +60,12 @@ class PanelNew extends Component
         $this->currentRow = $this->sections['body']->add(new Tag('div', null, 'row'));
         return $this->currentRow;
     }
-    
+
+    public function addClass($class)
+    {
+        $this->classCss['main'] .= ' ' . $class;
+    }
+
     public function addColumn($colspan = 12, $offset = 0)
     {
         if (empty($this->currentRow)) {

@@ -124,7 +124,10 @@ class SqlQuery
     
     public function __toString() {
         $string = '';
-        foreach ($this->elements as $word => $items) {            
+        foreach ($this->elements as $word => $items) {
+            if (empty($items)) {
+                continue;
+            }
             $string .= $word == 'JOIN' ? '' : $word.' ';
             $string .= $this->prefix($word);            
             $string .= is_array($items) ? implode($this->getSeparator($word), $items) : ' '.$items;            

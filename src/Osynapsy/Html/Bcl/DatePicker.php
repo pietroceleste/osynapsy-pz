@@ -95,4 +95,9 @@ class DatePicker extends Component
     {
         $this->dateComponent->setDisabled($condition);
     }
+
+    public function getTextBox()
+    {
+        return $this->dateComponent;
+    }
 }

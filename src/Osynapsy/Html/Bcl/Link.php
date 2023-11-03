@@ -25,9 +25,9 @@ class Link extends Component
         }
     }
     
-    public function openInModal($title, $widht = '640px', $height = '480px')
+    public function openInModal($title, $widht = '640px', $height = '480px', $postData = false)
     {
-        $this->setClass('open-modal');
+        $this->setClass('open-modal' . ($postData ? ' postdata' : ''));
         $this->att([
             'title' => $title,
             'modal-width' => $widht,

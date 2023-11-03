@@ -16,6 +16,7 @@ use Osynapsy\Html\Tag;
 use Osynapsy\Data\Dictionary;
 use Osynapsy\Html\Bcl\Column;
 use Osynapsy\Html\Bcl\Alert;
+use Osynapsy\Html\Bcl\Panel;
 
 /**
  * Represents a Html Form.
@@ -33,7 +34,7 @@ class Form extends Component
     private $repo;
     private $appendFootToMain = false;
 
-    public function __construct($name, $mainComponent = 'Panel', $tag = 'form')
+    public function __construct($name, $bodyComponentClass = Panel::class, $tag = 'form')
     {
         parent::__construct($tag, $name);
         $this->repo = new Dictionary(array(
@@ -42,23 +43,27 @@ class Form extends Component
                 'width' => 10
             )
         ));
-        //Form setting
-        $this->att('name',$name)
-             ->att('method','post')
-             ->att('role','form');
-        $mainComponent = '\\Osynapsy\\Html\\Bcl\\'.$mainComponent;
-        $this->appendFootToMain = ($mainComponent === 'Panel');
-        //Body setting
-        $this->body = new $mainComponent($name.'_panel', 'div');
-        $this->body->setParameter('label-position','inside');
-        $this->body->tagdep =& $this->tagdep;
+        $this->att('name',$name)->att('method','post')->att('role','form');
+        $this->body = $this->bodyFactory($bodyComponentClass, $name);
+    }
+
+    protected function bodyFactory($bodyComponentClass, $name)
+    {
+        //Start workaround
+        if ($bodyComponentClass === 'Tab') {
+            $bodyComponentClass = Tab::class;
+        }
+        //End workaround
+        $this->appendFootToMain = ($bodyComponentClass === Panel::class);
+        $body = new $bodyComponentClass($name.'_panel');
+        $body->setParameter('label-position', 'inside');
+        return $body;
     }
 
     protected function __build_extra__()
     {
         if ($this->head) {
-            $this->add(new Tag('div', null, 'm-b'))
-                 ->att('style', 'margin-bottom: 15px')
+            $this->add(new Tag('div', null, 'osy-mb-20 m-b'))
                  ->add(new Tag('div', null, $this->headClass))
                  ->add($this->head);
         }
@@ -85,11 +90,7 @@ class Form extends Component
         }
         $this->add($this->foot->get());
     }
-
-    public function addCard($title)
-    {
-        $this->body->addCard($title);
-    }
+    
 
     public function head($width=12, $offset = 0)
     {
@@ -134,13 +135,7 @@ class Form extends Component
     public function getPanel()
     {
         return $this->body;
-    }
-
-    public function put($lbl, $obj, $x=0, $y=0, $width=1, $offset=null, $class='')
-    {
-        $this->body->put($lbl, $obj, $x, $y, $width, $offset, $class);
-        return $this->body;
-    }
+    }   
 
     public function setCommand($delete = false, $save = true, $back = true, $modalClose = false, $footOnBottom = false)
     {
@@ -202,5 +197,10 @@ class Form extends Component
         }
         $this->repo->set($key, $value);
         return $this;
+    }
+
+    public function __call($method, $arguments)
+    {        
+        return call_user_func_array([$this->getPanel(), $method], $arguments);
     }
 }

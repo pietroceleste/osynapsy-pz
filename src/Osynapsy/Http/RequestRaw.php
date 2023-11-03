@@ -15,7 +15,7 @@ namespace Osynapsy\Http;
  */
 class RequestRaw 
 {
-	private $raw;
+    private $raw;
     private $server;
     
     public function __construct()

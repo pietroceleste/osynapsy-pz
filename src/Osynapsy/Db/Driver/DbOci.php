@@ -11,6 +11,8 @@
 
 namespace Osynapsy\Db\Driver;
 
+use Osynapsy\Db\Paging\Paging;
+
 /**
  * Oci wrap class
  *
@@ -339,14 +341,15 @@ class DbOci implements InterfaceDbo
         );
     }
 
-    public function replace($table, array $args, array $conditions)
+    public function replace($table, array $args, array $conditions, $key = null)
     {
-        $result = $this->select($table, ['count(*) AS NUMROWS'], $conditions);
+        $result = $this->select($table, empty($key) ? ['count(*) AS NUMROWS'] : [$key, '1 as NUMROWS'], $conditions);
         if (!empty($result) && !empty($result[0]) && !empty($result[0]['NUMROWS'])) {
             $this->update($table, $args, $conditions);
-            return;
+            return empty($key) ? null : $result[0][strtoupper($key)];
         }
-        $this->insert($table, array_merge($args, $conditions));
+        $rs = $this->insert($table, array_merge($args, $conditions), empty($key) ? [] : [$key => null]);
+        return empty($key) ? null : $rs[strtoupper($key)];
     }
 
     public function select($table, array $fields, array $condition)
@@ -395,5 +398,12 @@ class DbOci implements InterfaceDbo
     {
         $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = '{$format}'");
     }
+    
+     public function execQueryPaging($query, $queryParameters, $orderBy, $pageRequest,  $pageDimension = 10)
+     {
+        $dbPager = new Paging($this->cn, $query, $queryParameters, $pageDimension);
+        $dbPager->setOrderBy($orderBy ?: 1);
+        return $dbPager;
+     }
 /*End class*/
 }

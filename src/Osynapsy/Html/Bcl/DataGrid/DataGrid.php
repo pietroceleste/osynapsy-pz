@@ -3,20 +3,22 @@ namespace Osynapsy\Html\Bcl\DataGrid;
 
 use Osynapsy\Html\Component;
 use Osynapsy\Html\Tag;
+use Osynapsy\Db\Paging\Paging;
 
 class DataGrid extends Component
 {
     private $columns = [];
-    private $title;
+    private $title;    
     private $footer = [];
+    private $thClass = 'bcl-datagrid-th bcl-datagrid-th-order-by';
     private $emptyMessage = 'No data found';
     private $showHead = true;
-    protected $pagination;
+    protected $pager;
 
     public function __construct($name, $debugQuery = false)
     {
         parent::__construct('div', $name);
-        $this->addClass('container-fluid bcl-datagrid');
+        $this->addClass('bcl-datagrid');
         $this->requireCss('Bcl3/DataGrid/style.css');
         $this->requireJs('Bcl3/DataGrid/script.js');
         $this->debug = $debugQuery;
@@ -24,10 +26,11 @@ class DataGrid extends Component
 
     public function __build_extra__()
     {
-        //If datagrid has pager get data from it.
-        if (!empty($this->pagination)) {
+        $this->count++;            
+        //If datagrid has pager get data from it.        
+        if (!empty($this->pager)) {
             try {
-                $this->setData($this->pagination->loadData());
+                $this->setData($this->pager->paging->getDataset());                
             } catch (\Exception $e) {
                 $this->printError($e->getMessage());
             }
@@ -40,14 +43,14 @@ class DataGrid extends Component
         }
         $this->add($this->tbodyFactory());
         if ($this->debug) {
-            $this->footer = [sprintf('<pre style="margin: 5px 0px; border:1px solid #ddd;">%s</pre>', $this->pagination->getSql())];
+            $this->footer = [sprintf('<pre style="margin: 5px 0px; border:1px solid #ddd;">%s</pre>', $this->pager->paging->getMeta(Paging::META_PAGING_QUERY))];
         }
         if (!empty($this->footer)) {
             $this->add($this->buildFooter($this->footer));
         }
         //If datagrid has pager append to foot and show it.
-        if (!empty($this->pagination)) {
-            $this->add($this->paginationFactory($this->pagination));
+        if (!empty($this->pager)) {
+            $this->add($this->paginationFactory($this->pager));
         }
     }
 
@@ -61,7 +64,7 @@ class DataGrid extends Component
     private function theadFactory()
     {
         $thead = new Tag('div', null, 'row bcl-datagrid-thead');
-        $orderByFields = $this->pagination ? explode(',', $this->pagination->getOrderBy()) : null;
+        $orderByFields = $this->pager ? explode(',', $this->pager->paging->getOrderBy()) : null;
         foreach($this->columns as $label => $properties) {            
             if (empty($properties['hideTh'])) {
                 $thead->add($this->thFactory($label, $properties, $orderByFields));
@@ -74,7 +77,7 @@ class DataGrid extends Component
     {
         $orderByField = $properties['orderByField'];
         $keyClass = empty($properties['classTh']) ? 'class' : 'classTh';
-        $th = new Tag('div', null, 'hidden-xs d-none d-sm-block bcl-datagrid-th bcl-datagrid-th-order-by '.str_replace('d-block', '', $properties[$keyClass]));
+        $th = new Tag('div', null, $this->thClass . ' ' . str_replace('d-block', '', $properties[$keyClass]));
         $th->att('data-idx', $orderByField)->add($label);
         if (empty($orderedFields)) {
             return $th;
@@ -115,7 +118,7 @@ class DataGrid extends Component
             return $row;
         }
         $row->add(new Tag('div', null, 'col-lg-4 col-xs-4 col-4'))
-            ->add($this->pagination->getPageDimensionsCombo());
+            ->add($this->pager->getPageDimensionsCombo());
         $row->add(new Tag('div', null, 'col-lg-4 col-xs-4 col-4 text-center'))
              ->add('<label class="" style="margin-top: 30px;">'.$pagination->getInfo().'</label>');
         $row->add(new Tag('div', null, 'col-lg-4 col-xs-4 col-4 text-right'))
@@ -236,19 +239,15 @@ class DataGrid extends Component
      * @param array $sqlParameters Parameters of sql query
      * @param integer $pageDimension Page dimension (in row)
      */
-    public function setPagination($db, $sqlQuery, $sqlParameters, $pageDimension = 10, $orderBy = null)
+    public function setPagination($dbCn, $query, $queryParameters, $pageDimension = 10, $orderBy = null)
     {
-        $this->pagination = new Pager(
-            $this->id.(strpos($this->id, '_') ? '_pagination' : 'Pagination'),
-            empty($pageDimension) ? 10 : $pageDimension
-        );
-        $this->pagination->addClass('refreshParent');
-        $this->pagination->setSql($db, $sqlQuery, $sqlParameters);
-        $this->pagination->setParentComponent($this->id);
-        if (!empty($orderBy)) {
-            $this->pagination->setOrder($orderBy);
-        }
-        return $this->pagination;
+        $dbPager = new Paging($dbCn, $query, $queryParameters, $pageDimension);
+        $dbPager->setOrderBy($orderBy ?: 1);
+        $pagerId = $this->id . (strpos($this->id, '_') ? '_pagination' : 'Pagination');        
+        $pager = new Pager($pagerId, $dbPager);
+        $pager->addClass('refreshParent');        
+        $pager->setParentComponent($this->id);              
+        return $this->pager = $pager;
     }
 
     public function setEmptyMessage($message)
@@ -260,5 +259,10 @@ class DataGrid extends Component
     public function showHead($value)
     {
         $this->showHead = $value;
+    }
+
+    public function hideHeadOnMobile()
+    {
+        $this->thClass .= ' hidden-xs d-none d-sm-block';
     }
 }

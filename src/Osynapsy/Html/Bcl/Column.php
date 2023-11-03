@@ -77,7 +77,7 @@ class Column extends Component
     public function push($label, $object, $grouped = true, $class = 'form-group')
     {
         if ($object instanceof Tag) {
-            $object->att('data-label', strip_tags($label));
+            $object->att('data-label', strip_tags(is_array($label) ? $label[0] : $label));
         }
         if ($grouped) {
             $this->add(new FormGroup($object, $label, $class));

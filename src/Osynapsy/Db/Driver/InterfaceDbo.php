@@ -55,4 +55,6 @@ interface InterfaceDbo
     public function rollback();
     
     public function update($table, array $values, array $conditions);
+    
+    public function execQueryPaging($query, $queryParameters, $orderBy, $pageRequest,  $pageDimension = 10);
 }

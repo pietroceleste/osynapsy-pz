@@ -171,7 +171,7 @@ abstract class Model
 
         $sql  = " SELECT *".PHP_EOL;
         $sql .= " FROM  ".$this->repo->get('table')." ".PHP_EOL;
-        $sql .= " WHERE ".implode(' AND ',$sqlWhere);
+        $sql .= " WHERE ".implode(' AND ',$sqlWhere);        
         try {
             $rec = $this->db->execUnique($sql, $sqlParam, 'ASSOC');
             if (!empty($rec)) {

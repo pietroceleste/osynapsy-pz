@@ -16,7 +16,7 @@ use Osynapsy\Event\Dispatcher;
 use Osynapsy\Http\Request;
 use Osynapsy\Http\Response;
 use Osynapsy\Http\ResponseJson as JsonResponse;
-use Osynapsy\Http\ResponseHtmlOcl as HtmlResponse;
+use Osynapsy\Http\ResponseHtml as HtmlResponse;
 use Osynapsy\Observer\InterfaceSubject;
 use Osynapsy\Mvc\Action\InterfaceAction;
 

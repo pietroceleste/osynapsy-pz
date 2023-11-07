@@ -160,7 +160,7 @@ class DataGrid extends Component
     {
         switch($properties['type']) {
             case 'check':
-                $value = sprintf('<input type="checkbox" name="%s_chk[]" value="%s">', $this->id, $value);
+                $value = empty($value) ? null : sprintf('<input type="checkbox" name="%s_chk[]" value="%s">', $this->id, $value);
                 $properties['class'] .= ' text-center';
                 break;
             case 'money-right':

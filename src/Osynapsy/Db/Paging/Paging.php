@@ -4,6 +4,7 @@ namespace Osynapsy\Db\Paging;
 class Paging
 {
     const META_PAGE_DIMENSION = 'pageDimension';
+    const META_REQUEST_PAGE_DIMENSION = 'requestPageDimension';
     const META_PAGE_TOTAL = 'pageTotal';
     const META_PACE_CURRENT = 'pageCurrent';
     const META_REQUEST_PAGE = 'requestPage';
@@ -18,6 +19,7 @@ class Paging
     protected $meta = [
         'numberOfRows' => 0,
         'pageCurrent' => 1,
+        'pageCurrentDimension' => 10,
         'pageDimension' => 10,
         'pageTotal' => 0,
         'requestPage' => 1
@@ -38,7 +40,7 @@ class Paging
         $requestPage = $this->getMeta(self::META_REQUEST_PAGE);
         $where = empty($this->filters) ? '' : $this->whereClauseFactory($this->filters);
         $numberOfRows = $this->countRows($rawQuery,  $queryParameters, $where);
-        $pageDimension = $this->getMeta(self::META_PAGE_DIMENSION) ?: $numberOfRows;
+        $pageDimension = $this->getMeta(self::META_REQUEST_PAGE_DIMENSION) ?: $numberOfRows;
         $this->metaFactory($numberOfRows, $pageDimension, $requestPage);
         $query = $this->pagingQueryFactory($rawQuery, $where, $this->orderBy);
         try {
@@ -78,8 +80,7 @@ class Paging
                 break;
         }
         $this->setMeta('numberOfRows', $numberOfRows);
-        $this->setMeta(self::META_PACE_CURRENT, $pageCurrent);
-        $this->setMeta(self::META_PAGE_DIMENSION, $pageDimension);
+        $this->setMeta(self::META_PACE_CURRENT, $pageCurrent);        
         $this->setMeta(self::META_PAGE_TOTAL, $pageTotal);
     }
 
@@ -103,7 +104,7 @@ class Paging
     {
         $orderByClause = sprintf('ORDER BY %s', $orderBySequence ?: '1 DESC');
         $pageCurrent = $this->getMeta(self::META_PACE_CURRENT);
-        $pageDimension = $this->getMeta(self::META_PAGE_DIMENSION);
+        $pageDimension = $this->getMeta(self::META_REQUEST_PAGE_DIMENSION);
         switch ($this->dbCn->getType()) {
             case 'oracle':
                 return $this->pagingQueryOracleFactory($sql, $where, $orderByClause, $pageCurrent, $pageDimension);
@@ -198,7 +199,13 @@ class Paging
 
     public function setPageDimension($pageDimension)
     {
+        $this->setRequestPageDimension($pageDimension);
         $this->setMeta(self::META_PAGE_DIMENSION, (int) $pageDimension);
+    }
+
+    public function setRequestPageDimension($requestPageDimension)
+    {
+         $this->setMeta(self::META_REQUEST_PAGE_DIMENSION, (int) $requestPageDimension);
     }
 
     public function setRequestPage($requestPage)

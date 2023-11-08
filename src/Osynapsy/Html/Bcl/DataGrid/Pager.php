@@ -39,9 +39,9 @@ class Pager extends Component
             $this->paging->setOrderBy($_REQUEST[$this->id.'OrderBy']);
         }
         if (!empty($_REQUEST[$this->id.'PageDimension'])) {
-            $this->paging->setPageDimension($_REQUEST[$this->id.'PageDimension']);
+            $this->paging->setRequestPageDimension($_REQUEST[$this->id.'PageDimension']);
         } elseif (!empty($_REQUEST[$this->id.'_page_dimension'])) {
-            $this->paging->setPageDimension($_REQUEST[$this->id.'_page_dimension']);
+            $this->paging->setRequestPageDimension($_REQUEST[$this->id.'_page_dimension']);
         }
     }
 
@@ -121,7 +121,7 @@ class Pager extends Component
         return sprintf('da %s a %s di %s %s', $start, $end, $numberOfRows, $this->entity);
     }    
 
-    public function getPageDimensionsCombo()
+    public function comboPageDimensionFactory()
     {
         $pageDimension = $this->paging->getMeta(Paging::META_PAGE_DIMENSION);
         $pageDimensions = $this->getPageDimensionComboOptions($pageDimension);

@@ -240,7 +240,7 @@ class Pager extends Component
         $Combo->setPlaceholder($this->pageDimensionPalceholder);
         $Combo->att('onchange',"FormController.refreshComponent(['#{$this->parentComponent}'])")
               ->att('style','margin-top: 20px;')
-              ->setArray($this->pageDimensions);
+              ->setData($this->pageDimensions);
         return $Combo;
     }
 

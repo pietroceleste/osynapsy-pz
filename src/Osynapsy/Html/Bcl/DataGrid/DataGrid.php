@@ -118,7 +118,7 @@ class DataGrid extends Component
             return $row;
         }
         $row->add(new Tag('div', null, 'col-lg-4 col-xs-4 col-4'))
-            ->add($this->pager->getPageDimensionsCombo());
+            ->add($this->pager->comboPageDimensionFactory());
         $row->add(new Tag('div', null, 'col-lg-4 col-xs-4 col-4 text-center'))
              ->add('<label class="" style="margin-top: 30px;">'.$pagination->getInfo().'</label>');
         $row->add(new Tag('div', null, 'col-lg-4 col-xs-4 col-4 text-right'))

@@ -19,46 +19,53 @@ use Osynapsy\Html\Bcl\Panel;
 class Tab extends Component
 {
     private $ul;
-    private $nCard=0;
+    private $nCard = 0;
     private $currentCard;
-    private $tabContent;
+    private $tabContainer;
     private $id;
     
     public function __construct($id)
     {
-        parent::__construct('dummy');
-        $this->id = $id;
+        parent::__construct('dummy');        
         $this->requireJs('Bcl/Tab/script.js');
-        $this->add(new HiddenBox($id));
-        $this->ul = $this->add(new Tag('ul'));
-        $this->ul->att([
-            'id' => $id.'_nav', 
-            'class' => 'nav nav-tabs',
-            'role' => 'tablist',
-            'data-tabs' => 'tabs'
-        ]);
-        $this->tabContent = $this->add(new Tag('div'))->att('class','tab-content');
+        $this->id = $id;
+        $this->ul = $this->add($this->navTabsFactory($id));
+        $this->ul->add(new HiddenBox($id));
+        $this->tabContainer = $this->add(new Tag('div', null, 'tab-content'));
+    }
+
+    protected function navTabsFactory($id)
+    {
+        $ul = new Tag('ul', $id.'_nav', 'nav nav-tabs');
+        $ul->att(['role' => 'tablist', 'data-tabs' => 'tabs']);
+        return $ul;
     }
     
-    public function addCard($title)
+    public function addCard($title, $panelClass = Panel::class)
     {
-        $cardId = $this->id.'_'.$this->nCard++;
-        $li = $this->ul->add(new Tag('li'))->att('role','presentation');
-        if ($this->nCard == 1) {
-            //$li->att('class','active');
-        }
-        $li->add('<a href="#'.$cardId.'" data-toggle="tab">'.$title.'</a>');
-        $this->currentCard = $this->tabContent->add(new Panel($cardId))->att('class' , 'tab-pane fade no-border', true);
+        $cardId = sprintf('%s_%s', $this->id, $this->nCard++);
+        $this->ul->add($this->cardTabFactory($cardId, $title));
+        $this->currentCard = $this->tabContainer->add($this->cardPanelFactory($cardId, $panelClass));
         return $this->currentCard;
     }
-    
-    public function put($label, $object, $col, $row, $width = 1, $colspan = null, $class = '')
+
+    protected function cardTabFactory($cardId, $title)
     {
-        $this->currentCard->put($label, $object, $col, $row, $width, $colspan, $class);
+        $li = new Tag('li');
+        $li->att('role','presentation');
+        $li->add(sprintf('<a href="#%s" data-toggle="tab">%s</a>', $cardId, $title));
+        return $li;
     }
-    
-    public function setType($type)
+
+    protected function cardPanelFactory($cardId, $panelClass)
     {
-        $this->currentCard->setType($type);
+        $Panel = new $panelClass($cardId);
+        $Panel->addClass('tab-pane fade no-border');
+        return $Panel;
+    }
+
+    public function __call($name, $arguments)
+    {
+        return call_user_func_array([$this->currentCard, $name], $arguments);
     }
 }

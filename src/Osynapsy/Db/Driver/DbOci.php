@@ -282,24 +282,31 @@ class DbOci implements InterfaceDbo
         return $cols;
     }
 
-    public function insert($table, array $values, $keys = array())
+    public function insert($table, array $values, $rawkeys = [])
     {
-        $command  = 'INSERT INTO '.$table;
-        $command .= '('.implode(',', array_keys($values)).')';
-        $command .= ' VALUES ';
-        $command .= '(:'.implode(',:',array_keys($values)).')';
+        $keys = is_array($rawkeys) ? $rawkeys : [$rawkeys => null];
+        $command = sprintf(
+            'INSERT INTO %s (%s) VALUES (:%s)',
+            $table,
+            implode(',', array_keys($values)),
+            implode(',:', array_keys($values))
+        );
         if (is_array($keys) && !empty($keys)) {
-            $command .= ' RETURNING ';
-            $command .= implode(',',array_keys($keys));
-            $command .= ' INTO ';
-            $command .= ':KEY_'.implode(',:KEY_',array_keys($keys));
-            foreach ($keys as $k => $v) {
-                $values['KEY_'.$k] = null;
+            $command .= sprintf(
+                ' RETURNING %s INTO :KEY_%s',
+                implode(',',array_keys($keys)),
+                implode(',:KEY_',array_keys($keys))
+            );
+            foreach ($keys as $keyId=> $v) {
+                $values['KEY_'.$keyId] = null;
             }
         }
-        $values = $this->execCommand($command, $values, false);
+        $rs = $this->execCommand($command, $values, false);        
+        if (!is_array($rawkeys)) {
+            return $rs['KEY_'.$rawkeys];
+        }
         $res = array();
-        foreach ($values as $k => $v) {
+        foreach ($rs as $k => $v) {
             if (strpos($k,'KEY_') !== false) {
                 $res[str_replace('KEY_','',$k)] = $v;
             }
@@ -343,7 +350,7 @@ class DbOci implements InterfaceDbo
 
     public function replace($table, array $args, array $conditions, $key = null)
     {
-        $result = $this->select($table, empty($key) ? ['count(*) AS NUMROWS'] : [$key, '1 as NUMROWS'], $conditions);
+        $result = $this->select($table, empty($key) ? ['count(*) AS NUMROWS'] : [$key, '1 as NUMROWS'], $conditions);        
         if (!empty($result) && !empty($result[0]) && !empty($result[0]['NUMROWS'])) {
             $this->update($table, $args, $conditions);
             return empty($key) ? null : $result[0][strtoupper($key)];

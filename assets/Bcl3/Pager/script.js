@@ -1,21 +1,19 @@
 BclPager = {    
-    init : function() {
-        $('.BclPager').each(function() {  
-            $('body').on('click', '.BclPager a', function(e) {
-                e.preventDefault();
-                let parent = $(this).closest('.BclPager');                
-                $('input#'+parent.attr('id'), parent).val($(this).data('value'));
-                if ($(parent).hasClass('refreshParent')) {
-                    Osynapsy.refreshComponents([$(parent).data('parent')]);
-                    return;
-                }
-                if ($(parent).attr('action') === 'refreshComponent' || $(parent).hasClass('refreshParent')) {
-                    Osynapsy.refreshComponents([$(parent).data('target')]);
-                    return;
-                }                
-                $(this).closest('form').submit();
-            });
-        });
+    init : function() {       
+        $('body').on('click', '.BclPager a', function(e) {
+            e.preventDefault();
+            let parent = $(this).closest('.BclPager');                
+            $('input#'+parent.attr('id'), parent).val($(this).data('value'));
+            if ($(parent).hasClass('refreshParent')) {
+                Osynapsy.refreshComponents([$(parent).data('parent')]);
+                return;
+            }
+            if ($(parent).attr('action') === 'refreshComponent' || $(parent).hasClass('refreshParent')) {
+                Osynapsy.refreshComponents([$(parent).data('target')]);
+                return;
+            }                
+            $(this).closest('form').submit();
+        });        
     }
 };
 

@@ -63,7 +63,7 @@ class Form extends Component
     protected function __build_extra__()
     {
         if ($this->head) {
-            $this->add(new Tag('div', null, 'osy-mb-20 m-b'))
+            $this->add(new Tag('div', null, 'osy-mb-10 m-b'))
                  ->add(new Tag('div', null, $this->headClass))
                  ->add($this->head);
         }

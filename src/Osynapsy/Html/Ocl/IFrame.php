@@ -9,17 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Osynpasy\Ocl\Component;
+namespace Osynapsy\Html\Ocl;
 
 use Osynapsy\Html\Component;
 
 //Field iframe
-class Iframe extends Component
+class IFrame extends Component
 {
 
     public function __construct($name){
         parent::__construct('iframe',$name);
         $this->att('name',$name);
+        $this->att('style', 'width: 100%; height: 75vh; border: 0px; border: 1px solid #ddd');
     }
 
     protected function __build_extra__(){

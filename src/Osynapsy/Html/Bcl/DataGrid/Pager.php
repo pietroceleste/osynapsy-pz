@@ -116,6 +116,9 @@ class Pager extends Component
         $pageCurrent = $this->getMeta('pageCurrent');
         $pageDimension = $this->getMeta('pageDimension');
         $numberOfRows = $this->getMeta('numberOfRows');
+        if (empty($numberOfRows)) {
+            return false;
+        }
         $end = min($pageCurrent * $pageDimension, $numberOfRows);
         $start = ($pageCurrent - 1) * $pageDimension + 1;        
         return sprintf('da %s a %s di %s %s', $start, $end, $numberOfRows, $this->entity);

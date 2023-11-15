@@ -16,20 +16,14 @@ use Osynapsy\Html\Tag;
 use Osynapsy\Html\Component;
 
 abstract class AbstractView
-{
-    protected $components = array();
-    protected $controller;
-    protected $reponse;
-    protected $db;    
+{    
+    protected $controller;        
+    protected $properties = [];
     
-    public function __construct(Controller $controller, $title = null)
+    public function __construct(Controller $controller, array $properties = [])
     {
         $this->controller = $controller;
-        $this->request = $controller->request;
-        $this->db = $controller->getDb();        
-        if ($title) {
-            $this->setTitle($title);
-        }
+        $this->properties = $properties;
     }
     
     abstract public function init();
@@ -47,48 +41,53 @@ abstract class AbstractView
     
     public function getModel()
     {
-        return $this->getController()->model;
+        return $this->controller->getModel();
     }
     
 	public function getDb()
     {
-        return $this->getController()->getDb();
+        return $this->controller->getDb();
     }
-	
+
+    public function getResponse()
+    {
+        return $this->controller->getResponse();
+    }
+
     public function setTitle($title)
     {
-        $this->getController()->getResponse()->addContent($title,'title');
+        $this->getResponse()->addContent($title,'title');
     }
     
     public function addJs($path)
     {    
-        $this->getController()->getResponse()->addJs($path);
+        $this->getResponse()->addJs($path);
     }
     
     public function addCss($path)
     {    
-        $this->getController()->getResponse()->addCss($path);
+        $this->getResponse()->addCss($path);
     }
     
     public function addJsCode($code)
     {
-        $this->getController()->getResponse()->addJsCode($code);
+        $this->getResponse()->addJsCode($code);
     }
     
     public function addStyle($style)
     {
-        $this->getController()->getResponse()->addStyle($style);
+        $this->getResponse()->addStyle($style);
     }
     
     public function __toString()
     {
-        return $this->get();
+        return strval($this->get());
     }
     
     protected function componentFactory(array $componentIds)
     {
-        $this->getController()->getResponse()->resetTemplate();
-        $this->getController()->getResponse()->resetContent();
+        $this->getResponse()->resetTemplate();
+        $this->getResponse()->resetContent();
         $response = new Tag('div', 'response');
         foreach ($componentIds as $id) {
             $response->add(Component::getById($id));
@@ -122,5 +121,15 @@ abstract class AbstractView
                 }
             }
         }
+    }
+
+    public function __get($propertyId)
+    {
+        return array_key_exists($propertyId, $this->properties) ? $this->properties[$propertyId] : null;
+    }
+
+    public function __set($propertyId, $value)
+    {
+        $this->properties[$propertyId] = $value;
     }
 }

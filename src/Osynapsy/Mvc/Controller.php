@@ -231,4 +231,9 @@ abstract class Controller implements InterfaceController, InterfaceSubject
     {
         $this->getResponse()->js(sprintf("Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
     }
+
+    public function alertJs($message)
+    {
+        $this->getResponse()->js(sprintf("alert(['%s'])", addslashes($message)));
+    }
 }

@@ -183,9 +183,10 @@ class Form extends Component
         $objTitle = new Tag('h2', null, 'font-light m-t-2');
         $objTitle->add($title);
         $column = $this->head($size);
+        $column->att('style', 'padding: 0px');
         $column->push(false, $objTitle, false);
         if (!empty($subTitle)) {
-            $column->push(false,'<h4><i>'.$subTitle.'</i></h4>',false);
+            $column->push(false, is_string($subTitle) ? '<h4><i>'.$subTitle.'</i></h4>' : $subTitle,false);
         }
         return $column;
     }

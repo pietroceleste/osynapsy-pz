@@ -50,3 +50,6 @@
     background-color: white;
     border-radius: 0px 0px 0px 3px;
 }
+.bcl-datagrid-th-order-by {
+    cursor: pointer;
+}

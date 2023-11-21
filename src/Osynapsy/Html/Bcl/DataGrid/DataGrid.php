@@ -12,6 +12,7 @@ class DataGrid extends Component
     private $footer = [];
     private $thClass = 'bcl-datagrid-th bcl-datagrid-th-order-by';
     private $emptyMessage = 'No data found';
+    private $bodyHeight = 0;
     private $showHead = true;
     protected $pager;
 
@@ -96,6 +97,9 @@ class DataGrid extends Component
     private function tbodyFactory()
     {
         $body = new Tag('div', null, 'bcl-datagrid-body');
+        if (!empty($this->bodyHeight)) {
+            $body->att('style', sprintf('height: %svh; overflow: auto;', $this->bodyHeight));
+        }
         if (empty($this->data)) {
             $body->add($this->emptyMessageFactory($this->emptyMessage));
             return $body;
@@ -269,5 +273,10 @@ class DataGrid extends Component
     public function hideHeadOnMobile()
     {
         $this->thClass .= ' hidden-xs d-none d-sm-block';
+    }
+
+    public function setMaxHeight($height)
+    {
+        $this->bodyHeight = $height;
     }
 }

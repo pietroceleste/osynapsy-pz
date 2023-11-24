@@ -11,8 +11,10 @@
 
 namespace Osynapsy\Kernel;
 
-use Osynapsy\Data\Dictionary;
+use Osynapsy\Http\Request;
+use Osynapsy\Kernel\Route;
 use Osynapsy\Db\DbFactory;
+use Osynapsy\Helper\AutoWire;
 
 /**
  * Description of Runner
@@ -21,39 +23,24 @@ use Osynapsy\Db\DbFactory;
  */
 class Runner
 {
-    private $env;
-    private $route;
-    private $dbFactory;
-    private $appController;
+    private $request;
+    private $route;    
+    private $autowire;
     
-    public function __construct(Dictionary &$env, $currentRoute)
+    public function __construct(Request $request, Route $route)
     {
-        $this->env = $env;
-        $this->route = $currentRoute;
-    }
-    
-    private function checks()
-    {
-        if (!$this->route->controller) {
-            throw new KernelException('No route to destination ('.$this->env->get('server.REQUEST_URI').')', 404);
-        }
-        if (!$this->route->application) {
-            throw new KernelException('No application defined', 405);
-        }
-    }
+        $this->request = $request;
+        $this->route = $route;
+        $this->autowire = new AutoWire([$this->route, $this->request]);
+    }        
     
     public function run()
     {
         try {
-            $this->checks();        
+            $this->checks();            
             $this->loadDatasources();
             $this->runApplicationController();
-            $response = $this->runRouteController(
-                $this->route->controller
-            );
-            if ($response !== false) {
-                return $response;
-            }
+            return $this->runRouteController($this->route->controller);
         } catch (KernelException $e) {
             return $this->dispatchKernelException($e);
         } catch(\Exception $e) {
@@ -62,7 +49,51 @@ class Runner
             return $this->pageOops(sprintf('%s at row %s file %s', $e->getMessage(), $e->getLine(), $e->getFile()), $e->getTrace());
         }
     }
+
+    private function checks()
+    {
+        if (!$this->route->controller) {
+            throw new KernelException('No route to destination ('.$this->request->get('server.REQUEST_URI').')', 404);
+        }
+        if (!$this->route->application) {
+            throw new KernelException('No application defined', 405);
+        }
+    }
     
+    private function loadDatasources()
+    {
+        $listDatasource = $this->request->search('db',"env.app.{$this->route->application}.datasources");
+        $dbFactoryHandle = $this->autowire->getInstance(DbFactory::class);
+        $this->autowire->addHandle($dbFactoryHandle);
+        foreach ($listDatasource as $datasource) {
+            $connectionString = $datasource['@value'];
+            $dbFactoryHandle->createConnection($connectionString);
+        }
+        if ($dbFactoryHandle->hasConnection(0)) {
+            $this->autowire->addHandle($dbFactoryHandle->getConnection(0));
+        }
+    }
+
+    private function runApplicationController()
+    {
+        $applicationController = str_replace(':', '\\', $this->request->get("env.app.{$this->route->application}.controller"));
+        if (empty($applicationController)) {
+            return true;
+        }
+        $appController = $this->autowire->getInstance($applicationController);
+        $this->autowire->addHandle($appController);
+        if (!$appController->run()) {
+            throw new KernelException('App not running (access denied)','501');
+        }
+    }
+
+    private function runRouteController($classController)
+    {                
+        $controller = $this->autowire->getInstance($classController);
+        $this->autowire->addHandle($controller);
+        return (string) $controller->run();
+    }
+
     private function dispatchKernelException(KernelException $e)
     {
         switch($e->getCode()) {
@@ -72,43 +103,7 @@ class Runner
                 return $this->pageOops($e->getMessage(), $e->getTrace());
         }
     }
-    
-    private function runApplicationController()
-    {        
-        $applicationController = str_replace(':', '\\', $this->env->get("env.app.{$this->route->application}.controller"));
-        if (empty($applicationController)) {
-            return true;
-        }
-        //If app has applicationController instance it before recall route controller;        
-        $this->appController = new $applicationController(
-            $this->dbFactory->getConnection(0), 
-            $this->route,
-            $this->env
-        );
-        if (!$this->appController->run()) {
-            throw new KernelException('App not running (access denied)','501');
-        }
-    }
-    
-    private function runRouteController($classController)
-    {
-        if (empty($classController)) {
-            throw new KernelException('Route not found', '404');
-        }
-        $this->controller = new $classController($this->env, $this->dbFactory, $this->appController);
-        return (string) $this->controller->run();
-    }
-    
-    private function loadDatasources()
-    {            
-        $listDatasource = $this->env->search('db',"env.app.{$this->route->application}.datasources");
-        $this->dbFactory = new DbFactory();
-        foreach ($listDatasource as $datasource) {
-            $connectionString = $datasource['@value'];
-            $this->dbFactory->createConnection($connectionString);                       
-        }
-    }
-    
+                           
     public function pageNotFound($message = 'Page not found')
     {
         ob_clean();

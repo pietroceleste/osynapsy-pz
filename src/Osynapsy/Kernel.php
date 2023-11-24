@@ -30,7 +30,7 @@ class Kernel
     const VERSION = '0.4.1-DEV';
     
     public $router;
-    public $request;
+    public static $request;
     public $controller;
     public $appController;
     private $loader;    
@@ -46,27 +46,18 @@ class Kernel
     {                
         $this->composer = $composer;
         $this->loader = new Loader($fileconf);
-        $this->request = new Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER);
-        $this->request->set(
-            'app.parameters',
-            $this->loadConfig('parameter', 'name', 'value')
-        );
-        $this->request->set(
-            'env',
-            $this->loader->get()
-        );        
-        $this->request->set(
-            'app.layouts',
-            $this->loadConfig('layout', 'name', 'path')
-        );
-        $this->request->set(
-            'observers',
-            $this->loadConfig('observer', '@value', 'subject')
-        );
-        $this->request->set(
-            'listeners',
-            $this->loadConfig('listener', '@value', 'event')
-        );                
+        self::$request = $this->requestFactory();
+    }
+
+    protected function requestFactory()
+    {
+        $request = new Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER);
+        $request->set('app.parameters', $this->loadConfig('parameter', 'name', 'value'));
+        $request->set('env', $this->loader->get());
+        $request->set('app.layouts', $this->loadConfig('layout', 'name', 'path'));
+        $request->set('observers', $this->loadConfig('observer', '@value', 'subject'));
+        $request->set('listeners', $this->loadConfig('listener', '@value', 'event'));
+        return $request;
     }
     
     private function loadConfig($key, $name, $value)
@@ -84,7 +75,7 @@ class Kernel
      */
     private function loadRoutes()
     {        
-        $this->router = new Router($this->request);
+        $this->router = new Router(self::$request);
         $this->router->addRoute(
             'OsynapsyAssetsManager',
             '/assets/osynapsy/'.self::VERSION.'/?*',
@@ -105,7 +96,7 @@ class Kernel
                 $id = isset($route['id']) ? $route['id'] : uniqid();
                 $uri = $route['path'];
                 $controller = $route['@value'];
-                $template = !empty($route['template']) ? $this->request->get('app.layouts.'.$route['template']) : '';
+                $template = !empty($route['template']) ? self::$request->get('app.layouts.'.$route['template']) : '';
                 $this->router->addRoute($id, $uri, $controller, $template, $applicationId, $route);                
             }
         }        
@@ -135,8 +126,8 @@ class Kernel
      */
     public function followRoute(Route $route)
     {
-        $this->request->set('page.route', $route);
-        $runner = new Runner($this->request, $route);
+        self::$request->set('page.route', $route);
+        $runner = new Runner(self::$request, $route);
         return $runner->run();  
     }
 }

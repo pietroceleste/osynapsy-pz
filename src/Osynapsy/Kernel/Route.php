@@ -23,7 +23,8 @@ class Route
         'uri' => null,
         'application' => null,
         'controller' => null,
-        'template' => null
+        'template' => null,
+        'parameters' => []
     ];
     
     public function __construct($id = '', $uri = '', $application = '', $controller = '', $template = '',array $attributes = [])
@@ -49,5 +50,28 @@ class Route
     public function __toString()
     {
         return $this->id;
+    }
+
+    public function getParameter($idx)
+    {        
+        return array_key_exists($idx, $this->route['parameters']) ? $this->route['parameters'][$idx] : null;
+    }
+
+    public function getUrl(array $segmentParams = [], array $getParams = [])
+    {
+        $output = $result = [];
+        preg_match_all('/\?.?/', $this->uri, $output);
+        if (count($output[0]) > count($segmentParams)) {
+            throw new \Exception('Number of parameters don\'t match uri params');
+        }
+        $url = str_replace($output[0], $segmentParams, $this->uri);
+        $url .= !empty($getParams) ? '?' : '';
+        $url .= http_build_query($getParams);
+        return $url;
+    }
+
+    public static function createFromArray(array $route)
+    {
+        return new Route($route['id'], $route['path'], null, $route['@value'], $route['template'], $route);
     }
 }

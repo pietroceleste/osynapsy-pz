@@ -43,7 +43,7 @@ class AutoWire
         $dependences = [];
         $externalParameterIdx = 0;
         foreach ($reflectionObject->getParameters() as $parameter) {
-            $parameterType = str_replace('?', '', (string) $parameter->getType());
+            $parameterType = $this->getParameterType($parameter);
             if (array_key_exists($parameterType, self::$handles)) {
                 $dependences[] = self::$handles[$parameterType];
                 continue;
@@ -70,6 +70,15 @@ class AutoWire
             $dependences[] = $this->getInstance($parameterType);
         }
         return $dependences;
+    }
+
+    protected function getParameterType($reflectionParameter)
+    {
+        if (PHP_VERSION_ID > 50640) {
+            return str_replace('?', '', (string) $reflectionParameter->getType());
+        }
+        $class = $reflectionParameter->getClass();
+        return !empty($class) ? $class->name : null;
     }
 
     public function getInstance($className)

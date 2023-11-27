@@ -27,13 +27,18 @@ class DbFactory
     /**
      * get a db connection and return
      *
-     * @param idx $index
+     * @param idx indice della connessione da passare
      *
      * @return object
      */
-    public function getConnection($key)
+    public function getConnection($idx)
     {
-        return array_key_exists($key, $this->connectionPool) ? $this->connectionPool[$key] : false;
+        return array_key_exists($idx, $this->connectionPool) ? $this->connectionPool[$idx] : false;
+    }
+
+    public function hasConnection($idx)
+    {
+        return array_key_exists($idx, $this->connectionPool);
     }
     
     /**

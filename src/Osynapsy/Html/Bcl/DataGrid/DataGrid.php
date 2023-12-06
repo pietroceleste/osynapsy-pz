@@ -126,11 +126,11 @@ class DataGrid extends Component
             $row->add('&nbsp;');
             return $row;
         }
-        $row->add(new Tag('div', null, 'col-lg-3 col-xs-4 col-4'))
+        $row->add(new Tag('div', null, 'col-lg-3 col-sm-3 col-xs-2 col-4'))
             ->add($this->pager->comboPageDimensionFactory());
-        $row->add(new Tag('div', null, 'col-lg-6 col-xs-4 col-4 text-center'))
+        $row->add(new Tag('div', null, 'col-lg-6 col-sm-4 hidden-xs hidden-md col-4 text-center'))
              ->add('<label class="" style="margin-top: 30px;">'.$pagingInfo.'</label>');
-        $row->add(new Tag('div', null, 'col-lg-3 col-xs-4 col-4 text-right'))
+        $row->add(new Tag('div', null, 'col-lg-3 col-sm-9 col-xs-8 col-4 text-right'))
              ->add($pagination)
              ->setClass('mt-4');
         return $row;
@@ -171,6 +171,11 @@ class DataGrid extends Component
             case 'check':
                 $value = empty($value) ? null : sprintf('<input type="checkbox" name="%s_chk[]" value="%s">', $this->id, $value);
                 $properties['class'] .= ' text-center';
+                break;
+            case 'date':
+                $datetime = \DateTime::createFromFormat('Y-m-d', $value);
+                $value = $datetime === false ? $value : $datetime->format('d/m/Y');
+                $properties['classTd'][] = 'text-center';
                 break;
             case 'money-right':
                 $properties['class'] .= ' text-right';

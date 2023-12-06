@@ -13,36 +13,48 @@ namespace Osynapsy\Html\Bcl;
 
 use Osynapsy\Html\Tag;
 use Osynapsy\Html\Component;
-use Osynapsy\Html\Ocl\ListUnordered;
 use Osynapsy\Html\Ocl\HiddenBox;
 
 class Dropdown extends Component
 {
+    const ALIGN_LEFT = 'left';
+    const ALIGN_RIGHT = 'right';
+
     private $list;
     private $button;
     
     public function __construct($name, $label, $align = 'left', $tag = 'div')
     {
         parent::__construct($tag);
-        $this->add(new HiddenBox($name));
-        $this->button = $this->att('class','dropdown')
-             ->add(new Button($name.'_btn'))
-             ->att('type', 'button')
-             ->att('class','dropdown-toggle',true)
-             ->att('data-toggle','dropdown')
-             ->att('aria-haspopup','true')
-             ->att('aria-expanded','false');        
-        $this->button->add($label.' <span class="caret"></span>');
-        $this->list = $this->add(
-            new Tag('ul')
-        )->att('class','dropdown-menu dropdown-menu-'.$align)
-         ->att('aria-labelledby',$name);
+        $this->addClass('dropdown')->add(new HiddenBox($name));
+        $this->button = $this->add($this->buttonFactory($name.'_btn', $label));
+        $this->list = $this->add($this->ulFactory($name, $align));
+    }
 
+    protected function buttonFactory($id, $label)
+    {
+        $Button = new Button($id, 'button', 'dropdown-toggle', sprintf('%s <span class="caret"></span>', $label));
+        $Button->att([
+            'data-toggle' => 'dropdown',
+            'aria-haspopup' => 'true',
+            'aria-expanded' => 'false'
+        ]);
+        return $Button;
+    }
+
+    protected function ulFactory($name, $align)
+    {
+        $ul = new Tag('ul', null , 'dropdown-menu dropdown-menu-'.$align);
+        $ul->att('aria-labelledby', $name);
+        return $ul;
     }
     
     protected function __build_extra__()
     {
         foreach ($this->data as $key => $rec) {
+            if (empty($rec)) {
+                continue;
+            }
             if (is_object($rec)) {
                 $this->list->att('data-value',$key)->add(new Tag('li'))->add($rec);
                 continue;

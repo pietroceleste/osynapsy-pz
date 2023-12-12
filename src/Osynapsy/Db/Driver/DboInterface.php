@@ -26,7 +26,7 @@ define('Osynapsy\Core\Driver\DBPDO_BOTH', 3);
  * @license  GPL http://www.gnu.org/licenses/gpl-3.0.en.html
  * @link     http://docs.osynapsy.org/ref/InterfaceDbo
  */
-interface InterfaceDbo
+interface DboInterface
 {
     public function __construct($connectionString);
     

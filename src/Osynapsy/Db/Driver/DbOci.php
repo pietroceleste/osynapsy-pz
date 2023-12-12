@@ -24,7 +24,7 @@ use Osynapsy\Db\Paging\Paging;
  * @license  GPL http://www.gnu.org/licenses/gpl-3.0.en.html
  * @link     http://docs.osynapsy.org/ref/DbOci
  */
-class DbOci implements InterfaceDbo
+class DbOci implements DboInterface
 {
     private $parameters = array();
     private $__cur = null;

@@ -22,7 +22,7 @@ namespace Osynapsy\Db\Driver;
  * @license  GPL http://www.gnu.org/licenses/gpl-3.0.en.html
  * @link     http://docs.osynapsy.org/ref/DbPdo
  */
-class DbPdo extends \PDO implements InterfaceDbo
+class DbPdo extends \PDO implements DboInterface
 {
     private $param = array();
     private $iCursor = null;

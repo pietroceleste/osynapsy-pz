@@ -12,6 +12,7 @@
 namespace Osynapsy\Http;
 
 use Osynapsy\Data\Dictionary;
+use Osynapsy\Kernel\Route;
 
 class Request extends Dictionary
 {
@@ -44,5 +45,56 @@ class Request extends Dictionary
         $this->set('server.RAW_URL_PAGE', $url);
         $this->set('server.RAW_URL_SITE', $rawHost);
         $this->set('server.url', $rawHost);
+        if (!empty($server['HTTP_ACCEPT'])) {
+            $this->set('client.accept', explode(',', $server['HTTP_ACCEPT']));
+        }
+        $this->headerFactory($server);
+    }
+
+    protected function headerFactory($server)
+    {
+        $header = [];
+        foreach ($server as $key => $headerValue) {
+            if (preg_match('/^HTTP_/', $key)) {
+                $httpHeaderKey = strtr(ucwords(strtolower(strtr(substr($key,5), '_', ' '))),' ','-');
+                $header[$httpHeaderKey] = $headerValue;
+            }
+        }
+        $this->set('header', $header);
+    }
+
+    public function hasHeader($headerId)
+    {
+        return $this->keyExists('header.'.$headerId);
+    }
+
+    public function getAcceptedContentType()
+    {
+        return $this->get('client.accept');
+    }
+
+    public function getRoute($routeId = null)
+    {
+        return is_null($routeId) ? $this->get('page.route') : Route::createFromArray($this->findRuote($routeId));
+    }
+
+    protected function findRuote($routeId)
+    {
+        $routes = $this->search('route', 'env.app');
+        $result = array_search($routeId, array_column($routes, 'id'));
+        if ($result !== false) {
+            return $routes[$result];
+        }
+        throw new \Exception(sprintf('Route %s not found', $routeId));
+    }
+
+    public function getTemplate($id)
+    {
+        return empty($id) ? [] : $this->get(sprintf('app.templates.%s', $id));
+    }
+
+    public function __invoke($key)
+    {
+        return $this->get($key);
     }
 }

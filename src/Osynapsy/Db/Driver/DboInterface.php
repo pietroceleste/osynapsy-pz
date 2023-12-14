@@ -30,31 +30,29 @@ interface DboInterface
 {
     public function __construct($connectionString);
     
-    public function begin();
+    //public function begin();
     
-    public function commit();
+    //public function commit();
     
-    public function connect();
+    //public function connect();
     
     public function delete($table, array $conditions);
     
-    public function execCommand($command, $parameters);
+    public function execCommand($command, array $parameters = []);
     
-    public function execMulti($command, $parameterList);
+    public function execMulti($command, array $records);
     
-    public function execQuery($query, $parameters = null, $fetchMethod = null);
+    public function find($query, array $parameters = [], $fetchMethod = null);
     
-    public function execUnique($query, $parameters = null, $fetchMethod = 'NUM');
+    public function findOne($query, array $parameters = [], $fetchMethod = 'NUM');
     
-    public function getColumns();
+    //public function getColumns();
     
-    public function getType();
+    //public function getType();
     
     public function insert($table, array $values);
     
-    public function rollback();
+    //public function rollback();
     
-    public function update($table, array $values, array $conditions);
-    
-    public function execQueryPaging($query, $queryParameters, $orderBy, $pageRequest,  $pageDimension = 10);
+    public function update($table, array $values, array $conditions);        
 }

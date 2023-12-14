@@ -166,6 +166,13 @@ abstract class ActiveRecord
         $this->activeRecord[$field] = ($value !== '0' && $value !== 0 && empty($value))  ? $defaultValue : $value;        
         return $this;
     }
+
+    public function setValues(array $values = [])
+    {
+        foreach($values as $field => $value) {
+            $this->setValue($field, $value);
+        }
+    }
     
     /**
      * Save current active record on database
@@ -173,10 +180,13 @@ abstract class ActiveRecord
      * @return string
      * @throws \Exception
      */
-    public function save()
+    public function save(array $values = [])
     {
         if (!$this->state) {
             throw new \Exception('Record is not updatable');
+        }
+        if (!empty($values)) {
+            $this->setValues($values);
         }
         $this->beforeSave();
         $id = empty($this->originalRecord)? $this->insert() : $this->update();        
@@ -191,11 +201,13 @@ abstract class ActiveRecord
      */
     private function insert()
     {
-        $this->beforeInsert();        
+        $pkeys = $this->primaryKey();
+        $this->beforeInsert();
         $sequenceId = $this->getSequenceNextValue();                
         $autoincrementId = $this->dbConnection->insert(
             $this->table,
-            $this->activeRecord
+            $this->activeRecord,
+            !empty($pkeys) && count($pkeys) === 1 ? $pkeys[0] : []
         );
         $id = !empty($autoincrementId) ? $autoincrementId : $sequenceId;
         $this->loadRecordAfterInsert($id);

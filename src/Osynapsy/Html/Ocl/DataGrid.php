@@ -625,15 +625,15 @@ class DataGrid extends Component
             case 'oracle':
                 $sql = "SELECT a.*
                         FROM (
-                                 SELECT b.*,rownum as \"_rnum\"
-                                  FROM (
-                                         SELECT a.*
-                                         FROM ($sql) a
-                                         ".(empty($whr) ? '' : $whr)."
-                                         ".(!empty($_REQUEST[$this->id.'_order']) ? ' ORDER BY '.str_replace(array('][','[',']'),array(',','',''),$_REQUEST[$this->id.'_order']) : '')."
-                                         ".(empty($_REQUEST[$this->id.'_order']) && !empty($this->defaultOrderBy) ? sprintf(' ORDER BY %s' , $this->defaultOrderBy) : '')."
-                                        ) b
-                            ) a ";
+                            SELECT b.*,rownum as \"_rnum\"
+                            FROM (
+                                SELECT a.*
+                                FROM ($sql) a
+                                ".(empty($whr) ? '' : $whr)."
+                                ".(!empty($_REQUEST[$this->id.'_order']) ? ' ORDER BY '.str_replace(array('][','[',']'),array(',','',''),$_REQUEST[$this->id.'_order']) : '')."
+                                ".(empty($_REQUEST[$this->id.'_order']) && !empty($this->defaultOrderBy) ? sprintf(' ORDER BY %s' , $this->defaultOrderBy) : '')."
+                            ) b
+                        ) a ";
                 if (!empty($this->__par['row-num']) && array_key_exists('pag_cur', $this->__par)) {
                     $row_sta = (($this->__par['pag_cur'] - 1) * $this->__par['row-num']) + 1 ;
                     $row_end = ($this->__par['pag_cur'] * $this->__par['row-num']);
@@ -659,22 +659,31 @@ class DataGrid extends Component
         }
         //Eseguo la query
         try {
-            $this->setData(
-                $this->db->execQuery(
-                    $sql,
-                    $this->getParameter('datasource-sql-par'),
-                    'ASSOC'
-                )
-            );
+            $this->setData($this->db->execQuery($sql, $this->getParameter('datasource-sql-par'), 'ASSOC'));
+            $this->initColumns();
         } catch (\Exception $e) {
             die($sql.$e->getMessage());
+        }        
+    }
+
+    protected function initColumns()
+    {
+        if (empty($this->data) || !is_array($this->data)) {
+            return;
         }
-        //Salvo le colonne in un option
-        $this->setParameter('cols', $this->db->getColumns());
+        $cols = [];
+        foreach(array_keys($this->data[0]) as $title) {
+            $cols[] = [
+                'native_type' => 'string',
+                'flags' => array(),
+                'name' => $title,
+                'len' => '255',
+                'pdo_type' => 'string'
+            ];
+        }
+        $this->setParameter('cols', $cols);
         $this->setParameter('cols_vis', 0);
-        if (is_array($this->getParameter('cols'))) {
-            $this->setParameter('cols_tot', count($this->getParameter('cols')));
-        }
+        $this->setParameter('cols_tot', count($cols));
     }
 
     private function dataGroup()

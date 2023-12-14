@@ -24,27 +24,27 @@ use Osynapsy\Helper\AutoWire;
 class Runner
 {
     private $request;
-    private $route;
+    private $route;    
     private $autowire;
-
+    
     public function __construct(Request $request, Route $route)
     {
         $this->request = $request;
         $this->route = $route;
         $this->autowire = new AutoWire([$this->route, $this->request]);
-    }
-
+    }        
+    
     public function run()
     {
         try {
-            $this->checks();
+            $this->checks();            
             $this->loadDatasources();
             $this->runApplicationController();
             return $this->runRouteController($this->route->controller);
         } catch (KernelException $e) {
             return $this->dispatchKernelException($e);
         } catch(\Exception $e) {
-            return $this->pageOops($e->getMessage(), $e->getTrace());
+            return $this->pageOops($e->getMessage(), $e->getTrace()); 
         } catch(\Error $e) {
             return $this->pageOops(sprintf('%s at row %s file %s', $e->getMessage(), $e->getLine(), $e->getFile()), $e->getTrace());
         }
@@ -59,7 +59,7 @@ class Runner
             throw new KernelException('No application defined', 405);
         }
     }
-
+    
     private function loadDatasources()
     {
         $listDatasource = $this->request->search('db',"env.app.{$this->route->application}.datasources");
@@ -88,7 +88,7 @@ class Runner
     }
 
     private function runRouteController($classController)
-    {
+    {                
         $controller = $this->autowire->getInstance($classController);
         $this->autowire->addHandle($controller);
         return (string) $controller->run();
@@ -103,18 +103,18 @@ class Runner
                 return $this->pageOops($e->getMessage(), $e->getTrace());
         }
     }
-
+                           
     public function pageNotFound($message = 'Page not found')
     {
         ob_clean();
         header('HTTP/1.1 404 Not Found');
         return $message;
     }
-
+    
     public function pageOops($message, $trace)
-    {
+    {        
         ob_clean();
-        return strpos($_SERVER['HTTP_ACCEPT'], 'json') === false ?
+        return strpos($_SERVER['HTTP_ACCEPT'], 'json') === false ? 
                $this->pageOopsHtml($message, $trace) :
                $this->pageOopsText($message, $trace);
     }
@@ -126,7 +126,7 @@ class Runner
             Si è verificato il seguente errore:
 
             %s
-
+            
             riga funzione %s del file %s
 PAGE;
         return sprintf($page, $message, $trace[0]['line'], $trace[0]['function'], $trace[0]['file']);

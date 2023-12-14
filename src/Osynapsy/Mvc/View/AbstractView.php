@@ -132,4 +132,14 @@ abstract class AbstractView
     {
         $this->properties[$propertyId] = $value;
     }
+
+    public function __isset($propertyId)
+    {
+        return !empty($this->properties[$propertyId]);
+    }
+
+    public function __invoke(array $properties = [])
+    {
+        $this->properties += $properties;
+    }
 }

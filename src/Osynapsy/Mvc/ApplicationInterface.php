@@ -12,10 +12,13 @@
 namespace Osynapsy\Mvc;
 
 use Osynapsy\Kernel\Route;
+use Osynapsy\Http\Request;
+use Osynapsy\Db\Driver\DboInterface;
 
-interface InterfaceApplication
+
+interface ApplicationInterface
 {
-    public function __construct($db, Route $route);
+    public function __construct(Route $route, Request $request = null, DboInterface $dbo = null);
     
     public function run();
 }

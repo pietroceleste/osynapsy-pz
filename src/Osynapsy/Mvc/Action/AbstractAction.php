@@ -14,8 +14,6 @@ abstract class AbstractAction implements InterfaceAction
     protected $parameters;
     protected $triggers = [];
 
-    abstract public function execute();
-
     protected function executeTrigger($eventId)
     {
         if (empty($this->triggers[$eventId])) {

@@ -13,10 +13,11 @@ namespace Osynapsy\Mvc;
 
 use Osynapsy\Http\Request;
 use Osynapsy\Db\DbFactory;
+use Osynapsy\Mvc\ApplicationInterface;
 
-interface InterfaceController
+interface ControllerInterface
 {
-    public function __construct(Request $request = null, DbFactory $db = null, $appController = null);
+    public function __construct(Request $request = null, DbFactory $db = null, ApplicationInterface $appController = null);
 
     public function getResponse();
 

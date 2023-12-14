@@ -19,8 +19,9 @@ use Osynapsy\Http\ResponseJson as JsonResponse;
 use Osynapsy\Http\ResponseHtml as HtmlResponse;
 use Osynapsy\Observer\InterfaceSubject;
 use Osynapsy\Mvc\Action\InterfaceAction;
+use Osynapsy\Mvc\ApplicationInterface;
 
-abstract class Controller implements InterfaceController, InterfaceSubject
+abstract class Controller implements ControllerInterface, InterfaceSubject
 {
     use \Osynapsy\Observer\Subject;
 
@@ -34,12 +35,12 @@ abstract class Controller implements InterfaceController, InterfaceSubject
     public $response;
     public $app;
 
-    public function __construct(Request $request = null, DbFactory $db = null, $appController = null)
+    public function __construct(Request $request = null, DbFactory $db = null, ApplicationInterface $appController = null)
     {
         $this->parameters = $request->get('page.route')->parameters;
         $this->request = $request;
         $this->setDbHandler($db);
-        $this->app = $appController;
+        $this->app = $appController;        
         $this->dispatcher = new Dispatcher($this);
         $this->loadObserver();
         $this->setState('init');
@@ -52,6 +53,43 @@ abstract class Controller implements InterfaceController, InterfaceSubject
         if ($this->model) {
             $this->model->delete();
         }
+    }
+
+    public function run()
+    {
+        $cmd = filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_ACTION');
+        if (!empty($cmd)) {
+            return $this->execAction($cmd);
+        }
+        $this->setResponse(new HtmlResponse());
+        $layoutPath = $this->request->get('page.route')->template;
+        if (!empty($layoutPath)) {
+            $this->response->template = $this->response->getBuffer($layoutPath, $this);
+        }
+        if ($this->model) {
+            $this->model->find();
+        }
+        //$resp = $this->indexAction();
+        if (!method_exists($this, 'indexAction')) {
+            throw new Exception('No method indexAction exists');
+        }
+        $resp = autowire()->execute($this, 'indexAction');
+        if ($resp) {
+            $this->response->addContent(strval($resp));
+        }
+        return $this->response;
+    }
+
+    private function execAction($action)
+    {
+        $this->setResponse(new JsonResponse());
+        $parameters = empty($_REQUEST['actionParameters']) ? [] : $_REQUEST['actionParameters'];
+        if (array_key_exists($action, $this->externalActions)) {
+            $this->execExternalAction($action, $parameters);
+        } else {
+            $this->execInternalAction($action, $parameters);
+        }
+        return $this->response;
     }
 
     /**
@@ -90,18 +128,6 @@ abstract class Controller implements InterfaceController, InterfaceSubject
         if (!empty($res) && is_string($res)) {
             $this->response->error('alert',$res);
         }
-    }
-
-    private function execAction($action)
-    {
-        $this->setResponse(new JsonResponse());
-        $parameters = empty($_REQUEST['actionParameters']) ? [] : $_REQUEST['actionParameters'];
-        if (array_key_exists($action, $this->externalActions)) {
-            $this->execExternalAction($action, $parameters);
-        } else {
-            $this->execInternalAction($action, $parameters);
-        }
-        return $this->response;
     }
 
     public function getApp()
@@ -158,7 +184,7 @@ abstract class Controller implements InterfaceController, InterfaceSubject
         return $this->state;
     }
 
-    abstract public function indexAction();
+    //public function indexAction(...$args) {}
 
     abstract public function init();
 
@@ -170,28 +196,7 @@ abstract class Controller implements InterfaceController, InterfaceSubject
         }
         $this->response->addContent($view);
     }
-
-    public function run()
-    {
-        $cmd = filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_ACTION');
-        if (!empty($cmd)) {
-            return $this->execAction($cmd);
-        }
-        $this->setResponse(new HtmlResponse());
-        $layoutPath = $this->request->get('page.route')->template;
-        if (!empty($layoutPath)) {
-            $this->response->template = $this->response->getBuffer($layoutPath, $this);
-        }
-        if ($this->model) {
-            $this->model->find();
-        }
-        $resp = $this->indexAction();
-        if ($resp) {
-            $this->response->addContent(strval($resp));
-        }
-        return $this->response;
-    }
-
+    
     public function saveAction()
     {
         if ($this->model) {
@@ -226,10 +231,25 @@ abstract class Controller implements InterfaceController, InterfaceSubject
     {
         $this->model = $model;
     }
-
+    
+    /**
+     * Refresh component ids on the view
+     * 
+     * @param array $components
+     */
     public function refreshComponents(array $components)
     {
         $this->getResponse()->js(sprintf("Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
+    }
+
+    /**
+     * Refresh component ids on the parent view
+     *
+     * @param array $components
+     */
+    public function refreshParentComponents(array $components)
+    {
+        $this->getResponse()->js(sprintf("parent.Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
     }
 
     public function alertJs($message)

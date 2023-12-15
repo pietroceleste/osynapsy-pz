@@ -26,13 +26,13 @@ use Osynapsy\Db\Driver\Oci8\Statement;
  * @link     http://docs.osynapsy.org/ref/DbOci
  */
 class DboOci implements DboInterface
-{
+{   
     const FETCH_METHOD = [
         'NUM' => OCI_NUM,
         'ASSOC' => OCI_ASSOC,
         'BOTH' => OCI_BOTH
     ];
-    
+
     public  $backticks = '"';
     public  $connection;
     protected $statement;
@@ -147,11 +147,14 @@ class DboOci implements DboInterface
         list($where,) = $this->whereConditionFactory($conditions);
         $command = sprintf('DELETE FROM %s WHERE %s', $table, $where);
         $this->execCommand($command, $conditions);
-    }   
+    }
 
-    public function select($table, array $rawfields, array $filters = ['1 = 1'])
+    public function select($table, array $rawfields, array $filters = [])
     {
-        list($where,) = $this->whereFactory($filters);
+        $where = '1 = 1';
+        if (!empty($filters)) {
+            list($where,) = $this->whereConditionFactory($filters);
+        }
         $fields = implode(', ', $rawfields);
         $query = sprintf("SELECT %s FROM %s WHERE %s", $fields, $table, $where);
         return $this->execQuery($query, $filters, 'ASSOC');

@@ -13,7 +13,7 @@ class Update extends AbstractSql
     public function factory()
     {        
         $fields = implode(', ', array_map(fn($field) => "{$field} = :{$field}", array_keys($this->values)));
-        $where = $this->whereConditionFactory($this->conditions, 'whr');
+        $where = $this->whereConditionFactory($this->parameters, 'whr');
         $command = sprintf("UPDATE %s SET %s WHERE %s", $this->table, $fields, $where);
         return $command;
     }        

@@ -13,6 +13,10 @@ namespace Osynapsy\Db\Driver;
 
 use Osynapsy\Db\Driver\Oci8\Connection;
 use Osynapsy\Db\Driver\Oci8\Statement;
+use Osynapsy\Db\Sql\Dml\Oracle\Insert;
+use Osynapsy\Db\Sql\Dml\Update;
+use Osynapsy\Db\Sql\Dml\Delete;
+use Osynapsy\Db\Sql\Dql\Select;
 
 /**
  * Oci wrap class
@@ -90,38 +94,12 @@ class DboOci implements DboInterface
         return $this->execCommand($sql);
     }        
 
-    public function insert($table, array $values, $rawkeys = [])
+    public function insert($table, array $values, $returningValues = [])
     {
-        $keys = is_array($rawkeys) ? $rawkeys : [$rawkeys => null];
-        $command = sprintf(
-            'INSERT INTO %s (%s) VALUES (:%s)',
-            $table,
-            implode(',', array_keys($values)),
-            implode(',:', array_keys($values))
-        );
-        if (is_array($keys) && !empty($keys)) {
-            $command .= sprintf(' RETURNING %s INTO :K_%s', implode(',',array_keys($keys)), implode(',:K_',array_keys($keys)));
-            foreach (array_keys($keys) as $keyId) {
-                $values['K_'.$keyId] = null;
-            }
-        }
-        //die($command);
-        $result = $this->execCommand($command, $values, false);        
-        return $this->getReturningValues($result, $rawkeys);
-    }
-
-    protected function getReturningValues($rs, $keys)
-    {
-        if (!is_array($keys)) {
-            return $rs['K_'.$keys];
-        }
-        $res = [];
-        foreach ($rs as $k => $v) {
-            if (strpos($k,'K_') !== false) {
-                $res[str_replace('K_','',$k)] = $v;
-            }
-        }
-        return $res;
+        $handle = new Insert($table, $values, is_array($returningValues) ? $returningValues : [$returningValues => null]);
+        $command = strval($handle);
+        $result = $this->execCommand($command, $handle->getValues(), false);
+        return $handle->getReturningValues($result, $returningValues);
     }
 
     //Prendo l'ultimo valore di un campo autoincrement dopo l'inserimento
@@ -136,28 +114,20 @@ class DboOci implements DboInterface
 
     public function update($table, array $values, array $conditions)
     {
-        $fields = implode(', ', array_map(fn($field) => "{$field} = :{$field}", array_keys($values)));
-        list($where, $whereValues) = $this->whereConditionFactory($conditions, 'whr');
-        $command = sprintf("UPDATE %s SET %s WHERE %s", $table, $fields, $where);        
-        return $this->execCommand($command, array_merge($values, $whereValues));
+        $cmdHandle = new Update($table, $values, $conditions);
+        return $this->execCommand(strval($cmdHandle), $cmdHandle->getValues());
     }
 
     public function delete($table, array $conditions)
     {
-        list($where,) = $this->whereConditionFactory($conditions);
-        $command = sprintf('DELETE FROM %s WHERE %s', $table, $where);
-        $this->execCommand($command, $conditions);
+        $cmdHandle = new Delete($table, [], $conditions);
+        $this->execCommand(strval($cmdHandle), $cmdHandle->getValues());
     }
 
     public function select($table, array $rawfields, array $filters = [])
     {
-        $where = '1 = 1';
-        if (!empty($filters)) {
-            list($where,) = $this->whereConditionFactory($filters);
-        }
-        $fields = implode(', ', $rawfields);
-        $query = sprintf("SELECT %s FROM %s WHERE %s", $fields, $table, $where);
-        return $this->execQuery($query, $filters, 'ASSOC');
+        $qryHandle = new Select($table, $rawfields, $filters);
+        return $this->execQuery(strval($qryHandle), $qryHandle->getValues(), 'ASSOC');
     }
 
     public function replace($table, array $args, array $conditions, $key = null)
@@ -169,37 +139,6 @@ class DboOci implements DboInterface
         }
         $rs = $this->insert($table, array_merge($args, $conditions), empty($key) ? [] : [$key => null]);
         return empty($key) ? null : $rs[strtoupper($key)];
-    }
-
-    protected function whereConditionFactory(array $conditions, $prefix = '')
-    {
-        if (empty($conditions)) {
-            throw new \Exception('Conditions parameter is empty.');
-        }
-        $filters = $newvalues = [];
-        foreach($conditions as $field => $value) {
-            if (is_null($value)) {
-                $filters[] = $this->isNullClause($field);
-                continue;
-            }
-            if (is_array($value)) {
-                $filters[] = $this->inClauseFactory($field, $value);
-                continue;
-            }
-            $filters[] = $field . " = :". $prefix . $field;
-            $newvalues[$prefix . $field] = $value; 
-        }        
-        return [implode(' AND ', $filters), $newvalues];
-    }
-
-    protected function isNullClause($field)
-    {
-        return sprintf('%s is null', $field);
-    }
-
-    protected function inClauseFactory($field, array $values)
-    {
-        return sprintf("%s in ('%s')", $field, implode("','", $values));
     }
 
     public function freeRs($rs)
@@ -224,20 +163,7 @@ class DboOci implements DboInterface
     public function setDateFormat($format = 'YYYY-MM-DD')
     {
         $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = '{$format}'");
-    }
-    
-    protected function raiseException($object, array $errorkeys = ['message'], $postfix = null)
-    {
-        $err = oci_error($object);  // For oci_parse errors pass the connection handle
-        $errorMessage = [];
-        foreach($errorkeys as $errorkey) {
-            $errorMessage[] = $err[$errorkey];
-        }
-        if (!empty($postfix)) {
-            $errorMessage[] = $postfix;
-        }
-        throw new \Exception(implode(PHP_EOL, $errorMessage));
-    }
+    }        
 
     public function __call($method, array $parameters)
     {        

@@ -42,7 +42,7 @@ abstract class ActiveRecord
      * @param PDO $dbCn A valid dbPdo wrapper
      * @return void
      */
-    public function __construct($dbCn) 
+    public function __construct($dbCn, $keyValues = null)
     {
         $this->dbConnection = $dbCn;
         $this->keys = $this->primaryKey();
@@ -50,6 +50,9 @@ abstract class ActiveRecord
         $this->sequence = $this->sequence();
         $this->fields = $this->fields();
         $this->softDelete = $this->softDelete();
+        if (!is_null($keyValues)) {
+            $this->findByKey($keyValues);
+        }
     }
     
     /**

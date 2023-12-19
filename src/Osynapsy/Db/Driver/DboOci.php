@@ -102,16 +102,6 @@ class DboOci implements DboInterface
         return $handle->getReturningValues($result, $returningValues);
     }
 
-    //Prendo l'ultimo valore di un campo autoincrement dopo l'inserimento
-    public function lastInsertId($arg)
-    {
-        foreach ($arg as $k => $v) {
-            if (strpos('KEY_',$k) !== false) {
-                return $v;
-            }
-        }
-    }
-
     public function update($table, array $values, array $conditions)
     {
         $cmdHandle = new Update($table, $values, $conditions);

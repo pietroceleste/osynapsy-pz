@@ -12,7 +12,7 @@ class Insert extends InsertBase
 {
     public function factory()
     {
-        return parent::factory() . $this->returningFactory($this->parameters);
+        return parent::factory() . (empty($this->parameters) ? '' : $this->returningFactory($this->parameters));
     }
 
     protected function returningFactory(array $returningValues)

@@ -358,13 +358,17 @@ var Osynapsy = new (function(){
             }).on('click','.cmd-execute, .click-execute',function(event) {
                 event.stopPropagation();
                 Osynapsy.action.execute(this);
-            }).on('keydown','.onenter-execute',function(event){
-                event.stopPropagation();
-                //alert('ci sono');
+            }).on('keydown','.onenter-execute, .onenter',function(event){
+                event.stopPropagation();                
                 switch (event.keyCode) {
                     case 13 : //Enter
                     case 9:
-                        FormController.execute(this);
+                        if ($(this).attr('onenter')) {
+                            eval($(this).attr('onenter'));
+                        }
+                        if ($(this).attr('data-action')) {
+                            FormController.execute(this);
+                        }                        
                         return false;
                     break;
                 }

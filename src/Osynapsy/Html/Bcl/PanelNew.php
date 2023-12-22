@@ -28,7 +28,7 @@ class PanelNew extends Component
         'body' => 'panel-body',
         'foot' => 'panel-footer'
     ];
-    
+    protected $title;
     private $currentRow = null;
     private $currentColumn = null;
     
@@ -37,8 +37,7 @@ class PanelNew extends Component
         parent::__construct($tag, $id);
         $this->classCss['main'] = 'panel'.$class;
         if (!empty($title)) {
-            $this->sections['head'] = new Tag('div');
-            $this->sections['head']->add('<h4 class="panel-title">'.$title.'</h4>');
+            $this->setTitle($title);
         }
         $this->sections['body'] = new Tag('div');        
     }
@@ -117,5 +116,11 @@ class PanelNew extends Component
             $this->classCss['main'] = $main;
         }        
         return $this;
-    }    
+    }
+
+    public function setTitle($title)
+    {
+        $this->sections['head'] = new Tag('div');
+        $this->sections['head']->add('<h4 class="panel-title">'.$title.'</h4>');
+    }
 }

@@ -72,6 +72,11 @@ class DboOci implements DboInterface
         return $statement->fetchAll(self::FETCH_METHOD[$fetchMethodId]);
     }
 
+    public function findAssoc($sql, array $parameters = [])
+    {
+        return $this->find($sql, $parameters, 'ASSOC');
+    }
+
     public function findOne($sql, array $parameters = [], $fetchMethodId = 'NUM')
     {
        $statement = $this->statementFactory($sql);

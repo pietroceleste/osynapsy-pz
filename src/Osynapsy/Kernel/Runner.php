@@ -128,8 +128,8 @@ class Runner
             %s
 
             riga funzione %s del file %s
-PAGE;
-        return sprintf($page, $message, $trace[0]['line'], $trace[0]['function'], $trace[0]['file']);
+PAGE;        
+        return sprintf($page, $message, $trace[0]['line'] ?? '', $trace[0]['function'] ?? '', $trace[0]['file'] ?? '');
     }
 
     public function pageOopsHtml($message, $trace)

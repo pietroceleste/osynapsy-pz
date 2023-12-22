@@ -298,7 +298,7 @@ class Pager extends Component
         }
         //die(print_r($this->data,true));
         //Salvo le colonne in un option
-        $this->columns = $this->db->getColumns();
+        //$this->columns = $this->db->getColumns();
         return empty($this->data) ? array() : $this->data;
     }
     

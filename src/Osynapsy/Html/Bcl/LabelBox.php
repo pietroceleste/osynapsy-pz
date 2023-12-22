@@ -43,9 +43,23 @@ class LabelBox extends Component
     }
     
     public function setLabel($label)
-    {
-        $this->label = $label;
+    {        
+        $this->label = !is_array($label) ? $label : $this->searchLabelInArray($label);
         return $this;
+    }
+    
+    protected function searchLabelInArray($labels)
+    {
+        $value = $_REQUEST[$this->hiddenBox->id] ?? null;        
+        if (empty($value)) {
+            return '';
+        }
+        $ids = array_column($labels, 0);
+        $labelIdx = array_search($value, $ids);
+        if ($labelIdx===false) {
+            return '';
+        }
+        return $labels[$labelIdx][1];
     }
     
     public function __build_extra__()

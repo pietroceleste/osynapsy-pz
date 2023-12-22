@@ -177,10 +177,13 @@ class DataGrid extends Component
                 $value = $datetime === false ? $value : $datetime->format('d/m/Y');
                 $properties['classTd'][] = 'text-center';
                 break;
+            case 'number':
+                $value = sprintf('%.2f &nbsp;', $value);
+                break;
             case 'money-right':
                 $properties['class'] .= ' text-right';
             case 'money':
-                $value = number_format($value, 2, ',', '.'). ' &euro;';
+                $value = sprintf('%s &euro;&nbsp;',number_format($value, 2, ',', '.'));
                 break;
             case 'integer':
                 $value = number_format($value, 0, ',', '.');
@@ -213,6 +216,13 @@ class DataGrid extends Component
             'orderByField' => $field
         ];
         return $this;
+    }
+
+    public function delColumn($label)
+    {
+        if (array_key_exists($label, $this->columns)) {
+            unset($this->columns[$label]);
+        }
     }
 
     private function printError($error)

@@ -97,7 +97,7 @@ abstract class ModelRecord
         $this->getController()->getResponse()->go($this->repo->get('actions.after-delete'));
     }
 
-    private function recordFill()
+    protected function recordFill()
     {
         $keys = [];
         foreach($this->get('fields') as $field) {
@@ -105,10 +105,8 @@ abstract class ModelRecord
                 $keys[$field->name] = $field->getDefaultValue();
             }
         }
-        try {
-            $this->getRecord()->findByAttributes($keys);
-        } catch (\Exception $e) {
-        }
+
+        $this->getRecord()->where($keys);
     }
 
     public function find()

@@ -1,6 +1,7 @@
 <?php
 use Osynapsy\Kernel;
 use Osynapsy\Helper\AutoWire;
+use Osynapsy\Db\Driver\DboInterface;
 
 /**
  * If $elementPath is null return request Object else return required element of request
@@ -40,7 +41,7 @@ function app()
  * @return Dbo
  */
 function dbo()
-{
+{    
     return AutoWire::getHandle(DboInterface::class);
 }
 

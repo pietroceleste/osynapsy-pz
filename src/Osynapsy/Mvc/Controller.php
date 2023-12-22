@@ -71,7 +71,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
         }
         //$resp = $this->indexAction();
         if (!method_exists($this, 'indexAction')) {
-            throw new Exception('No method indexAction exists');
+            throw new \Exception('No method indexAction exists');
         }
         $resp = autowire()->execute($this, 'indexAction');
         if ($resp) {
@@ -233,6 +233,17 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     }
     
     /**
+     * Open javascript alert on the view
+     * 
+     * @param string $message to show
+     * 
+     */
+    public function alertJs($message)
+    {
+        $this->getResponse()->js(sprintf("alert(['%s'])", addslashes($message)));
+    }
+
+    /**
      * Refresh component ids on the view
      * 
      * @param array $components
@@ -252,8 +263,14 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
         $this->getResponse()->js(sprintf("parent.Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
     }
 
-    public function alertJs($message)
+    /**
+     * Hide modal $modalId on view
+     *
+     * @param string $modalId id of the modal to hide
+     *
+     */
+    public function closeModal($modalId = 'amodal')
     {
-        $this->getResponse()->js(sprintf("alert(['%s'])", addslashes($message)));
-    }
+        $this->getResponse()->js(sprintf("parent.$('#%s').modal('hide')", $modalId));
+    }   
 }

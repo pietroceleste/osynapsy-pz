@@ -213,7 +213,10 @@ abstract class Active implements RecordInterface
 
     public function getExtension($idx = 0)
     {
-        return $this->extendRecord[$idx];
+        if (!array_key_exists($idx, $this->extensions)) {
+            throw new \Exception(sprintf("No record exstension with idx = %s exists", $idx));
+        }
+        return $this->extensions[$idx][0];
     }
 
     protected function orderby() : array

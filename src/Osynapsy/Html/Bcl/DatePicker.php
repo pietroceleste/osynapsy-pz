@@ -89,11 +89,13 @@ class DatePicker extends Component
     public function onChange($code)
     {
         $this->dateComponent->att('onchange', $code);
+        return $this;
     }
 
     public function setDisabled($condition)
     {
         $this->dateComponent->setDisabled($condition);
+        return $this;
     }
 
     public function getTextBox()

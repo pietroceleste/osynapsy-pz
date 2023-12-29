@@ -367,7 +367,7 @@ var Osynapsy = new (function(){
                             eval($(this).attr('onenter'));
                         }
                         if ($(this).attr('data-action')) {
-                            FormController.execute(this);
+                            Osynapsy.action.execute(this);
                         }                        
                         return false;
                     break;

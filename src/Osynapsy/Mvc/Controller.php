@@ -18,7 +18,7 @@ use Osynapsy\Http\Response;
 use Osynapsy\Http\ResponseJson as JsonResponse;
 use Osynapsy\Http\ResponseHtml as HtmlResponse;
 use Osynapsy\Observer\InterfaceSubject;
-use Osynapsy\Mvc\Action\InterfaceAction;
+use Osynapsy\Mvc\Action\ActionInterface;
 use Osynapsy\Mvc\ApplicationInterface;
 
 abstract class Controller implements ControllerInterface, InterfaceSubject
@@ -102,20 +102,23 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     private function execExternalAction($action, array $parameters)
     {
         $this->setState('beforeAction'.ucfirst($action));
-        $actionInstance = $this->externalActions[$action];
-        $actionInstance->setController($this);
-        $actionInstance->setParameters($parameters);
-        $message = $actionInstance->execute();
+        $actionHandle = $this->actionFactory($this->externalActions[$action]);
+        $actionHandle->setController($this);
+        $actionHandle->setParameters($parameters);
+        $message = autowire()->execute($actionHandle, 'execute', $parameters);
         if (!empty($message)) {
             $this->getResponse()->error('alert', $message);
         }
         $this->setState('afterAction'.ucfirst($action));
     }
+    
+    private function actionFactory($actionHandle)
+    {
+        return is_object($actionHandle) ? $actionHandle : autowire()->getInstance($actionHandle);
+    }
 
     private function execInternalAction($cmd, array $parameters)
-    {
-        //$cmd = $_REQUEST[$this->actionKey];
-        //sleep(0.7);
+    {        
         $this->setState($cmd.'ActionStart');
         if (!method_exists($this, $cmd.'Action')) {
             $res = 'No action '.$cmd.' exist in '.get_class($this);
@@ -217,11 +220,16 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
      * @param string $actionClass
      * @return void
      */
-    public function setExternalAction($actionName, InterfaceAction $actionClass)
+    public function setExternalAction($actionName, ActionInterface $actionClass)
     {
         $this->externalActions[$actionName] = $actionClass;
     }
 
+    public function addExternalAction(string $actionClass, $actionId = null)
+    {
+        $this->externalActions[$actionId ?? sha1($actionClass)] = $actionClass;
+    }
+    
     public function setResponse(Response $response)
     {
         $this->response = $response;

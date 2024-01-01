@@ -8,7 +8,7 @@ use Osynapsy\Mvc\Controller;
  *
  * @author Pietro Celeste <p.celeste@osynapsy.net>
  */
-abstract class AbstractAction implements InterfaceAction
+abstract class AbstractAction implements ActionInterface
 {
     protected $controller;
     protected $parameters;

@@ -2,11 +2,11 @@ BclDatePicker =
 {
     init : function()
     {
-        $('.date-picker').each(function(){
+        $('.osy-date-picker').each(function(){
             var self = this;
             var opt = {
                 format: $(this).data('format'),
-                useCurrent: false
+                useCurrent : false
             };
             var minDate = $(this).data('min');
             if (typeof minDate !== 'undefined') {
@@ -30,10 +30,10 @@ BclDatePicker =
             }
             var onchange = $(this).attr('onchange');
             if (typeof onchange !== 'undefined') {
-                $(this).on('dp.change', function(){
+                $(this).on('dp.change', function(){                    
                     eval(onchange);
                 });
-            }
+            }            
             $(this).datetimepicker(opt);
         });
     }

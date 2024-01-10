@@ -63,13 +63,27 @@ class Route
         preg_match_all('/\?.?/', $this->uri, $output);
         if (count($output[0]) > count($segmentParams)) {
             throw new \Exception('Number of parameters don\'t match uri params');
-        }
-        $url = str_replace($output[0], $segmentParams, $this->uri);
+        }        
+        //$url = str_replace($output[0], $segmentParams, $this->uri);
+        $url = $this->string_replace($this->uri, $output[0], $segmentParams);        
         $url .= !empty($getParams) ? '?' : '';
         $url .= http_build_query($getParams);
         return $url;
     }
 
+    private function string_replace($stringRaw, $placeholders, $values)
+    {
+        $result = $stringRaw;
+        foreach($placeholders as $i => $placeholder) {
+            $placeholderPos = strpos($result, $placeholder);
+            if ($placeholderPos !== false) {
+                $segment =  $values[$i];
+                $result = substr_replace($result, $segment, $placeholderPos, strlen($placeholder));
+            }
+        }
+        return $result;
+    }
+    
     public static function createFromArray(array $route)
     {
         return new Route($route['id'], $route['path'], null, $route['@value'], $route['template'], $route);

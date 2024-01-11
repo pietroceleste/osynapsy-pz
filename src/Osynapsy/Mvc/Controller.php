@@ -248,7 +248,17 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
      */
     public function alertJs($message)
     {
-        $this->getResponse()->js(sprintf("alert(['%s'])", addslashes($message)));
+        $this->js(sprintf("alert(['%s'])", addslashes($message)));
+    }
+    
+    /**
+     * Redirect browser to location in $url parameter indicate
+     * 
+     * @param string $url
+     */
+    public function go($url)
+    {
+        $this->getResponse()->message('command', 'goto', $url);
     }
 
     /**
@@ -258,7 +268,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
      */
     public function refreshComponents(array $components)
     {
-        $this->getResponse()->js(sprintf("Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
+        $this->js(sprintf("Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
     }
 
     /**
@@ -268,7 +278,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
      */
     public function refreshParentComponents(array $components)
     {
-        $this->getResponse()->js(sprintf("parent.Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
+        $this->js(sprintf("parent.Osynapsy.refreshComponents(['%s'])", implode("','", $components)));
     }
 
     /**
@@ -279,6 +289,11 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
      */
     public function closeModal($modalId = 'amodal')
     {
-        $this->getResponse()->js(sprintf("parent.$('#%s').modal('hide')", $modalId));
-    }   
+        $this->js(sprintf("parent.$('#%s').modal('hide')", $modalId));
+    }
+
+    public function js($jscode)
+    {
+        $this->getResponse()->js($jscode);
+    }
 }

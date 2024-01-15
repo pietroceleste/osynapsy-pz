@@ -18,7 +18,7 @@ class Link extends Component
     public function __construct($id, $link, $label, $class='')
     {
         parent::__construct('a', $id);        
-        $this->att('href', $link)->add($label);
+        $this->att('href', $link ?: 'javascript:void(0)')->add($label);
         if ($class) {
             $this->addClass($class);
         }
@@ -32,6 +32,7 @@ class Link extends Component
             'modal-width' => $widht,
             'modal-height' => $height
         ]);
+        return $this;
     }
     
     public function setDisabled($condition)

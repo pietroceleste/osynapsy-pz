@@ -15,8 +15,8 @@ use Osynapsy\Db\DbFactory;
 use Osynapsy\Event\Dispatcher;
 use Osynapsy\Http\Request;
 use Osynapsy\Http\Response;
-use Osynapsy\Http\ResponseJson as JsonResponse;
-use Osynapsy\Http\ResponseHtml as HtmlResponse;
+use Osynapsy\Http\ResponseJsonOsy;
+use Osynapsy\Http\ResponseHtml;
 use Osynapsy\Observer\InterfaceSubject;
 use Osynapsy\Mvc\Action\ActionInterface;
 use Osynapsy\Mvc\ApplicationInterface;
@@ -31,6 +31,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     private $dbFactory;
     private $externalActions = [];
     public $model;
+    public $template;
     public $request;
     public $response;
     public $app;
@@ -57,32 +58,27 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
 
     public function run()
     {
-        $cmd = filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_ACTION');
-        if (!empty($cmd)) {
-            return $this->execAction($cmd);
-        }
-        $this->setResponse(new HtmlResponse());
-        $layoutPath = $this->request->get('page.route')->template;
-        if (!empty($layoutPath)) {
-            $this->response->template = $this->response->getBuffer($layoutPath, $this);
-        }
-        if ($this->model) {
-            $this->model->find();
-        }
-        //$resp = $this->indexAction();
+        $actionId = filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_ACTION');
+        return empty($actionId) ? $this->runDefaultAction() : $this->execAction($actionId);        
+    }
+    
+    protected function runDefaultAction()
+    {
+        $this->setResponse(new ResponseHtml);
+        $this->template = new View\Template($this, $this->request->get('page.route')->template);
         if (!method_exists($this, 'indexAction')) {
             throw new \Exception('No method indexAction exists');
-        }
-        $resp = autowire()->execute($this, 'indexAction');
-        if ($resp) {
-            $this->response->addContent(strval($resp));
-        }
+        } elseif ($this->model) {
+            $this->model->find();
+        }        
+        $this->template->addHtml(autowire()->execute($this, 'indexAction'));        
+        $this->response->writeStream(strval($this->template));
         return $this->response;
     }
 
     private function execAction($action)
     {
-        $this->setResponse(new JsonResponse());
+        $this->setResponse(new ResponseJsonOsy);
         $parameters = empty($_REQUEST['actionParameters']) ? [] : $_REQUEST['actionParameters'];
         if (array_key_exists($action, $this->externalActions)) {
             $this->execExternalAction($action, $parameters);
@@ -197,7 +193,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
         if ($return) {
             return $view;
         }
-        $this->response->addContent($view);
+        $this->response->writeStream($view);
     }
     
     public function saveAction()
@@ -213,6 +209,11 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
         $this->db = $this->dbFactory->getConnection(0);
     }
 
+    public function addExternalAction(string $actionClass, $actionId = null)
+    {
+        $this->externalActions[$actionId ?? sha1($actionClass)] = $actionClass;
+    }
+    
     /**
      * Set external class action for manage action
      *
@@ -224,12 +225,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     {
         $this->externalActions[$actionName] = $actionClass;
     }
-
-    public function addExternalAction(string $actionClass, $actionId = null)
-    {
-        $this->externalActions[$actionId ?? sha1($actionClass)] = $actionClass;
-    }
-    
+        
     public function setResponse(Response $response)
     {
         $this->response = $response;
@@ -258,7 +254,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
      */
     public function go($url)
     {
-        $this->getResponse()->message('command', 'goto', $url);
+        $this->response->message('command', 'goto', $url);
     }
 
     /**
@@ -287,9 +283,9 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
      * @param string $modalId id of the modal to hide
      *
      */
-    public function closeModal($modalId = 'amodal')
+    public function closeModal()
     {
-        $this->js(sprintf("parent.$('#%s').modal('hide')", $modalId));
+        $this->js(sprintf("parent.$('#%s').modal('hide')", 'amodal'));
     }
 
     public function js($jscode)

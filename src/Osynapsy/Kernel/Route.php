@@ -14,7 +14,7 @@ namespace Osynapsy\Kernel;
 /**
  * Description of Route
  *
- * @author Peter
+ * @author Pietro Celeste <p.celeste@osynapsy.net>
  */
 class Route 
 {

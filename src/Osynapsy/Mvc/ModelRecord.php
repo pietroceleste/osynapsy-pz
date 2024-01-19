@@ -74,7 +74,7 @@ abstract class ModelRecord
 
     public function getValue($key)
     {
-        return $this->getRecord()->getValue($key);
+        return $this->getRecord()->get($key);
     }
 
     public function set($key, $value)

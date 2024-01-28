@@ -80,8 +80,13 @@ class Request extends Dictionary
 
     protected function findRuote($routeId)
     {
-        $routes = $this->search('route', 'env.app');
-        $result = array_search($routeId, array_column($routes, 'id'));
+        $routes = array_values(
+            array_filter(
+                $this->search('route', 'env.app'), 
+                fn($route) => array_key_exists('id', $route)
+            )
+        );
+        $result = array_search($routeId, array_column($routes, 'id'));        
         if ($result !== false) {
             return $routes[$result];
         }

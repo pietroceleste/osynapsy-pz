@@ -9,7 +9,7 @@ class Paging
     const META_PACE_CURRENT = 'pageCurrent';
     const META_REQUEST_PAGE = 'requestPage';
     const META_PAGING_QUERY = 'pagingQuery';
-    
+
     protected $dbCn;
     protected $errors = [];
     protected $filters = [];
@@ -23,7 +23,7 @@ class Paging
         'pageDimension' => 10,
         'pageTotal' => 0,
         'requestPage' => 1
-    ];    
+    ];
 
     public function __construct($dbCn, $rawQuery, $queryParameters, $pageDimension = 10)
     {
@@ -34,8 +34,8 @@ class Paging
     }
 
     public function getDataset()
-    {                
-        $rawQuery = $this->query;        
+    {
+        $rawQuery = $this->query;
         $queryParameters = $this->queryParameters;
         $requestPage = $this->getMeta(self::META_REQUEST_PAGE);
         $where = empty($this->filters) ? '' : $this->whereClauseFactory($this->filters);
@@ -46,7 +46,7 @@ class Paging
         try {
             $this->setMeta(self::META_PAGING_QUERY, $query);
             $dataset = $this->dbCn->execQuery($query, $queryParameters, 'ASSOC');
-            //die(print_r($this->data,true));            
+            //die(print_r($this->data,true));
             return empty($dataset) ? [] : $dataset;
         } catch (\Exception $e) {
             die($this->formatSqlErrorMessage($rawQuery, $e->getMessage()));
@@ -65,7 +65,7 @@ class Paging
     }
 
     private function metaFactory($numberOfRows, $pageDimension, $requestPage)
-    {        
+    {
         $pageCurrent = $this->getMeta(self::META_PACE_CURRENT);
         $pageTotal = !empty($numberOfRows) ? ceil($numberOfRows / max($pageDimension, 1)) : 0;
         switch ($requestPage) {
@@ -74,13 +74,13 @@ class Paging
                 break;
             case 'last' :
                 $pageCurrent = $pageTotal;
-                break;            
+                break;
             default:
                 $pageCurrent = min($requestPage, $pageTotal);
                 break;
         }
         $this->setMeta('numberOfRows', $numberOfRows);
-        $this->setMeta(self::META_PACE_CURRENT, $pageCurrent);        
+        $this->setMeta(self::META_PACE_CURRENT, $pageCurrent);
         $this->setMeta(self::META_PAGE_TOTAL, $pageTotal);
     }
 
@@ -110,11 +110,13 @@ class Paging
                 return $this->pagingQueryOracleFactory($sql, $where, $orderByClause, $pageCurrent, $pageDimension);
             case 'pgsql':
                 return $this->pagingQueryPgSqlFactory($sql, $where, $orderByClause, $pageCurrent, $pageDimension);
+            case 'sqlsrv':
+                return $this->pagingQuerySqlSrvFactory($sql, $where, $orderBySequence, $pageCurrent, $pageDimension);
             default:
                 return $this->pagingQueryMySqlFactory($sql, $where, $orderByClause, $pageCurrent, $pageDimension);
         }
     }
-    
+
     protected function pagingQueryMySqlFactory($query, $where, $orderBy, $pageCurrent, $pageDimension)
     {
         $sql = sprintf("SELECT a.* FROM (%s) a %s %s", $query, $where, $orderBy);
@@ -128,16 +130,26 @@ class Paging
 
     protected function pagingQueryPgSqlFactory($rawQuery, $where, $orderBy, $pageCurrent, $pageDimension)
     {
-        $query = sprintf("SELECT a.* FROM (%s) a %s %s", $rawQuery, $where, $orderBy);        
+        $query = sprintf("SELECT a.* FROM (%s) a %s %s", $rawQuery, $where, $orderBy);
         if (!empty($pageDimension)) {
             $startFrom = max(0, ($pageCurrent - 1) * $pageDimension);
             $query .= sprintf("\nLIMIT %s OFFSET %s", $pageDimension, $startFrom);
-        }        
+        }
+        return $query;
+    }
+
+    protected function pagingQuerySqlSrvFactory($rawQuery, $where, $orderBy, $pageCurrent, $pageDimension)
+    {
+        $query = sprintf("SELECT a.* FROM (%s) a %s Order By %s", $rawQuery, $where, $orderBy ?? '1');
+        if (!empty($pageDimension)) {
+            $startFrom = max(0, ($pageCurrent - 1) * $pageDimension);
+            $query .= sprintf("\nOFFSET %s ROWS FETCH NEXT %s ROWS ONLY;", $startFrom, $pageDimension);
+        }
         return $query;
     }
 
     protected function pagingQueryOracleFactory($rawQuery, $where, $orderBy, $pageCurrent, $pageDimension)
-    {        
+    {
         $query = sprintf(
             'SELECT a.*
                 FROM (
@@ -156,7 +168,7 @@ class Paging
             $startFrom = (($pageCurrent - 1) * $pageDimension) + 1 ;
             $endTo = ($pageCurrent * $pageDimension);
             $query .=  sprintf('WHERE "_rnum" BETWEEN %s AND %s', $startFrom, $endTo);
-        }        
+        }
         return $query;
     }
 

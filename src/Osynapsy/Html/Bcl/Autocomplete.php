@@ -35,8 +35,9 @@ class Autocomplete extends Component
     public function __build_extra__()
     {
         if (filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_HTML_COMPONENTS') != $this->id) {
-            $value = $this->add(new InputHidden('__'.$this->id)); //->getValue();
-            $this->add($this->inputMaskFactory($value));
+            $hdnFieldId = '__'.$this->id;
+            $this->add(new InputHidden($hdnFieldId));
+            $this->add($this->inputMaskFactory($_REQUEST['__'.$this->id] ?? null));
             return;
         }
         $userQuery = filter_input(\INPUT_POST, $this->id);

@@ -15,31 +15,27 @@ use Osynapsy\Mvc\Controller;
 
 class Loader extends Controller
 {
-    protected $path;
-    protected $basePath;
+    const CONTENT_TYPE = [
+        'js' => 'application/javascript',
+        'css' => 'text/css'
+    ];
 
     public function init()
-    {
-        $this->path = $this->getParameter(0);        
-        $this->basePath = __DIR__ . '/../../../assets/';
+    {        
     }
     
     public function indexAction()
     {            
-        if (!$this->checkFile($this->basePath . $this->path)) {
-            return $this->pageNotFound();    
-        }        
-    }   
-            
-    private function checkFile($filename)
-    {
-        if (!is_file($filename)) {
-            return false;
+        $this->template->reset();
+        $basePath = __DIR__ . '/../../../assets/';
+        $relPath = $this->getParameter(0);
+        $fullPath = $basePath . $relPath;
+        if (!is_file($fullPath)) {
+            return $this->pageNotFound();
         }
-        $this->copyFileToCache($this->request->get('page.url'), $filename);        
-        $this->sendFile($filename);
-        return true;
-    }
+        $this->copyFileToCache($this->request->get('page.url'), $fullPath);
+        return $this->sendFile($fullPath);
+    }                
     
     private function copyFileToCache($webPath, $assetsPath)
     {
@@ -89,8 +85,8 @@ class Loader extends Controller
         // calc the string in GMT not localtime and add the offset
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
         //output the HTTP header
-        $this->response->setHeader('Expires', gmdate("D, d M Y H:i:s", time() + $offset) . " GMT");        
-        $this->response->setContentType('text/'.$ext);
-        readfile($filename);
+        $this->getResponse()->setHeader('Expires', gmdate("D, d M Y H:i:s", time() + $offset) . " GMT");        
+        $this->getResponse()->setContentType(self::CONTENT_TYPE[$ext] ?? 'text/'.$ext);
+        return file_get_contents($filename);
     }
 }

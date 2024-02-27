@@ -27,7 +27,7 @@ class DbPdo extends \PDO implements DboInterface
     private $param = array();
     private $iCursor = null;
     public  $backticks = '"';
-    
+
     public function __construct($str)
     {
         $par = explode(':',$str);
@@ -44,21 +44,22 @@ class DbPdo extends \PDO implements DboInterface
                 $this->param['db']  = trim($par[2]);
                 $this->param['usr'] = trim($par[3]);
                 $this->param['pwd'] = trim($par[4]);
+                $this->param['port'] = trim($par[5]);
                 $this->param['query-parameter-dummy'] = '?';
                 break;
         }
     }
-    
+
     public function begin()
     {
         $this->beginTransaction();
     }
-    
+
     public function countColumn()
     {
        return $this->iCursor->columnCount();
     }
-    
+
     public function connect()
     {
         $opt = array();
@@ -69,16 +70,25 @@ class DbPdo extends \PDO implements DboInterface
             case 'mysql' :
                 $opt[\PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8";
             default:
-                try{
-                    $cnstr = "{$this->param['typ']}:host={$this->param['hst']};dbname={$this->param['db']}";
-                    //var_dump($cnstr);
-                    parent::__construct($cnstr,$this->param['usr'],$this->param['pwd'], $opt);
-                } catch (\Exception $e) {
-                    die($cnstr.' '.$e);
-                }
+                $cnStr = $this->connectionStringFactory($this->param['typ'], $this->param);
+                parent::__construct($cnStr,$this->param['usr'],$this->param['pwd'], $opt);
                 break;
         }
         $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+    }
+
+    protected function connectionStringFactory($typ, $params)
+    {
+        switch($typ) {
+            case 'sqlsrv':
+                return sprintf("%s:Server=%s,%s;Database=%s", $typ, $params['hst'], $params['port'] ?? '1433', $params['db']);
+            case 'dblib':
+                $str = sprintf("%s:host=%s;dbname=%s", $typ, $params['hst'], $params['db']);
+                //var_dump($str);
+                return $str;
+            default :
+                return sprintf("%s:host=%s;dbname=%s", $typ, $params['hst'], $params['db']);
+        }
     }
 
     public function getType()
@@ -97,7 +107,7 @@ class DbPdo extends \PDO implements DboInterface
     {
       return $this->lastInsertId();
     }
-    
+
     public function execCommand($cmd, $par = null)
     {
         if (!empty($par)) {
@@ -107,7 +117,7 @@ class DbPdo extends \PDO implements DboInterface
             return $this->exec($cmd);
         }
     }
-    
+
     public function execMulti($cmd, $par)
     {
         $this->beginTransaction();
@@ -123,7 +133,7 @@ class DbPdo extends \PDO implements DboInterface
         $this->commit();
         return;
     }
-    
+
     public function execQuery($sql, $par = null, $mth = null, $iColumn = null)
     {
         $this->iCursor = $this->prepare($sql);
@@ -152,19 +162,34 @@ class DbPdo extends \PDO implements DboInterface
 
     public function execUnique($sql, $par = null, $mth = 'NUM')
     {
-        $raw = $this->execQuery($sql, $par, $mth);       
+        $raw = $this->execQuery($sql, $par, $mth);
         if (empty($raw)) {
             return null;
         }
         $one = array_shift($raw);
         return count($one) == 1 ? array_values($one)[0] : $one;
     }
-   
+
+    public function findOne($sql, $par = [], $mth = 'NUM')
+    {
+        return $this->execUnique($sql, $par, $mth);
+    }
+
+    public function find($sql, $par = [], $mth = null)
+    {
+        return $this->execQuery($sql, $par, $mth);
+    }
+
+    public function findAssoc($sql, $par = [])
+    {
+        return $this->execQuery($sql, $par, 'ASSOC');
+    }
+
     public function fetch_all($rs)
     {
         return $rs->fetchAll(\PDO::FETCH_ASSOC);
     }
-   
+
     public function getColumns($stmt = null)
     {
         $stmt = is_null($stmt) ? $this->iCursor : $stmt;
@@ -222,7 +247,7 @@ class DbPdo extends \PDO implements DboInterface
         $cmd = 'delete from '.$tbl.' where '.implode(' and ',$whr);
         $this->execCommand($cmd, $val);
     }
-    
+
     private function buildSelect($table, array $fields, array $conditions)
     {
         $sql = 'SELECT '. implode(',', $fields) . ' FROM ' . $table;
@@ -234,27 +259,27 @@ class DbPdo extends \PDO implements DboInterface
             $where[] = $field.' = :'.sha1($field);
             $params[sha1($field)] = $value;
         }
-        
-        $sql .= ' WHERE '.implode(' AND ', $where);    
+
+        $sql .= ' WHERE '.implode(' AND ', $where);
 
         return [$sql, $params];
     }
-    
+
     public function selectOne($table, array $conditions, array $fields = ['*'], $fetchMethod = 'ASSOC')
-    {        
+    {
         list($sql, $params) = $this->buildSelect($table, $fields, $conditions);
         return $this->execUnique(
-            $sql, 
-            $params, 
+            $sql,
+            $params,
             $fetchMethod
         );
     }
-    
+
     public function par($p)
     {
         return array_key_exists($p,$this->param) ? $this->param[$p] : null;
     }
-    
+
     public function cast($field,$type)
     {
         $cast = $field;

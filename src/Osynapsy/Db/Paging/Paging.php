@@ -110,6 +110,7 @@ class Paging
                 return $this->pagingQueryOracleFactory($sql, $where, $orderByClause, $pageCurrent, $pageDimension);
             case 'pgsql':
                 return $this->pagingQueryPgSqlFactory($sql, $where, $orderByClause, $pageCurrent, $pageDimension);
+            case 'dblib':
             case 'sqlsrv':
                 return $this->pagingQuerySqlSrvFactory($sql, $where, $orderBySequence, $pageCurrent, $pageDimension);
             default:

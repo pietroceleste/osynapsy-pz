@@ -390,9 +390,14 @@ abstract class Active implements RecordInterface
     private function update()
     {
         $this->beforeUpdate();
+        $keys = $this->primaryKey();
+        $fields = array_filter(
+            $this->fields(),
+            function($field) use ($keys) { return !in_array($field, $keys); }
+        );
         $this->getDb()->update(
             $this->table,
-            array_intersect_key($this->activeRecord, array_flip($this->fields())),
+            array_intersect_key($this->activeRecord, array_flip($fields)),
             $this->activeRecordCondition()
         );
         $this->afterUpdate();

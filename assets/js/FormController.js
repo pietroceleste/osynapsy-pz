@@ -266,6 +266,9 @@ var Osynapsy = new (function(){
         },
         dispatchCommands : function(response)
         {
+            if (!('debug' in response)) {
+                FormController.debug(message);
+            }
             if (!('command' in response)) {
                 return;
             }
@@ -515,6 +518,9 @@ var FormController =
     init : function()
     {
         Osynapsy.page.init();
+    },
+    debug : function(message) {
+        console.log(message);
     },
     back : function()
     {

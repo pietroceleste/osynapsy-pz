@@ -17,9 +17,9 @@ abstract class BaseView extends AbstractView
 {                   
     protected function add($part)
     {
-        $this->controller->response->send($part);
+        $this->getTemplate()->addHtml($part);
         if (is_object($part)) {
             return $part;
         }
-    }        
+    }
 }

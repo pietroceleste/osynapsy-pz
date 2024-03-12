@@ -8,7 +8,7 @@ use Osynapsy\Db\Paging\Paging;
 class DataGrid extends Component
 {
     private $columns = [];
-    private $title;    
+    private $title;
     private $footer = [];
     private $thClass = 'bcl-datagrid-th bcl-datagrid-th-order-by';
     private $emptyMessage = 'No data found';
@@ -27,11 +27,11 @@ class DataGrid extends Component
 
     public function __build_extra__()
     {
-        $this->count++;            
-        //If datagrid has pager get data from it.        
+        $this->count++;
+        //If datagrid has pager get data from it.
         if (!empty($this->pager)) {
             try {
-                $this->setData($this->pager->paging->getDataset());                
+                $this->setData($this->pager->paging->getDataset());
             } catch (\Exception $e) {
                 $this->printError($e->getMessage());
             }
@@ -66,10 +66,10 @@ class DataGrid extends Component
     {
         $thead = new Tag('div', null, 'row bcl-datagrid-thead');
         $orderByFields = $this->pager ? explode(',', $this->pager->paging->getOrderBy()) : null;
-        foreach($this->columns as $label => $properties) {            
+        foreach($this->columns as $label => $properties) {
             if (empty($properties['hideTh'])) {
                 $thead->add($this->thFactory($label, $properties, $orderByFields));
-            }            
+            }
         }
         return $thead;
     }
@@ -105,7 +105,9 @@ class DataGrid extends Component
             return $body;
         }
         foreach ($this->data as $rec) {
-            $body->add($this->buildRow($rec));
+            if (!empty($rec) && is_array($rec)) {
+                $body->add($this->buildRow($rec));
+            }
         }
         return $body;
     }
@@ -126,18 +128,18 @@ class DataGrid extends Component
             $row->add('&nbsp;');
             return $row;
         }
-        $row->add(new Tag('div', null, 'col-lg-3 col-sm-3 col-xs-2 col-4'))
+        $row->add(new Tag('div', null, 'col-lg-2 col-sm-3 col-xs-2 col-4'))
             ->add($this->pager->comboPageDimensionFactory());
-        $row->add(new Tag('div', null, 'col-lg-6 col-sm-4 hidden-xs hidden-md col-4 text-center'))
+        $row->add(new Tag('div', null, 'col-lg-4 col-lg-offset-2 col-sm-4 hidden-xs hidden-sm col-4 text-center'))
              ->add('<label class="" style="margin-top: 30px;">'.$pagingInfo.'</label>');
-        $row->add(new Tag('div', null, 'col-lg-3 col-sm-9 col-xs-8 col-4 text-right'))
+        $row->add(new Tag('div', null, 'col-lg-4 col-sm-9 col-xs-8 col-4 text-right'))
              ->add($pagination)
              ->setClass('mt-4');
         return $row;
     }
 
     private function emptyMessageFactory($emptyMessage)
-    {        
+    {
         return '<div class="row"><div class="col-lg-12 text-center">'.$emptyMessage.'</div></div>';
     }
 
@@ -177,13 +179,17 @@ class DataGrid extends Component
                 $value = $datetime === false ? $value : $datetime->format('d/m/Y');
                 $properties['classTd'][] = 'text-center';
                 break;
+            case 'percentage':
+                $value = sprintf('%+.2f %%', $value * 100);
+                break;
             case 'number':
-                $value = sprintf('%.2f &nbsp;', $value);
+            case 'numeric':
+                $value = sprintf('%.2f ', $value);
                 break;
             case 'money-right':
                 $properties['class'] .= ' text-right';
             case 'money':
-                $value = sprintf('%s &euro;&nbsp;',number_format($value, 2, ',', '.'));
+                $value = sprintf('%s &euro;&nbsp;&nbsp;&nbsp;',number_format($value, 2, ',', '.'));
                 break;
             case 'integer':
                 $value = number_format($value, 0, ',', '.');
@@ -205,16 +211,25 @@ class DataGrid extends Component
         return $value;
     }
 
-    public function addColumn($label, $field, $class = '', $type = 'string', callable $function = null, $prefix = null)
+    public function addColumn($label, $field, $class = '', $type = 'string', callable $function = null, $prefix = null, $position = null)
     {
-        $this->columns[$label] = [
-            'field' => $field,
-            'class' => $class,
-            'type' => $type,
-            'prefix' => $prefix,
-            'function' => $function,
-            'orderByField' => $field
+        $newcolumn = [
+            $label => [
+                'field' => $field,
+                'class' => $class,
+                'type' => $type,
+                'prefix' => $prefix,
+                'function' => $function,
+                'orderByField' => $field
+            ]
         ];
+        if (is_null($position)) {
+            $this->columns += $newcolumn;
+            return $this;
+        }
+        $remCols = array_splice($this->columns, $position);
+        $this->columns += $newcolumn;
+        $this->columns += $remCols;
         return $this;
     }
 
@@ -267,10 +282,10 @@ class DataGrid extends Component
     {
         $dbPager = new Paging($dbCn, $query, $queryParameters, $pageDimension);
         $dbPager->setOrderBy($orderBy ?: 1);
-        $pagerId = $this->id . (strpos($this->id, '_') ? '_pagination' : 'Pagination');        
+        $pagerId = $this->id . (strpos($this->id, '_') ? '_pagination' : 'Pagination');
         $pager = new Pager($pagerId, $dbPager);
-        $pager->addClass('refreshParent');        
-        $pager->setParentComponent($this->id);              
+        $pager->addClass('refreshParent');
+        $pager->setParentComponent($this->id);
         return $this->pager = $pager;
     }
 

@@ -59,7 +59,7 @@ class Dropdown extends Component
                 $this->list->att('data-value',$key)->add(new Tag('li'))->add($rec);
                 continue;
             }
-			if ($rec === 'divider') {
+            if ($rec === 'divider') {
                 $this->list->add(new Tag('li'))->att(['class' => 'divider','role' => 'separator']);
                 continue;
             }

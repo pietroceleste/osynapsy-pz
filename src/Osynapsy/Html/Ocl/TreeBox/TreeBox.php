@@ -42,13 +42,14 @@ class TreeBox extends AbstractComponent
         $this->addClass('osy-treebox');
         $this->requireJs('Ocl/TreeBox/ocl-treebox.js');
         $this->requireCss('Ocl/TreeBox/ocl-treebox.css');
+        $this->nodeOpenIds = explode(',', str_replace(['][','[',']'],[',','',''], $_REQUEST[$id.'_opn'] ?? ''));
     }
 
     public function __build_extra__()
     {
         if (empty($this->dataTree)) {
             return;
-        }        
+        }
         foreach ($this->dataTree->get() as $node) {
             $this->add($this->nodeFactory($node));
         }
@@ -114,7 +115,7 @@ class TreeBox extends AbstractComponent
 
     protected function branchBodyFactory($item, $icons)
     {
-        $branchBody = new Tag('div', null, 'osy-treebox-branch-body');        
+        $branchBody = new Tag('div', null, 'osy-treebox-branch-body');
         if (!in_array($item[0], $this->nodeOpenIds) && ($item[3] != '1')) {
             $branchBody->addClass('d-none hidden');
         }

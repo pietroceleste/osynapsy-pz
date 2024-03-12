@@ -1,6 +1,8 @@
 <?php
 use Osynapsy\Kernel;
 use Osynapsy\Helper\AutoWire;
+use Osynapsy\Mvc\ApplicationInterface;
+use Osynapsy\Mvc\ControllerInterface;
 use Osynapsy\Db\Driver\DboInterface;
 
 /**
@@ -57,8 +59,8 @@ function redirect($rawdestination, array $getParams = [], array $routeParams = [
 {
     $destination = ($rawdestination[0] === '#') ? route(ltrim($rawdestination, '#'), $routeParams) : $rawdestination;
     $url = sprintf('%s%s', $destination, !empty($getParams) ? '?' . http_build_query($getParams) : '');
-    if (request()->hasHeader("X-Osynapsy-Action")) {
-        response()->go($url);
+    if (request()->hasHeader("Osynapsy-Action")) {
+        AutoWire::getHandle(ControllerInterface::class)->go($url);
         return;
     }
     header('Location: '.$url);

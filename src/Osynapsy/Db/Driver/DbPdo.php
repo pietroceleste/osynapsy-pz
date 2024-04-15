@@ -65,6 +65,7 @@ class DbPdo extends \PDO implements DboInterface
         $opt = array();
         switch ($this->param['typ']) {
             case 'sqlite':
+            case 'odbc':
                 parent::__construct("{$this->param['typ']}:{$this->param['db']}");
                 break;
             case 'mysql' :

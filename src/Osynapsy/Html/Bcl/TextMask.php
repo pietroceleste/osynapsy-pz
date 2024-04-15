@@ -101,11 +101,14 @@ class TextMask extends TextBox
         ]
     ];
 
-    public function __construct($id)
+    public function __construct($id, $maskId = null)
     {
         parent::__construct($id, 'bcl-textmask');
         $this->requireJs('Lib/inputmask-5.0.0-beta/dist/jquery.inputmask.js');
         $this->requireJsCode("$('input.bcl-textmask').inputmask();");
+        if (!empty($maskId)) {
+            $this->setMask($maskId);
+        }
     }
 
     public function setMask($id)

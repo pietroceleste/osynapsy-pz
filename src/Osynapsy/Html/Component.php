@@ -34,7 +34,7 @@ class Component extends Tag
     }
 
     protected function build()
-    {        
+    {
         $this->__build_extra__();
         return parent::build(-1);
     }
@@ -122,6 +122,7 @@ class Component extends Tag
             self::$require[$type] = [];
         }
         if (!in_array($file, self::$require[$type])) {
+
             $fullPath = in_array($file[0], ['/','h']) ? $file : '/assets/osynapsy/'.Kernel::VERSION.'/'.$file;
             self::$require[$type][] = $fullPath;
         }
@@ -146,7 +147,10 @@ class Component extends Tag
      */
     public static function requireJsCode($code)
     {
-        self::requireFile($code, 'jscode');
+        if (!array_key_exists('jscode', self::$require)) {
+            self::$require['jscode'] = [];
+        }
+        self::$require['jscode'][] = $code;
     }
 
     /**

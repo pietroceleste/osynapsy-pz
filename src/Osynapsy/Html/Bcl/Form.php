@@ -90,7 +90,7 @@ class Form extends Component
         }
         $this->add($this->foot->get());
     }
-    
+
 
     public function head($width=12, $offset = 0)
     {
@@ -135,7 +135,7 @@ class Form extends Component
     public function getPanel()
     {
         return $this->body;
-    }   
+    }
 
     public function setCommand($delete = false, $save = true, $back = true, $modalClose = false, $footOnBottom = false)
     {
@@ -166,6 +166,7 @@ class Form extends Component
                  ->att('onclick',"parent.$('#amodal').modal('hide');");
         }
         if (!empty($this->foot) && !empty($footOnBottom)) {
+            $this->getPanel()->addClass('osy-mb-50');
             $this->foot->addClass('osy-fixed-bottom');
         }
     }
@@ -201,7 +202,7 @@ class Form extends Component
     }
 
     public function __call($method, $arguments)
-    {        
+    {
         return call_user_func_array([$this->getPanel(), $method], $arguments);
     }
 }

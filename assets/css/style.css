@@ -171,6 +171,8 @@ div#waitMask > div.message > div.progress {
 .osy-mb-10 {margin-bottom: 10px;}
 .osy-mb-20 {margin-bottom: 20px;}
 .osy-mb-30 {margin-bottom: 30px;}
+.osy-mb-40 {margin-bottom: 40px;}
+.osy-mb-50 {margin-bottom: 50px;}
 .osy-mr-10 {margin-right: 10px;}
 .osy-mr-20 {margin-right: 20px;}
 .osy-mr-30 {margin-right: 30px;}
@@ -203,6 +205,9 @@ div.sticky {
     position: fixed;
     bottom: 0px;
     width: 100%;
+    background-color: white;
+    border-top: 1px solid #eee;
+    opacity: 0.92;
 }
 
 .bg-transparent {background-color: transparent}

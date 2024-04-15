@@ -79,7 +79,13 @@ class DataGrid extends Component
         $orderByField = $properties['orderByField'];
         $keyClass = empty($properties['classTh']) ? 'class' : 'classTh';
         $th = new Tag('div', null, $this->thClass . ' ' . str_replace('d-block', '', $properties[$keyClass]));
-        $th->att('data-idx', $orderByField)->add($label);
+        $th->att('data-idx', $orderByField);
+        if ($properties['type'] === 'check') {
+            $th->add('<i class="fa fa-check" onclick="$(\'.grid-check\').click()"></i>');
+            $orderByField = null;
+        } else {
+            $th->add($label);
+        }
         if (empty($orderedFields)) {
             return $th;
         }
@@ -171,13 +177,16 @@ class DataGrid extends Component
     {
         switch($properties['type']) {
             case 'check':
-                $value = empty($value) ? null : sprintf('<input type="checkbox" name="%s_chk[]" value="%s">', $this->id, $value);
+                $value = empty($value) ? null : sprintf('<input type="checkbox" name="%s_chk[]" value="%s" class="grid-check">', $this->id, $value);
                 $properties['class'] .= ' text-center';
                 break;
             case 'date':
                 $datetime = \DateTime::createFromFormat('Y-m-d', $value);
                 $value = $datetime === false ? $value : $datetime->format('d/m/Y');
-                $properties['classTd'][] = 'text-center';
+                break;
+            case 'datetime':
+                $datetime = \DateTime::createFromFormat('Y-m-d H:i:s', $value);
+                $value = $datetime === false ? $value : $datetime->format('d/m/Y H:i:s');
                 break;
             case 'percentage':
                 $value = sprintf('%+.2f %%', $value * 100);

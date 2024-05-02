@@ -11,13 +11,13 @@ class Assertion
         return true;
     }
 
-	public static function digit($value, $message)
-	{
-		if (!\ctype_digit($value)){
-			self::raiseException($message);
-		}
-		return true;
-	}
+    public static function digit($value, $message)
+    {
+            if (!\ctype_digit($value)){
+                    self::raiseException($message);
+            }
+            return true;
+    }
 
     public static function equal($value1, $value2, $message)
     {
@@ -35,7 +35,15 @@ class Assertion
         return true;
     }
 
-	public static function isEmpty($value, $message)
+    public static function inArray($value, array $array, $message)
+    {
+        if (!in_array($value, $array)) {
+            self::raiseException($message);
+        }
+        return true;
+    }
+
+    public static function isEmpty($value, $message)
     {
         if (!empty($value)) {
             self::raiseException($message);
@@ -50,7 +58,7 @@ class Assertion
         }
         return true;
     }
-    
+
     public static function isValidEmailAddress($value, $message)
     {
         if (!filter_var($value, \FILTER_VALIDATE_EMAIL)) {

@@ -41,7 +41,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
         $this->parameters = $request->get('page.route')->parameters;
         $this->request = $request;
         $this->setDbHandler($db);
-        $this->app = $appController;        
+        $this->app = $appController;
         $this->dispatcher = new Dispatcher($this);
         $this->loadObserver();
         $this->setState('init');
@@ -59,9 +59,9 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     public function run()
     {
         $actionId = filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_ACTION');
-        return empty($actionId) ? $this->runDefaultAction() : $this->execAction($actionId);        
+        return empty($actionId) ? $this->runDefaultAction() : $this->execAction($actionId);
     }
-    
+
     protected function runDefaultAction()
     {
         $this->setResponse(new ResponseHtml);
@@ -70,8 +70,8 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
             throw new \Exception('No method indexAction exists');
         } elseif ($this->model) {
             $this->model->find();
-        }        
-        $this->template->addHtml(autowire()->execute($this, 'indexAction'));        
+        }
+        $this->template->addHtml(autowire()->execute($this, 'indexAction'));
         $this->response->writeStream(strval($this->template));
         return $this->response;
     }
@@ -107,14 +107,14 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
         }
         $this->setState('afterAction'.ucfirst($action));
     }
-    
+
     private function actionFactory($actionHandle)
     {
         return is_object($actionHandle) ? $actionHandle : autowire()->getInstance($actionHandle);
     }
 
     private function execInternalAction($cmd, array $parameters)
-    {        
+    {
         $this->setState($cmd.'ActionStart');
         if (!method_exists($this, $cmd.'Action')) {
             $res = 'No action '.$cmd.' exist in '.get_class($this);
@@ -187,15 +187,6 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
 
     abstract public function init();
 
-    public function loadView($path, $params = array(), $return = false)
-    {
-        $view = $this->response->getBuffer($path, $this);
-        if ($return) {
-            return $view;
-        }
-        $this->response->writeStream($view);
-    }
-    
     public function saveAction()
     {
         if ($this->model) {
@@ -213,7 +204,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     {
         $this->externalActions[$actionId ?? sha1($actionClass)] = $actionClass;
     }
-    
+
     /**
      * Set external class action for manage action
      *
@@ -225,7 +216,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     {
         $this->externalActions[$actionName] = $actionClass;
     }
-        
+
     public function setResponse(Response $response)
     {
         $this->response = $response;
@@ -235,21 +226,21 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
     {
         $this->model = $model;
     }
-    
+
     /**
      * Open javascript alert on the view
-     * 
+     *
      * @param string $message to show
-     * 
+     *
      */
-    public function alertJs($message)
+    public function alert($message)
     {
         $this->js(sprintf("alert(['%s'])", addslashes($message)));
     }
-    
+
     /**
      * Redirect browser to location in $url parameter indicate
-     * 
+     *
      * @param string $url
      */
     public function go($url)
@@ -259,7 +250,7 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
 
     /**
      * Refresh component ids on the view
-     * 
+     *
      * @param array $components
      */
     public function refreshComponents(array $components)
@@ -288,8 +279,13 @@ abstract class Controller implements ControllerInterface, InterfaceSubject
         $this->js(sprintf("parent.$('#%s').modal('hide')", 'amodal'));
     }
 
+    public function historyPushState($id)
+    {
+        $this->js(sprintf("history.pushState(null,null,'%s');", $id));
+    }
+
     public function js($jscode)
     {
-        $this->getResponse()->js($jscode);
+        $this->response->message('command', 'execCode', str_replace(PHP_EOL,'\n', $jscode));
     }
 }

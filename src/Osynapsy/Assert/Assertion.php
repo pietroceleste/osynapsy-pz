@@ -43,6 +43,14 @@ class Assertion
         return true;
     }
 
+    public static function isArray($value, $message)
+    {
+        if (!is_array($value)) {
+            self::raiseException($message);
+        }
+        return true;
+    }
+
     public static function isEmpty($value, $message)
     {
         if (!empty($value)) {

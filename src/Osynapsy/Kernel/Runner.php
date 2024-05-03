@@ -114,22 +114,24 @@ class Runner
     public function pageOops($message, $trace)
     {
         ob_clean();
-        return strpos($_SERVER['HTTP_ACCEPT'], 'json') === false ?
+        return strpos($_SERVER['HTTP_ACCEPT'] ?? null, 'json') === false ?
                $this->pageOopsHtml($message, $trace) :
                $this->pageOopsText($message, $trace);
     }
 
-    public function pageOopsText($message, $trace)
+    public function pageOopsText($message, $traces)
     {
 
-        $page = <<<PAGE
-            Si è verificato il seguente errore:
-
-            %s
-
-            riga funzione %s del file %s
-PAGE;        
-        return sprintf($page, $message, $trace[0]['line'] ?? '', $trace[0]['function'] ?? '', $trace[0]['file'] ?? '');
+        $tmp = PHP_EOL."funzione %s alla riga %s del file %s";
+        $result = sprintf(
+             'Si è verificato il seguente errore:
+              %s',
+            $message
+        );
+        foreach ($traces as $trace) {
+            $result .= sprintf($tmp,  $trace['function'] ?? '', $trace['line'] ?? '', $trace['file'] ?? '');
+        }
+        return $result;
     }
 
     public function pageOopsHtml($message, $trace)

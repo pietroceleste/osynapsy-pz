@@ -113,7 +113,7 @@ abstract class Active implements RecordInterface
         $params = [];
         foreach($this->keys as $idx => $key) {
             if (!$raw[$idx]) {
-                throw new \Exception('Values key is empty', 10);
+                throw new \Exception(sprintf('Values key is empty [%s]', $this::class), 10);
             }
             $params[$key] = $raw[$idx];
         }

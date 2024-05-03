@@ -18,69 +18,86 @@ use Osynapsy\Kernel;
 /**
  * Description of Cron
  *
- * @author Peter
+ * @author Pietro Celeste <p.celeste@osynapsy.net>
  */
-class Cron 
+class Cron
 {
     private $argv;
     private $script;
-    private $kernel;
-    
-    public function __construct(array $argv)
+    private $vendorDir;
+    private $rootDir;
+    private $appDirs = [];
+
+    public function __construct($vendorDir, array $argv)
     {
+        $this->vendorDir = $vendorDir;
+        $this->rootDir = realpath($this->vendorDir . '/../');
         $this->script = array_shift($argv);
         $this->argv = $argv;
+        $this->discoverOsyApplicationDirectories();
     }
-    
-    private function load($configuration)
+
+    /**
+     * Metodo che scopre i file di configurazione delle app registrate nei file istanza
+     */
+    protected function discoverOsyApplicationDirectories()
     {
-        if (empty($configuration) || !is_array($configuration)) {
-            return;
-        }
-        $jobs = [];
-        foreach($configuration as $app => $config) {
-            if (empty($config['cron'])) {
+        $instanceConfigurationDir = $this->rootDir. '/etc/';
+        $d = dir($instanceConfigurationDir);
+        do {
+            $file = $d->read();
+            $instanceFilePath = $instanceConfigurationDir . '/' . $file;
+            $xml = $this->loadInstanceConfiguration($instanceFilePath);
+            if (empty($xml)) {
                 continue;
             }
-            $jobs[$app] = $config['cron'];
-        }
-        return $jobs;
+            $appId = $xml->app->children()->getName();
+            $this->appDirs[$appId] = [$instanceFilePath, $this->vendorDir .'/'. str_replace('_', '/', $appId) . '/etc'];
+        } while ($file);
+        $d->close();
     }
-    
-    private function loadConfiguration()
+
+    protected function loadInstanceConfiguration($instanceFilePath)
     {
-        if (!is_dir($this->argv[0])) {
-            return;
-        }
-        $loader = new Loader($this->argv[0]);
-        return $loader->search('app');
+        return is_file($instanceFilePath) ? simplexml_load_file($instanceFilePath) : false;
     }
-    
+
     public function run()
     {
-        $this->exec(
-            $this->load(
-                $this->loadConfiguration()
-            )
-        );
-    }
-    
-    private function exec($jobs)
-    {
-        if (empty($jobs)) {
-            return;
-        }
-        $this->kernel = new Kernel($this->argv[0]);
-        foreach($jobs as $appId => $appJobs) {            
-            foreach($appJobs as $jobId => $jobController){
-                $this->execJob($jobId , $appId, $jobController);
+        foreach($this->appDirs as $appId => list($instanceFile, $appDir)) {
+            $appConfiguration = $this->loadAppConfiguration($appDir . '/config.xml');
+            if (empty($appConfiguration) || !is_array($appConfiguration)) {
+                continue;
+            }
+            $cronJobs = $this->loadCronJobs($appConfiguration);
+            if (!empty($cronJobs)) {
+                $this->exec($appId, $instanceFile, $cronJobs);
             }
         }
     }
-    
-    private function execJob($jobId, $application, $controller)
+
+    private function loadAppConfiguration($appConfFilePath)
     {
-        $job = new Route($jobId, null, $application, $controller);
-        echo $this->kernel->followRoute($job);
+        return (new Loader($appConfFilePath))->get();
+    }
+
+    private function loadCronJobs($appConfiguration)
+    {
+        if (empty($appConfiguration['cron'])) {
+            return [];
+        }
+        $rawjobs = array_values($appConfiguration['cron'])[0];
+        return array_combine(
+            array_column($rawjobs, 'id'),
+            array_column($rawjobs, '@value')
+       );
+    }
+
+    private function exec($appId, $instanceFile, $appJobs)
+    {
+        foreach($appJobs as $jobId => $jobController){
+             $jobRoute = new Route($jobId, null, $appId, $jobController);
+             echo (new Kernel($instanceFile))->followRoute($jobRoute);
+        }
     }
 }

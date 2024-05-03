@@ -103,7 +103,7 @@ class AutoWire
 
     public static function getHandle($handleId)
     {
-        return self::$handles[$handleId];
+        return self::$handles[$handleId] ?? null;
     }
 
     public static function hasHandle($handleId)

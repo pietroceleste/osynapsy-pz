@@ -20,7 +20,7 @@ use Osynapsy\Kernel\KernelException;
 
 /**
  * The Kernel is the core of Osynapsy
- * 
+ *
  * It init Http request e translate it in response
  *
  * @author Pietro Celeste <p.celeste@osynapsy.org>
@@ -28,22 +28,22 @@ use Osynapsy\Kernel\KernelException;
 class Kernel
 {
     const VERSION = '0.4.1-DEV';
-    
+
     public $router;
     public static $request;
     public $controller;
     public $appController;
-    private $loader;    
+    private $loader;
     private $composer;
-    
+
     /**
      * Kernel costructor
-     * 
+     *
      * @param string $fileconf path of the instance configuration file
      * @param object $composer Instance of composer loader
      */
     public function __construct($fileconf, $composer = null)
-    {                
+    {
         $this->composer = $composer;
         $this->loader = new Loader($fileconf);
         self::$request = $this->requestFactory();
@@ -59,7 +59,7 @@ class Kernel
         $request->set('listeners', $this->loadConfig('listener', '@value', 'event'));
         return $request;
     }
-    
+
     private function loadConfig($key, $name, $value)
     {
         $array = $this->loader->search($key);
@@ -69,12 +69,12 @@ class Kernel
         }
         return $result;
     }
-    
+
     /**
      * Load in router object all route of application present in config file
      */
     private function loadRoutes()
-    {        
+    {
         $this->router = new Router(self::$request);
         $this->router->addRoute(
             'OsynapsyAssetsManager',
@@ -97,16 +97,16 @@ class Kernel
                 $uri = $route['path'];
                 $controller = $route['@value'];
                 $template = !empty($route['template']) ? self::$request->get('app.layouts.'.$route['template']) : '';
-                $this->router->addRoute($id, $uri, $controller, $template, $applicationId, $route);                
+                $this->router->addRoute($id, $uri, $controller, $template, $applicationId, $route);
             }
-        }        
+        }
     }
-    
+
     /**
      * Run process to get response starting to request uri
-     * 
-     * @param string $requestUri is Uri requested from 
-     * @return string 
+     *
+     * @param string $requestUri is Uri requested from
+     * @return string
      */
     public function run($requestUri = null)
     {
@@ -118,9 +118,9 @@ class Kernel
             $this->router->dispatchRoute($requestUri)
         );
     }
-    
+
     /**
-     * 
+     *
      * @param Route $route
      * @return string
      */
@@ -128,6 +128,6 @@ class Kernel
     {
         self::$request->set('page.route', $route);
         $runner = new Runner(self::$request, $route);
-        return $runner->run();  
+        return $runner->run();
     }
 }

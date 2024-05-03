@@ -11,8 +11,14 @@
 
 chdir(__DIR__);
 
-require realpath($argv[1].'/../vendor/autoload.php');
+$vendorDir = realpath(__DIR__.'/../../');
+require $vendorDir. '/autoload.php';
 
-$cron = new \Osynapsy\Console\Cron($argv);
-echo $cron->run();
-
+try {
+    $cron = new \Osynapsy\Console\Cron($vendorDir, $argv);
+    echo $cron->run();
+} catch (\Exception $e) {
+    echo $e->getMessage();
+} finally {
+    echo PHP_EOL;
+}

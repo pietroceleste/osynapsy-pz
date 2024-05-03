@@ -12,6 +12,7 @@
 namespace Osynapsy\Assets;
 
 use Osynapsy\Mvc\Controller;
+use Osynapsy\Http\ResponseText;
 
 class Loader extends Controller
 {
@@ -21,19 +22,19 @@ class Loader extends Controller
     ];
 
     public function init()
-    {        
+    {
+        $this->setResponse(new ResponseText);
     }
     
     public function indexAction()
-    {            
-        $this->template->reset();
+    {        
         $basePath = __DIR__ . '/../../../assets/';
         $relPath = $this->getParameter(0);
         $fullPath = $basePath . $relPath;
         if (!is_file($fullPath)) {
             return $this->pageNotFound();
         }
-        $this->copyFileToCache($this->request->get('page.url'), $fullPath);
+        $this->copyFileToCache(request('page.url'), $fullPath);
         return $this->sendFile($fullPath);
     }                
     

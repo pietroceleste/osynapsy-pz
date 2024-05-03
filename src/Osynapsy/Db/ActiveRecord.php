@@ -30,12 +30,12 @@ abstract class ActiveRecord
     private $originalRecord = [];
     private $state = 'insert';
     private $sequence;
-    private $table;    
-    private $searchCondition = [];        
+    private $table;
+    private $searchCondition = [];
     private $softDelete = [];
     private $keys = [];
-    private $fields = [];    
-    
+    private $fields = [];
+
     /**
      * Object constructor
      *
@@ -54,7 +54,7 @@ abstract class ActiveRecord
             $this->findByKey($keyValues);
         }
     }
-    
+
     /**
      * Load record from database and store in originalRecord + activeRecord
      *
@@ -65,7 +65,7 @@ abstract class ActiveRecord
     {
         if (empty($reSearchParameters)) {
             throw new \Exception('Parameter required');
-        }        
+        }
         $this->searchCondition = $reSearchParameters;
         $where = [
             'conditions' => [],
@@ -76,16 +76,16 @@ abstract class ActiveRecord
         foreach ($reSearchParameters as $field => $value) {
             $fieldsh1 = $range[$i];
             $where['conditions'][] = "$field = :{$fieldsh1}";
-            $where['parameters'][$fieldsh1] = $value; 
+            $where['parameters'][$fieldsh1] = $value;
             $i++;
         }
-        try {            
-            $sql = "SELECT * FROM {$this->table} WHERE ".implode(' AND ', $where['conditions'])." ORDER BY 1";            
+        try {
+            $sql = "SELECT * FROM {$this->table} WHERE ".implode(' AND ', $where['conditions'])." ORDER BY 1";
             $this->originalRecord = $this->activeRecord = $this->dbConnection->execUnique(
                 $sql,
                 $where['parameters'],
                 'ASSOC'
-            );           
+            );
         } catch (\Exception $e) {
             throw new \Exception('Query error : '.$sql."\n".$e->getMessage(), 100);
         }
@@ -95,41 +95,41 @@ abstract class ActiveRecord
         $this->state = 'update';
         return $this->activeRecord;
     }
-    
+
     /**
      * Find record in table through key value example : 1, [1,2]
-     * 
+     *
      * @param int|string|array $keyValues
      * @return array
      * @throws \Exception
      */
     public function findByKey($keyValues)
-    {        
+    {
         $this->reset();
         $raw = is_array($keyValues) ? $keyValues : [$keyValues];
         if (count($this->keys) != count($raw)) {
             throw new \Exception('Values don\'t match keys '.count($this->keys).' ('.count($raw).')', 202);
-        }        
+        }
         $params = [];
         foreach($this->keys as $idx => $key) {
             if (!$raw[$idx]) {
-                throw new \Exception('Values key is empty', 10);
+                throw new \Exception(sprintf('Values key is empty [%s]', $this::class), 10);
             }
-            $params[$key] = $raw[$idx]; 
+            $params[$key] = $raw[$idx];
         }
         return $this->find($params);
     }
-    
+
     /**
      * Find record in table through array of attributes (example ['type' => 1])
-     * 
-     * @param array $reSearchParameters 
+     *
+     * @param array $reSearchParameters
      * @return array
      */
     public function findByAttributes(array $reSearchParameters)
     {
-        $this->reset();        
-        return $this->find($reSearchParameters);        
+        $this->reset();
+        return $this->find($reSearchParameters);
     }
 
     public function where(array $filters)
@@ -139,7 +139,7 @@ abstract class ActiveRecord
 
     /**
      * Get single value from active record or get all active record
-     * 
+     *
      * @param string $key
      * @return mixed
      */
@@ -153,11 +153,11 @@ abstract class ActiveRecord
         }
         return false;
     }
-    
+
     /**
      * Set value on current active record
-     * 
-     * @param string $field 
+     *
+     * @param string $field
      * @param string|int $value
      * @param string|int $defaultValue
      * @return $this
@@ -170,8 +170,8 @@ abstract class ActiveRecord
         }
         if (!in_array($field, $this->fields)) {
             throw new \Exception("Field {$field} do not exist");
-        }        
-        $this->activeRecord[$field] = ($value !== '0' && $value !== 0 && empty($value))  ? $defaultValue : $value;        
+        }
+        $this->activeRecord[$field] = ($value !== '0' && $value !== 0 && empty($value))  ? $defaultValue : $value;
         return $this;
     }
 
@@ -181,10 +181,10 @@ abstract class ActiveRecord
             $this->setValue($field, $value);
         }
     }
-    
+
     /**
      * Save current active record on database
-     * 
+     *
      * @return string
      * @throws \Exception
      */
@@ -197,21 +197,21 @@ abstract class ActiveRecord
             $this->setValues($values);
         }
         $this->beforeSave();
-        $id = empty($this->originalRecord)? $this->insert() : $this->update();        
+        $id = empty($this->originalRecord)? $this->insert() : $this->update();
         $this->afterSave();
         return $id;
     }
-    
+
     /**
      * Insert current active record on database
-     * 
+     *
      * @return string
      */
     private function insert()
     {
         $pkeys = $this->primaryKey();
         $this->beforeInsert();
-        $sequenceId = $this->getSequenceNextValue();                
+        $sequenceId = $this->getSequenceNextValue();
         $autoincrementId = $this->dbConnection->insert(
             $this->table,
             $this->activeRecord,
@@ -221,16 +221,16 @@ abstract class ActiveRecord
         $this->loadRecordAfterInsert($id);
         $this->afterInsert($id);
         return $id;
-    }        
-    
+    }
+
     /**
      * After insert load record from db.
-     * 
+     *
      * @return string
      */
     private function loadRecordAfterInsert($id)
     {
-        if (!empty($id) && count($this->keys) == 1) {                     
+        if (!empty($id) && count($this->keys) == 1) {
             $this->findByKey($id);
             return;
         }
@@ -243,10 +243,10 @@ abstract class ActiveRecord
         }
         $this->findByAttributes($attributes);
     }
-    
+
     /**
      * Update current active record on database
-     * 
+     *
      * @throws \Exception
      */
     private function update()
@@ -258,10 +258,10 @@ abstract class ActiveRecord
         $this->dbConnection->update($this->table, $this->activeRecord, $this->searchCondition);
         $this->afterUpdate();
     }
-    
+
     /**
      * Delete current active record from database
-     * 
+     *
      * @throws \Exception
      */
     public function delete()
@@ -284,10 +284,10 @@ abstract class ActiveRecord
         }
         $this->afterDelete();
     }
-    
+
     /**
      * Reset current active record
-     * 
+     *
      * @return $this
      */
     public function reset()
@@ -298,30 +298,30 @@ abstract class ActiveRecord
         $this->searchCondition = [];
         return $this;
     }
-    
+
     /**
      * Get current db connection
-     * 
+     *
      * @return DbPdo object
      */
     public function getDb()
     {
         return $this->dbConnection;
     }
-    
+
     /**
      * Get current state of active record
-     * 
+     *
      * @return string
      */
     public function getState()
     {
         return $this->state;
     }
-    
+
     /**
      * Get next value from sequence
-     * 
+     *
      * @return string
      */
     protected function getSequenceNextValue()
@@ -331,7 +331,7 @@ abstract class ActiveRecord
         }
         $firstKey = key(
             $this->keys
-        );        
+        );
         $sequenceValue = $this->getDb()->execUnique(
             "SELECT {$this->sequence}.nextval FROM dual"
         );
@@ -340,46 +340,46 @@ abstract class ActiveRecord
         }
         return $sequenceValue;
     }
-    
+
     /**
      * Get sequence
-     * 
+     *
      * @return string
      */
     protected function sequence()
     {
         return '';
     }
-    
+
     /**
      * Active or disactive softDelete
-     * 
+     *
      * @return boolean
      */
     protected function softDelete()
     {
         return false;
     }
-    
+
     protected function afterDelete(){}
-        
+
     protected function afterInsert(){}
-    
+
     protected function afterSave(){}
-    
+
     protected function afterUpdate(){}
-    
-    protected function beforeDelete(){}     
-        
+
+    protected function beforeDelete(){}
+
     protected function beforeInsert(){}
-    
+
     protected function beforeSave(){}
-    
-    protected function beforeUpdate(){}  
-    
+
+    protected function beforeUpdate(){}
+
     abstract public function fields();
-    
+
     abstract public function primaryKey();
-        
+
     abstract public function table();
 }

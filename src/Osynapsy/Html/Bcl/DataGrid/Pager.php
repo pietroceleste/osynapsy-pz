@@ -13,22 +13,23 @@ use Osynapsy\Db\Paging\Paging;
  * @author Pietro Celeste <p.celeste@osynapsy.net>
  */
 class Pager extends Component
-{    
+{
     protected $entity = 'Record';
-    public $errors = [];        
+    public $errors = [];
     protected $filters = [];
     protected $loaded = false;
-    protected $orderBy = null;    
+    protected $orderBy = null;
     protected $pageDimensionPalceholder = '- Dimensione pagina -';
-    protected $parentComponent;    
+    protected $parentComponent;
     protected $boxLength = 7;
+    protected $infoEnabled = ['pageDimension' => true, 'pageLabel' => true];
     public $paging;
     public $paginationType = 'POST';
     public $pageDimensions = [];
 
     public function __construct($id, Paging $paging)
-    {        
-        parent::__construct('div', $id);        
+    {
+        parent::__construct('div', $id);
         $this->requireJs('Bcl3/Pager/script.js');
         $this->addClass('BclPager');
         $this->paging = $paging;
@@ -46,11 +47,11 @@ class Pager extends Component
     }
 
     public function __build_extra__()
-    {        
+    {
         $pageCurrent = $this->getmeta('pageCurrent');
         $pageTotal = $this->getMeta('pageTotal');
         $this->add(new HiddenBox($this->id));
-        $this->add(new HiddenBox($this->id.'OrderBy'))->addClass('BclPaginationOrderBy');        
+        $this->add(new HiddenBox($this->id.'OrderBy'))->addClass('BclPaginationOrderBy');
         $ul = $this->add(new Tag('ul', null, 'pagination'));
         $ul->att('class','pagination');
         $ul->add($this->firstItemFactory($pageCurrent));
@@ -109,7 +110,7 @@ class Pager extends Component
     public function addFilter($field, $value = null)
     {
         $this->filters[$field] = $value;
-    }    
+    }
 
     public function getInfo()
     {
@@ -120,9 +121,9 @@ class Pager extends Component
             return false;
         }
         $end = min($pageCurrent * $pageDimension, $numberOfRows);
-        $start = ($pageCurrent - 1) * $pageDimension + 1;        
+        $start = ($pageCurrent - 1) * $pageDimension + 1;
         return sprintf('da %s a %s di %s %s', $start, $end, $numberOfRows, $this->entity);
-    }    
+    }
 
     public function comboPageDimensionFactory()
     {
@@ -137,7 +138,7 @@ class Pager extends Component
     }
 
     public function getPageDimensionComboOptions($pageDimension)
-    {                
+    {
         $pageDimensions = [];
         foreach([1, 2, 5, 10, 50] as $key) {
             $dimension = $pageDimension * $key;
@@ -174,5 +175,16 @@ class Pager extends Component
     public function getMeta($key = null)
     {
         return $this->paging->getmeta($key);
+    }
+
+    public function getInfoVisibility($key)
+    {
+        return $this->infoEnabled[$key] ?? false;
+    }
+
+    public function enableInfoFields($pageDimension = true, $pageTotalLabel = true)
+    {
+        $this->infoEnabled['pageDimension'] = $pageDimension;
+        $this->infoEnabled['pageLabel'] = $pageTotalLabel;
     }
 }

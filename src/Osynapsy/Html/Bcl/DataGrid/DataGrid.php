@@ -135,9 +135,9 @@ class DataGrid extends Component
             return $row;
         }
         $row->add(new Tag('div', null, 'col-lg-2 col-sm-3 col-xs-2 col-4'))
-            ->add($this->pager->comboPageDimensionFactory());
+            ->add($this->pager->getInfoVisibility('pageDimension') ? $this->pager->comboPageDimensionFactory() : '');
         $row->add(new Tag('div', null, 'col-lg-4 col-lg-offset-2 col-sm-4 hidden-xs hidden-sm col-4 text-center'))
-             ->add('<label class="" style="margin-top: 30px;">'.$pagingInfo.'</label>');
+             ->add($this->pager->getInfoVisibility('pageLabel') ? '<label class="" style="margin-top: 30px;">'.$pagingInfo.'</label>' : '');
         $row->add(new Tag('div', null, 'col-lg-4 col-sm-9 col-xs-8 col-4 text-right'))
              ->add($pagination)
              ->setClass('mt-4');
@@ -152,7 +152,7 @@ class DataGrid extends Component
     private function buildRow($row)
     {
         $tr = new Tag('div', null, 'row');
-        foreach ($this->columns as $properties) {
+        foreach ($this->columns as $properties) {            
             $value = array_key_exists($properties['field'], $row) ?
                      $row[$properties['field']] :
                      '<label class="label label-warning">No data found</label>';
@@ -198,7 +198,7 @@ class DataGrid extends Component
             case 'money-right':
                 $properties['class'] .= ' text-right';
             case 'money':
-                $value = sprintf('%s &euro;&nbsp;&nbsp;&nbsp;',number_format($value, 2, ',', '.'));
+                $value = is_numeric($value) ? sprintf('%s &euro;&nbsp;&nbsp;&nbsp;',  number_format($value, 2, ',', '.')) : $value;
                 break;
             case 'integer':
                 $value = number_format($value, 0, ',', '.');

@@ -118,7 +118,7 @@ BclAutocomplete =
                 BclAutocomplete.keyPressDispatcher(ev);
             }
         });
-        document.addEventListener('click', function(ev) {
+        document.addEventListener('click', function(ev) {            
             if (BclAutocomplete.searchContainers.length === 0) {
                 return;
             }
@@ -141,8 +141,7 @@ BclAutocomplete =
     },
     keyPressDispatcher : function(ev)
     {
-        let searchContainer = BclAutocomplete.getSearchContainer(ev.target);
-        console.log(ev.keyCode);
+        let searchContainer = BclAutocomplete.getSearchContainer(ev.target);       
         switch (ev.keyCode) {
             case 9: // Tab
                 break;

@@ -23,6 +23,7 @@ class Autocomplete extends Component
     protected $decodeEntityIdFunction;
     protected $datasourceFunction;
     protected $hiddenField;
+    protected $inputGroup;
 
     public function __construct($id)
     {
@@ -30,6 +31,15 @@ class Autocomplete extends Component
         $this->requireJs('Bcl/Autocomplete/script.js');
         $this->requireCss('Bcl/Autocomplete/style.css');
         $this->addClass('osy-autocomplete');
+        $this->inputGroup = $this->inputGroupFactory();
+    }
+
+    protected function inputGroupFactory()
+    {
+        $Autocomplete = new InputGroup($this->id, '', $this->ico);
+        $Autocomplete->getTextBox()->onselect = 'event.stopPropagation();';
+        $Autocomplete->getTextBox()->onclick = 'event.stopPropagation();';
+        return $Autocomplete;
     }
 
     public function __build_extra__()
@@ -47,14 +57,11 @@ class Autocomplete extends Component
 
     protected function inputMaskFactory($value)
     {
-        $Autocomplete = new InputGroup($this->id, '', $this->ico);
-        $Autocomplete->getTextBox()->onselect = 'event.stopPropagation();';
-        $Autocomplete->getTextBox()->onclick = 'event.stopPropagation();';
         if (!empty($this->decodeEntityIdFunction)) {
             $function = $this->decodeEntityIdFunction;
-            $Autocomplete->getTextBox()->setValue($function($value));
+            $this->inputGroup->getTextBox()->setValue($function($value));
         }
-        return $Autocomplete;
+        return $this->inputGroup;
     }
 
     protected function getDecodedValue()
@@ -143,5 +150,10 @@ class Autocomplete extends Component
     public function setDatasource(callable $datasourceFunction)
     {
         $this->datasourceFunction = $datasourceFunction;
+    }
+
+    public function getInputGroup()
+    {
+        return $this->inputGroup;
     }
 }

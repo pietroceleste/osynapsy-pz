@@ -21,7 +21,7 @@ class PanelNew extends Component
         'body' => null,
         'foot' => null
     );
-    
+
     private $classCss = [
         'main' => 'panel',
         'head' => 'panel-heading',
@@ -31,7 +31,7 @@ class PanelNew extends Component
     protected $title;
     private $currentRow = null;
     private $currentColumn = null;
-    
+
     public function __construct($id, $title='', $class = ' panel-default', $tag = 'div')
     {
         parent::__construct($tag, $id);
@@ -39,9 +39,9 @@ class PanelNew extends Component
         if (!empty($title)) {
             $this->setTitle($title);
         }
-        $this->sections['body'] = new Tag('div');        
+        $this->sections['body'] = new Tag('div');
     }
-    
+
     protected function __build_extra__()
     {
         $this->att('class', $this->classCss['main']);
@@ -53,16 +53,17 @@ class PanelNew extends Component
             $this->add($section);
         }
     }
-    
+
     public function addRow()
     {
         $this->currentRow = $this->sections['body']->add(new Tag('div', null, 'row'));
         return $this->currentRow;
     }
 
-    public function addClass($class)
+    public function addClass($panelClass, $bodyClass = '')
     {
-        $this->classCss['main'] .= ' ' . $class;
+        $this->classCss['main'] .= ' ' . $panelClass;
+        $this->classCss['body'] .= ' ' . $bodyClass;
     }
 
     public function addColumn($colspan = 12, $offset = 0)
@@ -73,14 +74,14 @@ class PanelNew extends Component
         $this->currentColumn = $this->currentRow->add(new Column($colspan, $offset));
         return $this->currentColumn;
     }
-    
+
     public function getBody()
     {
         return $this->sections['body'];
     }
-    
+
     public function pushHorizontalField($label, $field, $info = '', $labelColumnWidth = 3)
-    {        
+    {
         $row = $this->addRow()->att('class', 'form-group');
         $offset = $labelColumnWidth;
         if (!empty($label)) {
@@ -97,12 +98,12 @@ class PanelNew extends Component
         }
         $this->classCss['main'] = 'form-horizontal';
     }
-        
+
     public function resetClass()
     {
         $this->setClass('','','','');
     }
-    
+
     public function setClass($body, $head = null, $foot = null, $main = null)
     {
         $this->classCss['body'] = $body;
@@ -114,7 +115,7 @@ class PanelNew extends Component
         }
         if (!is_null($main)) {
             $this->classCss['main'] = $main;
-        }        
+        }
         return $this;
     }
 

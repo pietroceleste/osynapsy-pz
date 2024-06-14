@@ -119,9 +119,17 @@ class PanelNew extends Component
         return $this;
     }
 
-    public function setTitle($title)
+    public function setTitle($title, $commands = [])
     {
         $this->sections['head'] = new Tag('div');
-        $this->sections['head']->add('<h4 class="panel-title">'.$title.'</h4>');
+        $this->sections['head']->add('<h4 class="panel-title pull-left">'.$title.'</h4>');
+        if (!empty($commands)) {
+            $commandContainer = new Tag('div', null, 'pull-right');
+            foreach($commands as $command) {
+                $commandContainer->add($command);
+            }
+            $this->sections['head']->add($commandContainer);
+        }
+        $this->sections['head']->add('&nbsp;');
     }
 }

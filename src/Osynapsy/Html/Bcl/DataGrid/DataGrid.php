@@ -248,6 +248,19 @@ class DataGrid extends Component
             unset($this->columns[$label]);
         }
     }
+    
+    public function setColumn($label, $field, $class = '', $type = 'string', callable $function = null, $prefix = null, $position = null)
+    {
+        $this->columns[$label] = [
+            'field' => $field,
+            'class' => $class,
+            'type' => $type,
+            'prefix' => $prefix,
+            'function' => $function,
+            'orderByField' => $field
+        ];
+        return $this;
+    }
 
     private function printError($error)
     {

@@ -213,16 +213,16 @@ var Osynapsy = new (function(){
     };
 
     pub.typingEvent = function(obj)
-    {
+    {        
         if (pub.typingTimeout !== undefined) {
             clearTimeout(pub.typingTimeout);
         }
-        pub.typingTimeout = setTimeout(function(){
+        pub.typingTimeout = setTimeout(function(){            
             var code = $(obj).attr('ontyping');
             if (code) {
                 eval(code);
             }
-        }, 500);
+        }, 750);
     };
 
     pub.kernel.message =

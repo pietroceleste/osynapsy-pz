@@ -10,6 +10,8 @@ use Osynapsy\Mvc\Controller;
  */
 interface ActionInterface
 {    
+    public function getController() : Controller;
+    
     public function setController(Controller $controller);
     
     public function setParameters(array $parameters);

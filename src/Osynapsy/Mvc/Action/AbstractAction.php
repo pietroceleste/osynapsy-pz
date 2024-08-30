@@ -22,7 +22,7 @@ abstract class AbstractAction implements ActionInterface
         call_user_func($this->triggers[$eventId], $this);
     }
 
-    public function getController()
+    public function getController() : Controller
     {
         return $this->controller;
     }
@@ -71,6 +71,6 @@ abstract class AbstractAction implements ActionInterface
 
     public function raiseException($message, $code = 501)
     {
-	throw new \Exception($message, $code);
+        throw new \Exception($message, $code);
     }
 }

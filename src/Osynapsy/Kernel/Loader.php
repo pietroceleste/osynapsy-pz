@@ -19,36 +19,36 @@ use Osynapsy\Data\Dictionary;
  * @author Pietro Celeste <p.celeste@osynapsy.org>
  */
 class Loader
-{    
+{
     private $repo;
     private $path;
-    
+
     public function __construct($path)
-    {            
-        $this->path = realpath($path);        
+    {
+        $this->path = realpath($path);
         $this->repo = new Dictionary();
-        $this->repo->set('configuration', $this->load());        
+        $this->repo->set('configuration', $this->load());
         $this->loadAppConfiguration();
     }
-    
+
     private function load()
-    {    
+    {
         $array = [];
         if (is_file($this->path)) {
             $array = $this->loadFile($this->path);
         } elseif (is_dir($this->path)) {
-            $array = $this->loadDir($this->path);        
+            $array = $this->loadDir($this->path);
         }
         return $array;
     }
-    
+
     private function loadDir($path)
     {
         $files = scandir($path);
         $array = [];
         if (empty($files) || !is_array($files)) {
             return $array;
-        }        
+        }
         foreach ($files as $file){
             if (strpos($file,'.xml') === false) {
                 continue;
@@ -63,7 +63,7 @@ class Loader
         $xml = new \SimpleXMLIterator($path, null, true);
         return $this->parseXml($xml);
     }
-    
+
     private function loadAppConfiguration()
     {
         $apps = $this->repo->get('configuration.app');
@@ -78,11 +78,11 @@ class Loader
             }
         }
     }
-    
+
     private function parseXml($xml, &$tree = [])
-    {                                
+    {
         for($xml->rewind(); $xml->valid(); $xml->next() ) {
-            $nodeKey = $xml->key();            
+            $nodeKey = $xml->key();
             if (!array_key_exists($nodeKey, $tree)) {
                 $tree[$nodeKey] = [];
             }
@@ -99,12 +99,12 @@ class Loader
         }
         return $tree;
     }
-    
+
     public function get($key = '')
     {
         return $this->repo->get('configuration'.(empty($key) ? '' : ".{$key}"));
     }
-            
+
     public function search($keySearch, $searchPath = null, $debug = false)
     {
         $fullPath = 'configuration';

@@ -27,7 +27,7 @@ class Message implements MessageInterface
     {
         $type = is_array($raw) ? 'text' : 'text';
         return [
-            'type' => $type, 
+            'type' => 'text', 
             $type => is_array($raw) ? json_encode($raw) : $raw
         ];
     }

@@ -28,10 +28,10 @@ class Client
         return $this->model;
     }
     
-    public function send(string $prompt, array $data = [], $maxTokens = 1024)
+    public function send(Message $prompt, $maxTokens = 1024)
     {        
         $headers = $this->headerRequestFactory();
-        $body = $this->bodyRequestFactory($prompt, $data, $maxTokens);        
+        $body = $this->bodyRequestFactory($prompt, $maxTokens);        
         $response = Rest::postJson(self::ANTHROPIC_API_ENDPOINT, $body, $headers);
         return $response['body'];
     }
@@ -49,16 +49,11 @@ class Client
         return $headers;
     }
     
-    protected function bodyRequestFactory($prompt, $data, $maxTokens) : array
-    {        
-        $message = $this->messageFactory();
-        $message->add('user', $prompt);
-        if (!empty($data)) {
-            $message->prepend($data);
-        }        
+    protected function bodyRequestFactory(Message $prompt, $maxTokens) : array
+    {    
         $body = [
             'model' => $this->getModel()->getId(),            
-            'messages' => $message->get()            
+            'messages' => $prompt->get()            
         ];
         if (!empty($maxTokens)) {
             $body['max_tokens'] = $maxTokens;
@@ -66,7 +61,7 @@ class Client
         return $body;
     }
     
-    protected function messageFactory() : MessageInterface
+    public function messageFactory() : MessageInterface
     {
         return new Message;        
     }

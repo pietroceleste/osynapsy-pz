@@ -10,7 +10,7 @@ class DataGrid extends Component
     private $columns = [];
     private $title;
     private $footer = [];
-    private $thClass = 'bcl-datagrid-th bcl-datagrid-th-order-by';
+    private $thClass = 'bcl-datagrid-th';
     private $emptyMessage = 'No data found';
     private $bodyHeight = 0;
     private $showHead = true;
@@ -81,12 +81,12 @@ class DataGrid extends Component
         $th = new Tag('div', null, $this->thClass . ' ' . str_replace('d-block', '', $properties[$keyClass]));
         $th->att('data-idx', $orderByField);
         if ($properties['type'] === 'check') {
-            $th->add('<i class="fa fa-check" onclick="$(\'.grid-check\').click()"></i>');
+            $th->add('<i class="fa fa-check" onclick="$(\'.grid-check\', $(this).closest(\'.bcl-datagrid\')).click(); console.log(\'ok\')"></i>');
             $orderByField = null;
         } else {
-            $th->add($label);
+            $th->addClass('bcl-datagrid-th-order-by')->add($label);
         }
-        if (empty($orderedFields)) {
+        if (empty($orderedFields) || empty($orderByField)) {
             return $th;
         }
         foreach ([$orderByField, $orderByField.' DESC'] as $i => $token) {

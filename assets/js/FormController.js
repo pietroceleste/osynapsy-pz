@@ -21,7 +21,7 @@ var Osynapsy = new (function(){
                     return;
                 }
             }
-            var showMask = $(object).hasClass('no-mask') ? false : true;
+            var showMask = $(object).hasClass('no-mask') ? false : true;            
             var callParameters = this.grabActionParameters(object);
             this.remoteExecute(action, form, callParameters, showMask);
         },
@@ -487,7 +487,7 @@ var Osynapsy = new (function(){
             var message = '';
             message += '<div class="progress_msg">Upload in progress .... <span id="progress_idx">0%</span> completed</div>';
             message += '<div class="progress"><div id="progress_bar" style="background-color: #ceddef; width: 0%;">&nbsp;</div></div>';
-            this.build(message, document, {top : '0px', left : '0px'})
+            this.build(message, document, {top : '0px', left : '0px'});
         },
         remove : function()
         {

@@ -17,7 +17,7 @@ use Osynapsy\Html\Ocl\HiddenBox as InputHidden;
 
 class Autocomplete extends Component
 {
-    protected $emptyMessage = 'No value match ';
+    protected $emptyMessage = 'No value match <b>%s</b> query';
     protected $autocompleteclass = ['osy-autocomplete'];
     protected $ico = '<span class="fa fa-search"></span>';
     protected $decodeEntityIdFunction;
@@ -104,8 +104,8 @@ class Autocomplete extends Component
     }
 
     protected function emptyListMessageFactory($userQuery)
-    {
-        return sprintf('<div class="item empty-message">%s&nbsp;<b>%s</b>&nbsp;query</div>', $this->emptyMessage, $userQuery);
+    {        
+        return sprintf('<div class="item empty-message">'. $this->emptyMessage .'</div>',  $userQuery);
     }
 
     public function setLabel($label)

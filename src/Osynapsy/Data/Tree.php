@@ -28,13 +28,15 @@ class Tree
     private $openNodes = [];
     private $dataSet;
     private $tree;
+    protected $limitLevel;
 
-    public function __construct($idKey, $parentKey, $isOpenKey = null, array $dataSet = [])
+    public function __construct($idKey, $parentKey, $isOpenKey = null, array $dataSet = [], int $limitToLevel = 0)
     {
         $this->keyId = $idKey;
         $this->keyParent = $parentKey;
         $this->keyIsOpen = $isOpenKey;
         $this->setDataset($dataSet);
+        $this->setLimitToLevel($limitToLevel);
     }
 
     protected function init()
@@ -54,6 +56,9 @@ class Tree
             $childId = $child[$this->keyId];
             if (!empty($level)) {
                 //$child['_parent'] =& $rawDataSet[$parentId];
+            }
+            if (!empty($this->limitLevel) &&  $level > $this->limitLevel) {
+                continue;
             }
             $child['_level'] = $level;
             $child['_position'] = $this->setPosition($idx, $lastIdx);
@@ -108,5 +113,10 @@ class Tree
             return self::POSITION_BEGIN;
         }
         return self::POSITION_BETWEEN;
+    }
+    
+    public function setLimitToLevel(int $limitToLevel)
+    {
+        $this->limitLevel = $limitToLevel;
     }
 }

@@ -28,6 +28,7 @@ class TreeBox extends AbstractComponent
     private $refreshOnClick = [];
     private $refreshOnOpen = [];
     private $dataTree;
+    protected $limitLevel = 0;
 
     const CLASS_SELECTED_LABEL = 'osy-treebox-label-selected';
     const ICON_NODE_CONNECTOR_EMPTY = '<span class="tree tree-null">&nbsp;</span>';
@@ -181,7 +182,15 @@ class TreeBox extends AbstractComponent
         if (empty($this->getData())){
             return $this;
         }
-        $this->dataTree = new TreeDataStructure($keyId, $keyParentId, $keyIsOpen, $this->getData());
+        $this->dataTree = new TreeDataStructure($keyId, $keyParentId, $keyIsOpen, $this->getData(), $this->limitLevel);
         return $this;
+    }
+    
+    public function setLimitToLevel(int $limitToLevel)
+    {
+        $this->limitLevel = $limitToLevel;
+        if (!empty($this->dataTree)) {
+            $this->dataTree->setLimitToLevel($limitToLevel);
+        }
     }
 }

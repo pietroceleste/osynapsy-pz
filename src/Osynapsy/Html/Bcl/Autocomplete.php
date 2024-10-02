@@ -28,7 +28,7 @@ class Autocomplete extends Component
     public function __construct($id)
     {
         parent::__construct('div', $id);
-        $this->requireJs('Bcl/Autocomplete/script.js');
+        $this->requireJs('Bcl/Autocomplete/script.js?v=1.02');
         $this->requireCss('Bcl/Autocomplete/style.css');
         $this->addClass('osy-autocomplete');
         $this->inputGroup = $this->inputGroupFactory();

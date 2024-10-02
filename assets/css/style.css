@@ -213,3 +213,4 @@ div.sticky {
 .bg-transparent {background-color: transparent}
 .bg-white {background-color: white !important;}
 .bg-silver {background-color: #f8f8f8 !important;}
+.no-wrap {overflow: hidden; white-space: nowrap;}

@@ -46,10 +46,9 @@ class Paging
         try {
             $this->setMeta(self::META_PAGING_QUERY, $query);
             $dataset = $this->dbCn->execQuery($query, $queryParameters, 'ASSOC');
-            //die(print_r($this->data,true));
             return empty($dataset) ? [] : $dataset;
         } catch (\Exception $e) {
-            die($this->formatSqlErrorMessage($rawQuery, $e->getMessage()));
+            die($this->formatSqlErrorMessage($query, $e->getMessage()));
         }
     }
 

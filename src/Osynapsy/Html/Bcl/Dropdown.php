@@ -19,10 +19,13 @@ class Dropdown extends Component
 {
     const ALIGN_LEFT = 'left';
     const ALIGN_RIGHT = 'right';
+    
+    const DIVIDER = 'divider';
+    const SEPARATOR = 'divider';
 
     private $list;
     private $button;
-    
+
     public function __construct($name, $label, $align = 'left', $tag = 'div')
     {
         parent::__construct($tag);
@@ -48,7 +51,7 @@ class Dropdown extends Component
         $ul->att('aria-labelledby', $name);
         return $ul;
     }
-    
+
     protected function __build_extra__()
     {
         foreach ($this->data as $key => $rec) {
@@ -70,7 +73,7 @@ class Dropdown extends Component
                  ->add('<a href="#">'.$rec[1].'</a>');
         }
     }
-            
+
     public function getButton()
     {
         return $this->button;

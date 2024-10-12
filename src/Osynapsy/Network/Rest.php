@@ -18,60 +18,60 @@ class Rest
         $url = $endpoint;
         if (!empty($data)) {
            $url .= '?'.http_build_query($data);
-        }        
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
+        }
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+	return curl_exec($ch);
+    }
+
+    public static function post($url, $data, array $header = [])
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        if (!empty($header)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        }
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	$response = curl_exec($ch);
-        if ($response===false) {
-            throw new \Exception(curl_error($ch));
-        }
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 400);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        $response = self::responseFactory($ch, curl_exec($ch));
         curl_close($ch);
         return $response;
     }
 
-    public static function post($url, $data, array $headers = [])
+    protected static function responseFactory($ch, $rawResponse)
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        if (!empty($headers)) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        }
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        //curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        $response = curl_exec($ch);
         $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        curl_close($ch);
-        return [
-            'content-type' => $contentType,
-            'header' => substr($response, 0, $headerSize),
-            'body' => substr($response, $headerSize),
-            'raw' => $response
+        $response = [
+            'code' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
+            'content-type' => curl_getinfo($ch, CURLINFO_CONTENT_TYPE),
+            'error' => curl_errno($ch),
+            'header' => trim(substr($rawResponse, 0, $headerSize)),
+            'body' => curl_errno($ch) ? curl_error($ch) : substr($rawResponse, $headerSize)
         ];
+        return $response;
     }
 
-    public static function postJson($url, $data, array $rawheaders = [])
+    public static function postJson($url, $data, array $arrayHeaders = [])
     {
         $json = json_encode($data, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);
-        $headers = self::array2header($rawheaders + ['Content-Type' => 'application/json', 'Content-Length' => strlen($json)]);        
-        $response = self::post($url, $json, $headers);
+        $arrayHeaders['Content-Type'] = 'application/json';
+        $arrayHeaders['Content-Length'] = strlen($json);
+        $arrayHeaders['Expect'] = '';
+        $response = self::post($url, $json, self::array2header($arrayHeaders));
         $response['body'] = json_decode($response['body'], true) ?? $response['body'];
         return $response;
     }
-    
+
     private static function array2header(array $array = [])
-    {        
+    {
         return array_map(
-            fn($key, $value) => sprintf('%s: %s', strtolower($key), $value), 
+            fn($key, $value) => sprintf('%s: %s', strtolower($key), $value),
             array_keys($array),
             $array
         );

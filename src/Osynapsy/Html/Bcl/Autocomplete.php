@@ -28,7 +28,7 @@ class Autocomplete extends Component
     public function __construct($id)
     {
         parent::__construct('div', $id);
-        $this->requireJs('Bcl/Autocomplete/script.js?v=1.02');
+        $this->requireJs('Bcl/Autocomplete/script.js?v=1.03');
         $this->requireCss('Bcl/Autocomplete/style.css');
         $this->addClass('osy-autocomplete');
         $this->inputGroup = $this->inputGroupFactory();
@@ -104,7 +104,7 @@ class Autocomplete extends Component
     }
 
     protected function emptyListMessageFactory($userQuery)
-    {        
+    {
         return sprintf('<div class="item empty-message">'. $this->emptyMessage .'</div>',  $userQuery);
     }
 

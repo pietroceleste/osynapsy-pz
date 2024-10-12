@@ -16,13 +16,14 @@ class DataGrid extends Component
     private $showHead = true;
     protected $pager;
 
-    public function __construct($name, $debugQuery = false)
+    public function __construct($name, $debugQuery = false, $debugCountQuery = false)
     {
         parent::__construct('div', $name);
         $this->addClass('bcl-datagrid');
         $this->requireCss('Bcl3/DataGrid/style.css');
         $this->requireJs('Bcl3/DataGrid/script.js');
         $this->debug = $debugQuery;
+        $this->debugCountQuery = $debugCountQuery;
     }
 
     public function __build_extra__()
@@ -45,6 +46,9 @@ class DataGrid extends Component
         $this->add($this->tbodyFactory());
         if ($this->debug) {
             $this->footer = [sprintf('<pre style="margin: 5px 0px; border:1px solid #ddd;">%s</pre>', $this->pager->paging->getMeta(Paging::META_PAGING_QUERY))];
+        }
+        if ($this->debugCountQuery) {
+            $this->footer = [sprintf('<pre style="margin: 5px 0px; border:1px solid #ddd;">%s</pre>', $this->pager->paging->getMeta(Paging::META_PAGING_COUNT_QUERY))];
         }
         if (!empty($this->footer)) {
             $this->add($this->buildFooter($this->footer));
@@ -152,7 +156,7 @@ class DataGrid extends Component
     private function buildRow($row)
     {
         $tr = new Tag('div', null, 'row');
-        foreach ($this->columns as $properties) {            
+        foreach ($this->columns as $properties) {
             $value = array_key_exists($properties['field'], $row) ?
                      $row[$properties['field']] :
                      '<label class="label label-warning">No data found</label>';
@@ -248,7 +252,7 @@ class DataGrid extends Component
             unset($this->columns[$label]);
         }
     }
-    
+
     public function setColumn($label, $field, $class = '', $type = 'string', callable $function = null, $prefix = null, $position = null)
     {
         $this->columns[$label] = [

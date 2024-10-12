@@ -21,7 +21,7 @@ class LabelBox extends Component
     
     public function __construct($id, $label='')
     {
-        $this->requireCss('Bcl/LabelBox/style.css');
+        $this->requireCss('Bcl/LabelBox/style.css?v=1.0');
         parent::__construct('div', $id.'_labelbox');
         $this->att('class','osynapsy-labelbox');
         $this->hiddenBox = $this->add(new HiddenBox($id));

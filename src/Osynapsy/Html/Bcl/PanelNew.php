@@ -121,6 +121,10 @@ class PanelNew extends Component
 
     public function setTitle($title, $commands = [])
     {
+        if (is_null($title)) {
+            $this->sections['head'] = null;
+            return;
+        }
         $this->sections['head'] = new Tag('div');
         $this->sections['head']->add('<h4 class="panel-title pull-left">'.$title.'</h4>');
         if (!empty($commands)) {

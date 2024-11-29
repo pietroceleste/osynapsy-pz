@@ -9,6 +9,7 @@ class Paging
     const META_PACE_CURRENT = 'pageCurrent';
     const META_REQUEST_PAGE = 'requestPage';
     const META_PAGING_QUERY = 'pagingQuery';
+    const META_PAGING_COUNT_QUERY = 'pagingCountQuery';
 
     protected $dbCn;
     protected $errors = [];
@@ -55,6 +56,7 @@ class Paging
     protected function countRows($rawQuery, $queryParameters, $whereCondition)
     {
         $countQuery = sprintf("SELECT COUNT(*) FROM (%s) a %s", $rawQuery, $whereCondition);
+        $this->setMeta(self::META_PAGING_COUNT_QUERY, $countQuery);
         try {
             return $this->dbCn->execUnique($countQuery, $queryParameters);
         } catch(\Exception $e) {

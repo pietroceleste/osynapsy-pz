@@ -14,6 +14,7 @@ class DataGrid extends Component
     private $emptyMessage = 'No data found';
     private $bodyHeight = 0;
     private $showHead = true;
+    private $checkSelected = [];
     protected $pager;
 
     public function __construct($name, $debugQuery = false, $debugCountQuery = false)
@@ -181,7 +182,7 @@ class DataGrid extends Component
     {
         switch($properties['type']) {
             case 'check':
-                $value = empty($value) ? null : sprintf('<input type="checkbox" name="%s_chk[]" value="%s" class="grid-check">', $this->id, $value);
+                $value = empty($value) ? null : sprintf('<input type="checkbox" name="%s_chk[]" value="%s" class="grid-check"%s>', $this->id, $value, in_array($value, $this->checkSelected) ? ' checked' : '');
                 $properties['class'] .= ' text-center';
                 break;
             case 'date':
@@ -334,5 +335,10 @@ class DataGrid extends Component
     public function setMaxHeight($height)
     {
         $this->bodyHeight = $height;
+    }
+
+    public function setCheckSelected(array $checkSelected)
+    {
+        $this->checkSelected = $checkSelected;
     }
 }

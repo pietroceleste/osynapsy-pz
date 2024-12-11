@@ -290,7 +290,7 @@ abstract class Active implements RecordInterface
         if (!empty($values)) {
             $this->setValues($values);
         }
-        $this->beforeSave();        
+        $this->beforeSave();
         $id = empty($this->originalRecord)? $this->insert() : $this->update($values);
         if (!empty($this->extensions) && !empty($this->extendRecord)) {
             $this->saveRecordExtensions();
@@ -394,7 +394,7 @@ abstract class Active implements RecordInterface
         $fields = array_filter(
             array_keys($onlyFields) ?: $this->fields(),
             function($field) use ($keys) { return !in_array($field, $keys); }
-        );        
+        );
         $this->getDb()->update(
             $this->table,
             array_intersect_key($this->activeRecord, array_flip($fields)),

@@ -18,29 +18,40 @@ class InputGroup extends Component
 {
     protected $textBox;
     protected $postfix;
+    protected $prefix;
 
     public function __construct($name, $prefix = '', $postfix = '')
     {
         parent::__construct('div');
-        $this->att('class','input-group');
+        $this->addClass('input-group');
         if (!empty($prefix)) {
-            $this->add(new Tag('span'))
-                 ->att('class', 'input-group-addon')
-                 ->att('id',$name.'_prefix')
-                 ->add($prefix);
+            $this->setPrefix($prefix, $name);
         }
-        if (is_object($name)) {
-            $this->textBox = $this->add($name);
-        } else {
-            $this->textBox = $this->add(new TextBox($name));
-            $this->textBox->att('aria-describedby',$name.'_prefix');
-        }
-
+        $this->textBoxFactory($name);
         if ($postfix) {
-            $class = is_object($postfix) ?'input-group-btn' : 'input-group-addon';
-            $this->postfix = $this->add(new Tag('span'))->att('class', $class);
-            $this->postfix->add($postfix);
+            $this->setPostfix($postfix);
         }
+    }
+
+    public function __build_extra__()
+    {
+        if ($this->prefix) {
+            $this->add($this->prefix);
+        }
+        $this->add($this->textBox);
+        if ($this->postfix) {
+            $this->add($this->postfix);
+        }
+    }
+
+    public function getPrefix()
+    {
+        return $this->postfix;
+    }
+
+    public function getPostfix()
+    {
+        return $this->postfix;
     }
 
     public function getTextBox()
@@ -48,8 +59,20 @@ class InputGroup extends Component
         return $this->textBox;
     }
 
-    public function getPostfix()
+    public function setPrefix($prefix, $inputGroupId)
     {
-        return $this->postfix;
+        $this->prefix = new Tag('span', $inputGroupId . '_prefix', 'input-group-addon');
+        $this->prefix->add($prefix);
+    }
+
+    public function setPostfix($object)
+    {
+        $this->postfix = new Tag('span', null, 'input-group-' . (is_object($object) ? 'btn' : 'addon'));
+        $this->postfix->add($object);
+    }
+
+    public function textBoxFactory($name)
+    {
+        $this->textBox = is_object($name) ? $name : (new TextBox($name))->att('aria-describedby', $name.'_prefix');
     }
 }

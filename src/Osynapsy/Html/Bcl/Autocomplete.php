@@ -24,10 +24,12 @@ class Autocomplete extends Component
     protected $datasourceFunction;
     protected $hiddenField;
     protected $inputGroup;
+    protected $ID;
 
     public function __construct($id)
     {
-        parent::__construct('div', $id);
+        parent::__construct('div', $id . '_cnt');
+        $this->ID = $id;
         $this->requireJs('Bcl/Autocomplete/script.js?v=1.03');
         $this->requireCss('Bcl/Autocomplete/style.css');
         $this->addClass('osy-autocomplete');
@@ -36,7 +38,7 @@ class Autocomplete extends Component
 
     protected function inputGroupFactory()
     {
-        $Autocomplete = new InputGroup($this->id, '', $this->ico);
+        $Autocomplete = new InputGroup($this->ID, '', $this->ico);
         $Autocomplete->getTextBox()->onselect = 'event.stopPropagation();';
         $Autocomplete->getTextBox()->onclick = 'event.stopPropagation();';
         return $Autocomplete;
@@ -44,13 +46,13 @@ class Autocomplete extends Component
 
     public function __build_extra__()
     {
-        if (filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_HTML_COMPONENTS') != $this->id) {
-            $hdnFieldId = '__'.$this->id;
+        if (filter_input(\INPUT_SERVER, 'HTTP_OSYNAPSY_HTML_COMPONENTS') != $this->ID) {
+            $hdnFieldId = '__'.$this->ID;
             $this->add(new InputHidden($hdnFieldId));
-            $this->add($this->inputMaskFactory($_REQUEST['__'.$this->id] ?? null));
+            $this->add($this->inputMaskFactory($_REQUEST[$hdnFieldId] ?? null));
             return;
         }
-        $userQuery = filter_input(\INPUT_POST, $this->id);
+        $userQuery = filter_input(\INPUT_POST, $this->ID);
         $dataset = $this->loadDataset($userQuery);
         $this->add($this->valueListFactory($dataset, $userQuery));
     }

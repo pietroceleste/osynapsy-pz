@@ -92,6 +92,11 @@ class DbPdo extends \PDO implements DboInterface
         }
     }
 
+    public static function buildTunnel($remoteUser, $remoteHost, $internalIpHost, $port)
+    {
+        exec(sprintf('ssh -fNg -L %s:%s:%s %s@%s > /dev/null 2>/dev/null &', $port, $internalIpHost, $port, $remoteUser, $remoteHost));
+    }
+
     public function getType()
     {
        return $this->param['typ'];

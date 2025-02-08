@@ -31,10 +31,11 @@ class Connection
 
     public function connect()
     {
-        $connectionString = sprintf("//%s:%s/%s", $this->getParameter('host'), $this->getParameter('port'), $this->getParameter('db'));
+        $connectionString = sprintf("//%s:%s/%s", $this->getParameter('host'), $this->getParameter('port'), $this->getParameter('db'));        
         $this->connection = oci_connect($this->getParameter('username'), $this->getParameter('password'), $connectionString, 'AL32UTF8');
         if (!$this->connection) {
-            $this->raiseException($this->connection);
+            $err = oci_error();            
+            throw new \Exception(sprintf('Connessione non riuscita (%s)', $err['message']));
         }
         $this->initConnection($this->statementFactory());
     }

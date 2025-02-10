@@ -564,6 +564,16 @@ abstract class Active implements RecordInterface
     {
         $this->behavior = $behavior;
     }
+    
+    public function clone()
+    {
+        $values = $this->get();
+        foreach($this->keys as $key) {
+            unset($values[$key]);
+        }
+        $this->reset()->save($values);
+        return $this;
+    }
 
     protected function afterDelete(){}
 

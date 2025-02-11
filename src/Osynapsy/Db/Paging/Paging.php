@@ -45,7 +45,7 @@ class Paging
         $this->metaFactory($numberOfRows, $pageDimension, $requestPage);
         $query = $this->pagingQueryFactory($rawQuery, $where, $this->orderBy);
         try {
-            $this->setMeta(self::META_PAGING_QUERY, $query);
+            $this->setMeta(self::META_PAGING_QUERY, $query, $queryParameters);
             $dataset = $this->dbCn->execQuery($query, $queryParameters, 'ASSOC');
             return empty($dataset) ? [] : $dataset;
         } catch (\Exception $e) {
@@ -195,8 +195,11 @@ class Paging
         return $this->query;
     }
 
-    public function setMeta($key, $value)
+    public function setMeta($key, $value, array $parameters = [])
     {
+        foreach ($parameters as $parId => $par) {
+            $value = str_replace([':'.$parId, $parId], ["'$par'"], $value);
+        }
         $this->meta[$key] = $value;
     }
 

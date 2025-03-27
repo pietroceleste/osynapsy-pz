@@ -86,7 +86,7 @@ class DataGrid extends Component
         $th = new Tag('div', null, $this->thClass . ' ' . str_replace('d-block', '', $properties[$keyClass]));
         $th->att('data-idx', $orderByField);
         if ($properties['type'] === 'check') {
-            $th->add('<i class="fa fa-check" onclick="$(\'.grid-check\', $(this).closest(\'.bcl-datagrid\')).click(); console.log(\'ok\')"></i>');
+            $th->add('<i class="fa fa-check check-all-cmd"></i>');
             $orderByField = null;
         } else {
             $th->addClass('bcl-datagrid-th-order-by')->add($label);

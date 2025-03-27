@@ -36,9 +36,14 @@ BclDataGrid =
             $('.BclPaginationCurrentPage','#'+gridId).val(1);
             orderByField.val(orderByString);
             Osynapsy.refreshComponents([gridId]);
-        }).on('click','.bcl-datagrid-th-check-all', function(){
+        }).on('click','.bcl-datagrid-th-check-all', function(){            
             var className = $(this).data('fieldClass');
             $('.'+className).click();
+        }).on('click', '.check-all-cmd', function() {
+            let grid = $(this).closest('.bcl-datagrid');
+            let tot_chk = $('.grid-check', grid).length;
+            let chk_chk = $('.grid-check', grid).filter(':checked').length;
+            $('.grid-check', grid).prop('checked', (tot_chk > chk_chk ? true : false));
         });
     }
 };

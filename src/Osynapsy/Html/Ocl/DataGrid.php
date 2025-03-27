@@ -105,6 +105,9 @@ class DataGrid extends Component
             $this->buildHead(
                 $table->add(new Tag('thead'))
             );
+        }        
+        if ($this->getParameter('datasource-sql-debug')) {
+            $table->add($this->getSqlDebug());
         }
         if (is_array($this->data) && !empty($this->data)) {
             $this->buildBody(
@@ -187,7 +190,7 @@ class DataGrid extends Component
                 $this->buildBody($container,@$this->dataGroups[$item_id],$lev+1,$ico_arr);
             }
             $i++;
-        }
+        }                
     }
 
     protected function formatOption($opt)
@@ -737,11 +740,12 @@ class DataGrid extends Component
         return $this->columnProperties[$n][$propertyKey];
     }
 
-    public function SetSql($db, $sql, $par=array())
+    public function SetSql($db, $sql, $par=array(), $debug = false)
     {
         $this->db = $db;
         $this->setParameter('datasource-sql', $sql);
         $this->setParameter('datasource-sql-par', $par);
+        $this->setParameter('datasource-sql-debug', $debug);
     }
 
     public function setDefaultOrderBy($orderby)
@@ -760,5 +764,14 @@ class DataGrid extends Component
     public function setEmptyMessage($message)
     {
         $this->emptyMessage = $message;
+    }
+    
+    public function getSqlDebug()
+    {
+        return str_replace(
+            array_map(fn($k) => ":$k", array_keys($this->getParameter('datasource-sql-par'))),
+            array_map(fn($k) => "'$k'",array_values($this->getParameter('datasource-sql-par'))),
+            sprintf('<pre>%s</pre>',$this->getParameter('datasource-sql'))
+        );
     }
 }

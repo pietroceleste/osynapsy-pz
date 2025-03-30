@@ -19,6 +19,8 @@ use Osynapsy\Db\Driver\DboInterface;
 interface ApplicationInterface
 {
     public function __construct(Route $route, Request $request = null, DboInterface $dbo = null);
-    
+
     public function run();
+
+    public function getRoute() : Route;
 }

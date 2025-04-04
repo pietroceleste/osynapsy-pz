@@ -125,11 +125,15 @@ class Form extends Component
     public function foot($obj)
     {
         if (empty($this->foot)) {
-            $this->foot = new Tag('div');
-            $this->foot->att('class','clearfix');
+            $this->footInit();
         }
         $this->foot->add($obj);
         return is_object($obj) ? $obj : $this->foot;
+    }
+
+    public function footInit()
+    {
+        return $this->foot = new Tag('div', null, 'clearfix');
     }
 
     public function getPanel()

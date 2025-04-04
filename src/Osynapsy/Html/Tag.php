@@ -184,4 +184,9 @@ class Tag
     {
         $this->cnt = array($content);
     }
+    
+    public function empty()
+    {
+        $this->cnt = [];
+    }
 }

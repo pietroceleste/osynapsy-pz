@@ -91,7 +91,7 @@ class Runner
     {
         $controller = $this->autowire->getInstance($classController);
         $this->autowire->addHandle($controller);
-        return (string) $controller->run();
+        return strval($controller->run());
     }
 
     private function dispatchKernelException(KernelException $e)

@@ -53,3 +53,6 @@
 .bcl-datagrid-th-order-by {
     cursor: pointer;
 }
+.bcl-datagrid-body .row:hover {
+    background-color: #f8f8f8 !important;
+}

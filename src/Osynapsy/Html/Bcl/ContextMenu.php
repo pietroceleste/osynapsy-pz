@@ -16,31 +16,37 @@ use Osynapsy\Html\Component;
 
 class ContextMenu extends Component
 {
-    private $actions = array();
-    private $ul;
-    
-    public function __construct($id, $link, $label, $class='')
+    protected $items;
+
+    public function __construct($id)
     {
         $this->requireCss('Bcl/ContextMenu/style.css');
         $this->requireJs('Bcl/ContextMenu/script.js');
         parent::__construct('div', $id);
         $this->att('class', 'BclContextMenu dropdown clearfix');
-        $this->ul = $this->add(new Tag('ul'))
-                         ->att('class','dropdown-menu')
-                         ->att('role','menu')
-                         ->att('aria-labelledby','dropdownMenu')
-                         ->att('style','display: block; position: static; margin-bottom: 5px;');
-        
     }
-    
-    public function addAction($label, $action, $params='')
+
+    public function __build_extra__(): void
     {
-        $this->ul
-             ->add(new Tag('li'))
-             ->add(new Tag('a'))
-             ->att('href','javascript:void(0);')
-             ->att('data-action',$action)
-             ->att('data-action-param',$params)
-             ->add($label);
+        $ul = $this->add(new Tag('ul', null, 'dropdown-menu'));
+        $ul->att([
+            'role' => 'menu',
+            'aria-labelledby' => 'dropdownMenu',
+            'style' => 'display: block; position: static; margin-bottom: 5px;'
+        ]);
+        foreach($this->items as $item) {
+            $ul->add(new Tag('li'))->add($item);
+        }
+    }
+
+
+    public function addItem($label, $action, array $params = [])
+    {
+        $item = new Link(false, false, $label);
+        $item->att('data-action', $action);
+        if (!empty($params)) {
+             $item->att('data-action-param', implode(",", $params));
+        }
+        $this->items[] = $item;
     }
 }

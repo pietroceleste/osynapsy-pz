@@ -1,31 +1,25 @@
 BclContextMenu = 
 {
+    
+    selectedItem : null,
     init : function()
     {
-  
-        $("body").on("contextmenu", ".BclContextMenuOrigin", function(e) {
-           
-            var $contextMenu = $('#' +  $(this).data('bclcontextmenuid'));
-            
-            $contextMenu.css({
+        $("body").on("contextmenu", ".BclContextMenuOrigin", function(e) {           
+            BclContextMenu.selectedItem = $(this);
+            let contextMenu = $('#' +  $(this).data('bclcontextmenuid'));            
+            contextMenu.css({
                 display: "block",
                 left: e.pageX,
                 top: e.pageY
             });
-            var param = $(this).data('action-param') ? $(this).data('action-param') : '';
-            $contextMenu.data('action-param',param);
+            let param = $(this).data('action-param') ? $(this).data('action-param') : '';
+            contextMenu.data('action-param',param);            
             return false;
-        });
-        
-        $('.BclContextMenu').each(function(){
-            $(this).on("click", "a", function() {
-                FormController.exec(
-                    $(this).data('action'), 
-                    'actionParameter=' + $(this).closest('.BclContextMenu').data('action-param')
-                );
-                $(this).closest('.BclContextMenu').hide();
-            });
-        });
+        });        
+        $('.BclContextMenu').on("click", "a", function() {
+            Osynapsy.action.remoteExecute($(this).data('action'));
+            $(this).closest('.BclContextMenu').hide();
+        });        
     }
 }
 

@@ -29,7 +29,7 @@
     border-top: 1px solid #ddd;
 }
 .bcl-datagrid-body .row:hover {
-    background-color: #f8f8f8;
+    background-color: #f8f8f8 !important;
 }
 .bcl-datagrid-body .row {
     border-left: 1px solid #ddd;
@@ -49,8 +49,7 @@
 
 .bcl-datagrid-body div.row:hover .cmd-row
 {
-    display: block;
-    
+    display: block;    
 }
 .bcl-datagrid-body .cmd-row:hover a
 {

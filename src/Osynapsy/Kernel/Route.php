@@ -88,4 +88,10 @@ class Route
     {
         return new Route($route['id'], $route['path'], null, $route['@value'], $route['template'], $route);
     }
+    
+    public function getSegment(int $index)
+    {
+        $segments = explode('/', $this->uri ?? '');
+        return $segments[$index] ?? null;
+    }
 }

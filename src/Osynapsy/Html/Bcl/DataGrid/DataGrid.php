@@ -329,7 +329,7 @@ class DataGrid extends Component
 
     public function hideHeadOnMobile()
     {
-        $this->thClass .= ' hidden-xs d-none d-sm-block';
+        $this->thClass .= ' hidden-xs hidden-sm d-none d-sm-block';
     }
 
     public function setMaxHeight($height)

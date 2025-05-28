@@ -75,7 +75,26 @@ class Assertion
         return true;
     }
 
-	public static function greaterThan($value, $limit, $message)
+    public static function isValidDate($value, $format, $message)
+    {
+        $date = \DateTime::createFromFormat($format, $value);
+        if ($date) {
+            return true;
+        }
+        self::raiseException($message);
+    }
+
+    public static function isValidSqlDate($value, $message)
+    {
+        return self::isValidDate($value, 'Y-m-d', $message);
+    }
+
+    public static function isValidItDate($value, $message)
+    {
+        return self::isValidDate($value, 'd/m/Y', $message);
+    }
+
+    public static function greaterThan($value, $limit, $message)
     {
         if ($value <= $limit) {
             self::raiseException($message);
@@ -107,12 +126,20 @@ class Assertion
         return true;
     }
 
-	public static function notEmpty($value, $message)
+    public static function notEmpty($value, $message)
     {
         if (empty($value)) {
             self::raiseException($message);
         }
         return true;
+    }
+
+    public static function notEmptyOrZero($value, $message)
+    {
+        if (empty($value) && !in_array($value, [0,'0'])) {
+            self::raiseException($message);
+        }
+        return $value;
     }
 
     protected static function raiseException($message, $code = null)

@@ -124,6 +124,16 @@ class ComboBox extends Component
         }
     }
 
+    public function selectOptionByValueIfEmpty($value)
+    {
+        if (!is_null($value) && !empty($this->data)) {
+            $idx = array_search($value, array_column($this->data, 0));
+            if ($idx !== false) {
+                $this->selectOptionByIndexIfEmpty($idx);
+            }
+        }        
+    }
+    
     public function countOption()
     {
         return count($this->data);

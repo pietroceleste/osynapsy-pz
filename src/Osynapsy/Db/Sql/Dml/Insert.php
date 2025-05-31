@@ -2,6 +2,7 @@
 namespace Osynapsy\Db\Sql\Dml;
 
 use Osynapsy\Db\Sql\AbstractSql;
+use Osynapsy\Db\Sql\Expression;
 
 /**
  * Description of Insert
@@ -11,9 +12,15 @@ use Osynapsy\Db\Sql\AbstractSql;
 class Insert extends AbstractSql
 {
     public function factory()
-    {        
-        $strFields = implode(',', array_keys($this->values));
-        $strPlaceholders = ':'.implode(',:', array_keys($this->values));        
-        return sprintf('INSERT INTO %s (%s) VALUES (%s)', $this->table, $strFields, $strPlaceholders);
-    }        
+    {
+        $fields = array_keys($this->values);
+        $placeholders = array_map(
+            function ($field) {
+                $value = $this->values[$field];
+                return $value instanceof Expression ? (string) $value : ':' . $field;
+            },
+            $fields
+        );
+        return sprintf('INSERT INTO %s (%s) VALUES (%s)', $this->table, implode(',', $fields), implode(',', $placeholders));
+    }
 }

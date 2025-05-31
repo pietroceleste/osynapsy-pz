@@ -33,6 +33,7 @@ class DbPdo extends \PDO implements DboInterface
         $par = explode(':',$str);
         switch ($par[0]) {
             case 'sqlite':
+            case 'odbc':
                 $this->param['typ'] = trim($par[0]);
                 $this->param['db']  = trim($par[1]);
                 break;

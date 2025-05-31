@@ -17,6 +17,7 @@ use Osynapsy\Db\Sql\Dml\Oracle\Insert;
 use Osynapsy\Db\Sql\Dml\Update;
 use Osynapsy\Db\Sql\Dml\Delete;
 use Osynapsy\Db\Sql\Dql\Select;
+use Osynapsy\Db\Sql\Expression;
 
 /**
  * Oci wrap class
@@ -30,7 +31,7 @@ use Osynapsy\Db\Sql\Dql\Select;
  * @link     http://docs.osynapsy.org/ref/DbOci
  */
 class DboOci implements DboInterface
-{   
+{
     const FETCH_METHOD = [
         'NUM' => OCI_NUM,
         'ASSOC' => OCI_ASSOC,
@@ -46,15 +47,16 @@ class DboOci implements DboInterface
     public function __construct($osyConnectionStringFormat)
     {
         $this->connection = new Connection($osyConnectionStringFormat);
-    }        
+    }
 
     public function execCommand($command, array $parameters = [], $returnStatement = true)
     {
         $statement = $this->statementFactory($command);
-        $result = $statement->execute($parameters);
+        $filteredParameters = array_filter($parameters, fn($v) => !($v instanceof Expression));
+        $result = $statement->execute($filteredParameters);
         return $returnStatement ? $statement : $result;
     }
-    
+
     public function execMulti($command, array $records)
     {
         $this->beginTransaction();
@@ -82,11 +84,11 @@ class DboOci implements DboInterface
        $statement = $this->statementFactory($sql);
        $statement->execute($parameters);
        $result = $statement->fetch(self::FETCH_METHOD[$fetchMethodId]);
-       return empty($result) ? null : (count($result) == 1 ? $result[0] : $result); 
+       return empty($result) ? null : (count($result) == 1 ? $result[0] : $result);
     }
-    
+
     public function getIterator($query, $parameters = [], $method = 'ASSOC')
-    {	    
+    {
         $rs = $this->execCommand($query, $parameters);
         while ($record = $this->fetch($rs, $method)) {
             yield $record;
@@ -97,7 +99,7 @@ class DboOci implements DboInterface
     public function query($sql)
     {
         return $this->execCommand($sql);
-    }        
+    }
 
     public function insert($table, array $values, $returningValues = [])
     {
@@ -137,7 +139,7 @@ class DboOci implements DboInterface
     }
 
     public function freeRs($rs)
-    {        
+    {
         oci_free_statement($rs);
     }
 
@@ -158,10 +160,10 @@ class DboOci implements DboInterface
     public function setDateFormat($format = 'YYYY-MM-DD')
     {
         $this->execCommand("ALTER SESSION SET NLS_DATE_FORMAT = '{$format}'");
-    }        
+    }
 
     public function __call($method, array $parameters)
-    {        
+    {
         if (!method_exists($this->connection, $method)) {
             throw new \Exception(sprintf('Method %s do not exists', $method));
         }

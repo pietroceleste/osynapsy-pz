@@ -84,7 +84,7 @@ class Tag
         foreach ($a as $t) {
             $this->add($t);
         }
-        return $t;
+        return $t ?? $this;
     }
 
     public function att($p, $v='', $concat=false)

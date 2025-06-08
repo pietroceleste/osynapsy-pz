@@ -139,11 +139,11 @@ class DataGrid extends Component
             $row->add('&nbsp;');
             return $row;
         }
-        $row->add(new Tag('div', null, 'col-lg-2 col-sm-3 col-xs-2 col-4'))
+        $row->add(new Tag('div', null, 'col-lg-2 col-sm-3 col-xs-2 col-4 hidden-xs'))
             ->add($this->pager->getInfoVisibility('pageDimension') ? $this->pager->comboPageDimensionFactory() : '');
         $row->add(new Tag('div', null, 'col-lg-4 col-lg-offset-2 col-sm-4 hidden-xs hidden-sm col-4 text-center'))
              ->add($this->pager->getInfoVisibility('pageLabel') ? '<label class="" style="margin-top: 30px;">'.$pagingInfo.'</label>' : '');
-        $row->add(new Tag('div', null, 'col-lg-4 col-sm-9 col-xs-8 col-4 text-right'))
+        $row->add(new Tag('div', null, 'col-lg-4 col-sm-9 col-xs-12 col-4 text-right'))
              ->add($pagination)
              ->setClass('mt-4');
         return $row;

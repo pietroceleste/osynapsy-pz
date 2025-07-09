@@ -87,6 +87,11 @@ class DboOci implements DboInterface
        return empty($result) ? null : (count($result) == 1 ? $result[0] : $result);
     }
 
+    public function findOneAssoc($sql, array $parameters = [])
+    {       
+       return $this->findOne($sql, $parameters, 'ASSOC');
+    }
+    
     public function getIterator($query, $parameters = [], $method = 'ASSOC')
     {
         $rs = $this->execCommand($query, $parameters);

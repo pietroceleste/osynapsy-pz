@@ -5,7 +5,7 @@ BclFileBox =
         $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
             console.log(numFiles);
             console.log(label);
-            $('input[type=text]',$(this).closest('.input-group')).val(label);
+            $('input[type=text]',$(this).closest('.input-group')).val(label);            
         });
         $(document).on('change', '.btn-file :file', function() {
             var input = $(this),

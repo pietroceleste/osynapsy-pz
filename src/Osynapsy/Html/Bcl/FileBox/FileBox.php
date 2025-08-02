@@ -58,7 +58,7 @@ class FileBox extends Component
             case str_starts_with($mimeType, 'image/'):
                 $span->add($this->imagePreviewFactory($filepath));
             default:
-                $span->add($this->genericDownloadFactory($filepath, $mimetype));
+                $span->add($this->genericDownloadFactory($filepath, $mimeType));
                 break;            
         }
                 

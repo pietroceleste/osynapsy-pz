@@ -57,12 +57,15 @@ class Rest
         return $response;
     }
 
-    public static function postJson($url, $data, array $arrayHeaders = [])
+    public static function postJson($url, $data, array $arrayHeaders = [], $autorizathionToken = null)
     {
         $json = json_encode($data, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);
         $arrayHeaders['Content-Type'] = 'application/json';
         $arrayHeaders['Content-Length'] = strlen($json);
         $arrayHeaders['Expect'] = '';
+        if (!empty($autorizathionToken)) {
+            $arrayHeaders['Authorization'] = sprintf('Bearer %s', $autorizathionToken);
+        }
         $response = self::post($url, $json, self::array2header($arrayHeaders));
         $response['body'] = json_decode($response['body'], true) ?? $response['body'];
         return $response;

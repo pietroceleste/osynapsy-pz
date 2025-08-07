@@ -77,6 +77,14 @@ var Osynapsy = new (function(){
                     data : $(form).serialize()+'&'+extraData
                 };
             } else {
+                let formData = new FormData($(form)[0]);
+                if (!Osynapsy.isEmpty(actionParameters)) {
+                    const pars = actionParameters.split('&');
+                    for(const elm of pars) {
+                        const [fld, val] = elm.split('=', 2);                        
+                        formData.append(fld, decodeURIComponent(val));
+                    }                                       
+                }                
                 var options  = {
                     beforeSend : function() {
                         Osynapsy.waitMask.showProgress();
@@ -89,7 +97,7 @@ var Osynapsy = new (function(){
                         return xhr;
                     },
                     //Se devo effettuare un upload personalizzo il metodo jquery $.ajax per fargli spedire il FormData
-                    data :  new FormData($(form)[0]),
+                    data :  formData,
                     mimeType : "multipart/form-data",
                     contentType : false,
                     cache : false,

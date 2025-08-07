@@ -28,18 +28,9 @@ class Client
 
     public function send(Message $prompt, $maxTokens = 1024)
     {
-        $headers = $this->headerRequestFactory($this->key);
         $body = $this->bodyRequestFactory($prompt, $maxTokens);
-        $response = Rest::postJson(self::API_ENDPOINT, $body, $headers);
+        $response = Rest::postJson(self::API_ENDPOINT, $body, [], $this->key);
         return $response['body'];
-    }
-
-    protected function headerRequestFactory($key)
-    {
-        return [
-            'Content-Type' => 'application/json',
-            'Authorization' =>  sprintf('Bearer %s', $key)
-        ];
     }
 
     protected function bodyRequestFactory(Message $prompt, $maxTokens) : array

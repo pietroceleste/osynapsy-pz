@@ -105,7 +105,7 @@ class DataGrid extends Component
             $this->buildHead(
                 $table->add(new Tag('thead'))
             );
-        }        
+        }
         if ($this->getParameter('datasource-sql-debug')) {
             $table->add($this->getSqlDebug());
         }
@@ -190,7 +190,7 @@ class DataGrid extends Component
                 $this->buildBody($container,@$this->dataGroups[$item_id],$lev+1,$ico_arr);
             }
             $i++;
-        }                
+        }
     }
 
     protected function formatOption($opt)
@@ -666,7 +666,7 @@ class DataGrid extends Component
             $this->initColumns();
         } catch (\Exception $e) {
             die($sql.$e->getMessage());
-        }        
+        }
     }
 
     protected function initColumns()
@@ -765,7 +765,7 @@ class DataGrid extends Component
     {
         $this->emptyMessage = $message;
     }
-    
+
     public function getSqlDebug()
     {
         return str_replace(
@@ -773,5 +773,10 @@ class DataGrid extends Component
             array_map(fn($k) => "'$k'",array_values($this->getParameter('datasource-sql-par'))),
             sprintf('<pre>%s</pre>',$this->getParameter('datasource-sql'))
         );
+    }
+
+    public function disablePagination()
+    {
+        $this->setParameter('row-num', 0);
     }
 }

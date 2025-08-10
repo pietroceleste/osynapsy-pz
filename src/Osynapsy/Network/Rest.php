@@ -25,13 +25,16 @@ class Rest
 	return curl_exec($ch);
     }
 
-    public static function post($url, $data, array $header = [])
+    public static function post($url, $data, array $header = [], $autorizathionToken = null)
     {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
+        if (!empty($autorizathionToken)) {
+             $header[] = sprintf('Authorization: Bearer %s', $autorizathionToken);
+        }
         if (!empty($header)) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        }
+        }        
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -63,10 +66,7 @@ class Rest
         $arrayHeaders['Content-Type'] = 'application/json';
         $arrayHeaders['Content-Length'] = strlen($json);
         $arrayHeaders['Expect'] = '';
-        if (!empty($autorizathionToken)) {
-            $arrayHeaders['Authorization'] = sprintf('Bearer %s', $autorizathionToken);
-        }
-        $response = self::post($url, $json, self::array2header($arrayHeaders));
+        $response = self::post($url, $json, self::array2header($arrayHeaders), $autorizathionToken);
         $response['body'] = json_decode($response['body'], true) ?? $response['body'];
         return $response;
     }

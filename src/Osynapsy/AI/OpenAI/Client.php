@@ -3,17 +3,15 @@ namespace Osynapsy\AI\OpenAI;
 
 use Osynapsy\Network\Rest;
 use Osynapsy\AI\OpenAI\Model\ModelInterface;
-use Osynapsy\AI\OpenAI\Message\Message;
-use Osynapsy\AI\OpenAI\Message\MessageInterface;
+use Osynapsy\AI\OpenAI\Prompt\Prompt;
+use Osynapsy\AI\OpenAI\Prompt\PromptInterface;
 
 class Client
 {
-    const API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
-
     protected $version;
     protected $model;
     protected $key;
-    protected $cache = False;
+    protected $cache = False;    
 
     public function __construct(string $key, ?ModelInterface $model = null)
     {
@@ -26,28 +24,17 @@ class Client
         return $this->model;
     }
 
-    public function send(Message $prompt, $maxTokens = 1024)
+    public function send(PromptInterface $prompt, $maxTokens = 1024)
     {
-        $body = $this->bodyRequestFactory($prompt, $maxTokens);
-        $response = Rest::postJson(self::API_ENDPOINT, $body, [], $this->key);
-        return $response['body'];
+        $body = $this->getModel()->buildRequest($prompt, $maxTokens);
+        $postMethod = $this->getModel()->useJson() ? 'postJson' : 'post';
+        $response = Rest::{$postMethod}($this->getModel()->getEndpoint(), $body, [], $this->key);
+        return $this->getModel()->getResponse($response['body']);
     }
 
-    protected function bodyRequestFactory(Message $prompt, $maxTokens) : array
+    public function promptFactory() : promptInterface
     {
-        $body = [
-            'model' => $this->getModel()->getId(),
-            'messages' => $prompt->get()
-        ];
-        if (!empty($maxTokens)) {
-            $body['max_tokens'] = $maxTokens;
-        }
-        return $body;
-    }
-
-    public function messageFactory() : MessageInterface
-    {
-        return new Message;
+        return new Prompt;
     }
 
     protected function setVersion(string $ver) : void

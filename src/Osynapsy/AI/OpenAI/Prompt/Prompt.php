@@ -1,7 +1,7 @@
 <?php
-namespace Osynapsy\AI\OpenAI\Message;
+namespace Osynapsy\AI\OpenAI\Prompt;
 
-class Message implements MessageInterface
+class Prompt implements PromptInterface
 {
     protected $messages = [];
     

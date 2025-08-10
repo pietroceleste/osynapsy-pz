@@ -1,10 +1,10 @@
 <?php
 namespace Osynapsy\AI\OpenAI\Model;
 
-class Gpt_4_1 extends Gpt_4o
+class Gpt_5 extends Gpt_4_1
 {
     public function getId() : string
     {
-        return 'gpt-4.1';
-    }
+        return 'gpt-5';
+    }               
 }

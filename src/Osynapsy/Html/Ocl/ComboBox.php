@@ -131,9 +131,9 @@ class ComboBox extends Component
             if ($idx !== false) {
                 $this->selectOptionByIndexIfEmpty($idx);
             }
-        }        
+        }
     }
-    
+
     public function countOption()
     {
         return count($this->data);
@@ -151,6 +151,9 @@ class ComboBox extends Component
 
     public function setPlaceholder($placeholder)
     {
+        if ($placeholder === false) {
+            $this->setParameter('option-select-disable', true);
+        }
         $this->placeholder = $placeholder;
     }
 }

@@ -121,7 +121,6 @@ class Runner
 
     public function pageOopsText($message, $traces)
     {
-
         $tmp = PHP_EOL."funzione %s alla riga %s del file %s";
         $result = sprintf(
              'Si è verificato il seguente errore:

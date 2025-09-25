@@ -205,7 +205,7 @@ abstract class ModelRecord
             if (!$field->readonly && $field->name) {
                 $this->getRecord()->setValue($field->name, $value);
             }
-        }
+        }        
         //If occurred some error stop db updating
         if ($this->getController()->getResponse()->error()) {
             return;

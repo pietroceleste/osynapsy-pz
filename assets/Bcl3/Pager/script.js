@@ -1,6 +1,6 @@
 BclPager = {    
     init : function() {       
-        $('body').on('click', '.BclPager a', function(e) {
+        $('body').on('click', '.BclPager a', function(e) {            
             e.preventDefault();
             let parent = $(this).closest('.BclPager');                
             $('input#'+parent.attr('id'), parent).val($(this).data('value'));

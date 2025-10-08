@@ -21,24 +21,24 @@ use Osynapsy\Html\Component;
  */
 class ChartGoogle extends Component
 {
-    private $columns = array();
-    private $rows = array();
-    private $type;
-    private $options = array(
+    protected $columns = array();
+    protected $rows = array();
+    protected $type;
+    protected $options = [
         'title' => 'No title'
-    );
+    ];
 
     public function __construct($id,  $title = 'No title', $type='BarChart')
     {
         parent::__construct('div', $id);
-        $this->type = $type;
-        $this->att('class','OclChartGoogle');
+        $this->type = $type;        
         $this->setOption('title', $title);
         $this->requireJs('//www.gstatic.com/charts/loader.js');
     }
 
     public function __build_extra__()
     {
+        $this->addClass('OclChartGoogle');
         $script = $this->add(new Tag('script'));
         $script->add("document.addEventListener('DOMContentLoaded',function() {".PHP_EOL);
         $script->add("google.charts.load('current', {'packages':['corechart']});".PHP_EOL);

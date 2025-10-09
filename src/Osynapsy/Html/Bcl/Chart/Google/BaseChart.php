@@ -42,6 +42,14 @@ class BaseChart extends Component
 
     public const LEGEND_POSITION_TOP = 'top';
     public const LEGEND_POSITION_BOTTOM = 'bottom';
+    
+    public const THEMES = [
+        'blueYellow' => ['#006BFF', '#FFD301'],
+        'greenRed'   => ['#2ECC71', '#E74C3C'],
+        'grayScale'  => ['#E0E0E0', '#333333'],
+        'tealPurple' => ['#00BFA5', '#9C27B0'],
+        'navyCyan'   => ['#001F54', '#00B4D8'],
+    ];
 
     protected $columns = [];
     protected $type;
@@ -77,8 +85,15 @@ class BaseChart extends Component
         return $this;
     }
 
-    public function applyGradientPalette(int $numSlices, string $startColor = '#006BFF', string $endColor = '#FFD301')
+    public function applyGradientPalette(string $themeOrColorStart, ?string $colorEnd = null, int $numSlices = 25): self
     {
+        // Se il primo parametro è un tema, sostituisci i colori
+        if (isset(self::THEMES[$themeOrColorStart])) {
+            [$colorStart, $colorEnd] = self::THEMES[$themeOrColorStart];
+        } else {
+            $colorStart = $themeOrColorStart;
+            $colorEnd = $colorEnd ?? '#FFD301';
+        }
             // Converte colore hex in RGB
         $hexToRgb = fn($hex) => [
             hexdec(substr($hex, 1, 2)),
@@ -86,11 +101,11 @@ class BaseChart extends Component
             hexdec(substr($hex, 5, 2))
         ];
 
-        $startRgb = $hexToRgb($startColor);
-        $endRgb   = $hexToRgb($endColor);
+        $startRgb = $hexToRgb($colorStart);
+        $endRgb   = $hexToRgb($colorEnd);
         $colors   = [];
 
-        for ($i = 0; $i < $numSlices; $i++) {
+        /*for ($i = 0; $i < $numSlices; $i++) {
             // Applichiamo una curva "ease-in-out" (più lenta all’inizio e alla fine)
             $t = $i / ($numSlices - 1);
             $t = $t * $t * (3 - 2 * $t); // curva smoothstep
@@ -100,8 +115,15 @@ class BaseChart extends Component
             $b = (int) round($startRgb[2] + ($endRgb[2] - $startRgb[2]) * $t);
 
             $colors[] = sprintf("#%02X%02X%02X", $r, $g, $b);
-        }
+        }*/
 
+        for ($i = 0; $i < $numSlices; $i++) {
+            $r = (int)($startRgb[0] + ($endRgb[0] - $startRgb[0]) * $i / max($numSlices - 1, 1));
+            $g = (int)($startRgb[1] + ($endRgb[1] - $startRgb[1]) * $i / max($numSlices - 1, 1));
+            $b = (int)($startRgb[2] + ($endRgb[2] - $startRgb[2]) * $i / max($numSlices - 1, 1));
+            $colors[] = sprintf("#%02X%02X%02X", $r, $g, $b);
+        }
+        
         return $this->setColors($colors);
     }
 

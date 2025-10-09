@@ -42,13 +42,16 @@ class BaseChart extends Component
 
     public const LEGEND_POSITION_TOP = 'top';
     public const LEGEND_POSITION_BOTTOM = 'bottom';
-    
+
     public const THEMES = [
         'blueYellow' => ['#006BFF', '#FFD301'],
         'greenRed'   => ['#2ECC71', '#E74C3C'],
         'grayScale'  => ['#E0E0E0', '#333333'],
         'tealPurple' => ['#00BFA5', '#9C27B0'],
         'navyCyan'   => ['#001F54', '#00B4D8'],
+        'corporate' => ['#0A4C8C','#A3B8CC'],
+        'corporateGold' => ['#1E3C72','#2A5298'],
+        'executiveGray' => ['#3A3D40','#D3D3D3'],
     ];
 
     protected $columns = [];
@@ -123,7 +126,7 @@ class BaseChart extends Component
             $b = (int)($startRgb[2] + ($endRgb[2] - $startRgb[2]) * $i / max($numSlices - 1, 1));
             $colors[] = sprintf("#%02X%02X%02X", $r, $g, $b);
         }
-        
+
         return $this->setColors($colors);
     }
 

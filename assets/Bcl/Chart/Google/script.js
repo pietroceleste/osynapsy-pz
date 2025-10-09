@@ -20,10 +20,8 @@ BclChartGoogle = {
         });
     },
     drawChart : function drawChart(elementId, chartType, columns, rows, options) 
-    {                                
-        console.log(elementId);
-        let dataset = new google.visualization.DataTable();
-        
+    {                                        
+        let dataset = new google.visualization.DataTable();        
         for (let col in columns) {            
             dataset.addColumn(columns[col], col);
         }        

@@ -88,10 +88,10 @@ class DboOci implements DboInterface
     }
 
     public function findOneAssoc($sql, array $parameters = [])
-    {       
+    {
        return $this->findOne($sql, $parameters, 'ASSOC');
     }
-    
+
     public function getIterator($query, $parameters = [], $method = 'ASSOC')
     {
         $rs = $this->execCommand($query, $parameters);

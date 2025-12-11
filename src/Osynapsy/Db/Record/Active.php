@@ -12,6 +12,7 @@
 namespace Osynapsy\Db\Record;
 
 use Osynapsy\Db\Driver\DboInterface;
+use Osynapsy\Db\Sql\Expression;
 
 /**
  * Active record pattern implementation
@@ -339,22 +340,19 @@ abstract class Active implements RecordInterface
     private function insert()
     {
         $pkeys = $this->primaryKey();
-        $this->beforeInsert();
-        $sequenceId = $this->getSequenceNextValue();
-        /*var_dump(array_intersect_key(
-                $this->activeRecord,
-                array_flip($this->fields()
-        )));
-        exit;*/
-        $autoincrementId = $this->getDb()->insert(
+        $this->beforeInsert();        
+        $sequence = $this->sequence();
+        if (!empty($sequence) && !empty($pkeys) && count($pkeys) === 1) {
+            $this->setValue($pkeys[0], new Expression("{$sequence}.nextval"));
+        }
+        $id = $this->getDb()->insert(
             $this->table,
             array_intersect_key(
                 $this->activeRecord,
                 array_flip($this->fields())
             ),
             !empty($pkeys) && count($pkeys) === 1 ? $pkeys[0] : []
-        );
-        $id = !empty($autoincrementId) ? $autoincrementId : $sequenceId;
+        );        
         $this->loadRecordAfterInsert($id);
         $this->afterInsert($id);
         return $id;
@@ -564,7 +562,7 @@ abstract class Active implements RecordInterface
     {
         $this->behavior = $behavior;
     }
-    
+
     public function clone()
     {
         $values = $this->get();

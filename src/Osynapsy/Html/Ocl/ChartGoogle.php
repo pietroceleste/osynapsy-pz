@@ -31,7 +31,7 @@ class ChartGoogle extends Component
     public function __construct($id,  $title = 'No title', $type='BarChart')
     {
         parent::__construct('div', $id);
-        $this->type = $type;        
+        $this->type = $type;
         $this->setOption('title', $title);
         $this->requireJs('//www.gstatic.com/charts/loader.js');
     }
@@ -97,5 +97,6 @@ class ChartGoogle extends Component
     public function setOption($key, $value)
     {
         $this->options[$key] = $value;
+        return $this;
     }
 }

@@ -16,6 +16,8 @@ use Osynapsy\Html\Component;
 
 class RadioList extends Component
 {
+    private $appendTextBoxAfterLabel = false;
+    
     public function __construct($name)
     {
         parent::__construct('div',$name);
@@ -31,8 +33,16 @@ class RadioList extends Component
             $rec = array_values($rec);
             $tr = $table->add(new Tag('div'));
             $radio = $tr->add(new RadioBox($this->id));
-            $radio->att('value',$rec[0]);
+            $radio->att('onclick', "$('#txt_note').removeClass('hidden');")->att('value',$rec[0]);
             $tr->add('&nbsp;&nbsp&nbsp;'.$rec[1]);
         }
+        if ($this->appendTextBoxAfterLabel) {
+           $tr->add('<input id="txt_note" placeholder="Note" type="textbox" name="'.$this->id.'_text[]" value="" class="form-control'.(!empty($_REQUEST[$this->id]) ? '' : ' hidden d-none').'">');
+        }
+    }
+
+    public function appendTextBoxAfterLabel($bool)
+    {
+        $this->appendTextBoxAfterLabel = $bool;
     }
 }

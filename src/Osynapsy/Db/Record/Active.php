@@ -153,6 +153,10 @@ abstract class Active implements RecordInterface
         $values = is_array($value) ? $value : [$fieldName => $value];
         $parameters = $conditions = [];
         foreach ($values as $field => $value) {
+            if ($value instanceof Expression) {
+                $conditions[] = sprintf("%s = %s", !is_int($field) ? $field : $fieldName, strval($value));
+                continue;
+            }
             $parameterId = "p{$idx}";
             $conditions[] = sprintf("%s = :%s", !is_int($field) ? $field : $fieldName, $parameterId);
             $parameters[$parameterId] = $value;
@@ -340,7 +344,7 @@ abstract class Active implements RecordInterface
     private function insert()
     {
         $pkeys = $this->primaryKey();
-        $this->beforeInsert();        
+        $this->beforeInsert();
         $sequence = $this->sequence();
         if (!empty($sequence) && !empty($pkeys) && count($pkeys) === 1) {
             $this->setValue($pkeys[0], new Expression("{$sequence}.nextval"));
@@ -352,7 +356,7 @@ abstract class Active implements RecordInterface
                 array_flip($this->fields())
             ),
             !empty($pkeys) && count($pkeys) === 1 ? $pkeys[0] : []
-        );        
+        );
         $this->loadRecordAfterInsert($id);
         $this->afterInsert($id);
         return $id;
@@ -571,6 +575,11 @@ abstract class Active implements RecordInterface
         }
         $this->reset()->save($values);
         return $this;
+    }
+
+    protected function raiseException($message)
+    {
+        throw new \Exception($message);
     }
 
     protected function afterDelete(){}

@@ -16,6 +16,7 @@ class DataGrid extends Component
     private $showHead = true;
     private $checkSelected = [];
     protected $pager;
+    protected $hooks = [];
 
     public function __construct($name, $debugQuery = false, $debugCountQuery = false)
     {
@@ -117,10 +118,21 @@ class DataGrid extends Component
         }
         foreach ($this->data as $rec) {
             if (!empty($rec) && is_array($rec)) {
+                $this->executeHook('before-row-build', $body, $rec);
                 $body->add($this->buildRow($rec));
+                $this->executeHook('after-row-build', $body, $rec);
             }
         }
+        $this->executeHook('after-body-build', $body, $rec ?? []);
         return $body;
+    }
+
+    protected function executeHook($hookId, $body, $rec)
+    {
+        $hook = $this->hooks[$hookId] ?? null;
+        if (is_callable($hook)) {
+            $hook($rec, $body);
+        }
     }
 
     /**
@@ -340,5 +352,20 @@ class DataGrid extends Component
     public function setCheckSelected(array $checkSelected)
     {
         $this->checkSelected = $checkSelected;
+    }
+
+    public function setBeforeRowBuild(callable $fnc)
+    {
+        $this->hooks['before-row-build'] = $fnc;
+    }
+
+    public function setAfterRowBuild(callable $fnc)
+    {
+        $this->hooks['after-row-build'] = $fnc;
+    }
+
+    public function setAfterBodyBuild(callable $fnc)
+    {
+        $this->hooks['after-body-build'] = $fnc;
     }
 }

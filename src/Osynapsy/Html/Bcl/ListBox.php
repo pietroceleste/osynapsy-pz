@@ -34,7 +34,8 @@ class ListBox extends Component
     protected function __build_extra__()
     {        
         $list = $this->add(new Tag('ul', null, 'listbox-list'));        
-        foreach ($this->data as $rec) {
+        foreach ($this->data as $raw) {
+            $rec = array_values($raw);
             $selected = '';
             if (array_key_exists($this->hdn->id, $_REQUEST) && ($rec[0] == $_REQUEST[$this->hdn->id])) {
                 $this->box->set($rec[1]);

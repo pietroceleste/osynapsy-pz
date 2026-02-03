@@ -35,7 +35,7 @@ class ListBox extends Component
     {        
         $list = $this->add(new Tag('ul', null, 'listbox-list'));        
         foreach ($this->data as $raw) {
-            $rec = array_values($raw);
+            $rec = is_array($raw) ? array_values($raw) : [$raw, $raw];
             $selected = '';
             if (array_key_exists($this->hdn->id, $_REQUEST) && ($rec[0] == $_REQUEST[$this->hdn->id])) {
                 $this->box->set($rec[1]);

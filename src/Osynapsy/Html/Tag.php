@@ -156,6 +156,11 @@ class Tag
         return false;
     }
 
+    public function getLastChild()
+    {
+        return end($this->cnt);
+    }
+    
     public function addClass($class)
     {
         return empty($class) ? $this : $this->att('class', $class, true);

@@ -351,6 +351,11 @@ abstract class ActiveRecord
         return '';
     }
 
+    protected function raiseException($message)
+    {
+        throw new \Exception($message);
+    }
+
     /**
      * Active or disactive softDelete
      *

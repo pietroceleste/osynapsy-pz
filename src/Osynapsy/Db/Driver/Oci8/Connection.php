@@ -108,4 +108,12 @@ class Connection
     {
         oci_free_statement($this->statement);
     }
+    
+    public function __destruct()
+    {
+        if ($this->connection) {
+            @oci_close($this->connection);
+            $this->connection = null;
+        }
+    }
 }

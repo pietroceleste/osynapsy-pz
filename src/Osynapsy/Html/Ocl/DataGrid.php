@@ -399,7 +399,7 @@ class DataGrid extends Component
             if (!empty($this->__col[$i]) && is_array($this->__col[$i])){
                 $this->__build_attr($cel,$this->__col[$i]);
             }
-            $cel->add(($opt['cell']['value'] !== '0' && empty($opt['cell']['value'])) ? '&nbsp;' : nl2br($opt['cell']['value']));
+            $cel->add(($opt['cell']['value'] !== '0' && empty($opt['cell']['value'])) ? '&nbsp;' : $opt['cell']['value']);
             if (!empty($opt['cell']['attr']) && is_array($opt['cell']['attr'])) {
                 $cel->att($opt['cell']['attr']);
             }

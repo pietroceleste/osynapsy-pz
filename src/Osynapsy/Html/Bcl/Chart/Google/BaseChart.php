@@ -50,7 +50,7 @@ class BaseChart extends Component
         'tealPurple' => ['#00BFA5', '#9C27B0'],
         'navyCyan'   => ['#001F54', '#00B4D8'],
         'corporate' => ['#0A4C8C','#A3B8CC'],
-        'corporateGold' => ['#1E3C72','#2A5298'],
+        'eco' => ['#004D1A','#FFF4C2'],
         'executiveGray' => ['#3A3D40','#D3D3D3'],
     ];
 

@@ -889,7 +889,7 @@
             /**
              * Hides the widget. Possibly will emit dp.hide
              */
-            hide = function () {
+            hide = function () {                
                 var transitioning = false;
                 if (!widget) {
                     return picker;

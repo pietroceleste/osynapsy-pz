@@ -209,7 +209,7 @@ abstract class ModelRecord
         //If occurred some error stop db updating
         if ($this->getController()->getResponse()->error()) {
             return;
-        }
+        }        
         //If where list is empty execute db insert else execute a db update
         if ($this->getRecord()->getState() == 'insert') {
             $this->insert();

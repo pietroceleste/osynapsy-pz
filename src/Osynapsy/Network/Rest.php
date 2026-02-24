@@ -13,16 +13,27 @@ namespace Osynapsy\Network;
 
 class Rest
 {
-    public static function get($endpoint, $data = [])
+    public static function get($endpoint, $data = [], array $headers = [], $autorizathionToken = null)
     {
         $url = $endpoint;
         if (!empty($data)) {
            $url .= '?'.http_build_query($data);
         }
-        $ch = curl_init($url);
+        $ch = curl_init($url);        
+        if (!empty($autorizathionToken)) {
+             $headers['Authorization'] = sprintf('Bearer %s', $autorizathionToken);
+        }
+        if (!empty($headers)) {
+            curl_setopt($ch, CURLOPT_HEADER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, self::array2header($headers));
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-	return curl_exec($ch);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $response = self::responseFactory($ch, curl_exec($ch));
+        curl_close($ch);
+	return $response;
     }
 
     public static function post($url, $data, array $header = [], $autorizathionToken = null)
@@ -34,7 +45,10 @@ class Rest
         }
         if (!empty($header)) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        }        
+        }
+        if (is_array($data) && in_array('Content-Type: application/x-www-form-urlencoded', $header)) {
+            $data = http_build_query($data);
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -60,6 +74,14 @@ class Rest
         return $response;
     }
 
+    
+    public static function getJson($url, $data, array $arrayHeaders = [], $autorizathionToken = null)
+    {        
+        $response = self::get($url, $data, $arrayHeaders, $autorizathionToken);
+        $response['body'] = json_decode($response['body'], true) ?? $response['body'];
+        return $response;
+    }
+    
     public static function postJson($url, $data, array $arrayHeaders = [], $autorizathionToken = null)
     {
         $json = json_encode($data, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);
@@ -71,6 +93,27 @@ class Rest
         return $response;
     }
 
+    public static function asPostableFile($path, $fileName)
+    {
+        // 1. Controllo di sicurezza: il file esiste davvero?
+        if (!file_exists($path)) {
+            throw new \Exception("Impossibile preparare il file: il percorso '$path' non esiste.");
+        }
+
+        // 2. Estrazione del MIME Type (es: application/pdf, image/jpeg)
+        // Usiamo finfo per leggere i "magic bytes" del file, metodo più sicuro dell'estensione
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $path);
+        finfo_close($finfo);
+
+        // 3. Estrazione del nome originale del file dal percorso
+        //$fileName = basename($path);
+
+        // 4. Restituzione dell'oggetto CURLFile correttamente configurato
+        // Parametri: percorso reale, tipo mime, nome che vedrà Adiuto
+        return new \CURLFile($path, $mimeType, $fileName);
+    }
+    
     private static function array2header(array $array = [])
     {
         return array_map(

@@ -125,7 +125,7 @@ class SmtpClient
     private $errors = [];
     private $response = [];
     private $contextOptions = [];
-    
+
     public function __construct($server, $port, $username=null, $password=null, $secure=null)
     {
         $this->server = $server;
@@ -162,12 +162,12 @@ class SmtpClient
             $this->timeout,
             STREAM_CLIENT_CONNECT,
             $streamContext
-        );        
+        );
         if (!$this->conn) {
             $this->response[] = 'ERROR : '.$errno .' '. $errstr;
         }
-        if (substr($this->getServerResponse(),0,3) != '220') {             
-            return false;             
+        if (substr($this->getServerResponse(),0,3) != '220') {
+            return false;
         }
         return true;
     }
@@ -177,23 +177,23 @@ class SmtpClient
         if (!array_key_exists('ssl', $this->contextOptions)) {
             $this->contextOptions['ssl'] = [];
         }
-        $this->contextOptions['ssl']['verify_peer'] = $verify; 
-        $this->contextOptions['ssl']['verify_peer_name'] = $verify; 
+        $this->contextOptions['ssl']['verify_peer'] = $verify;
+        $this->contextOptions['ssl']['verify_peer_name'] = $verify;
         $this->contextOptions['ssl']['allow_self_signed'] = !$verify;
         return $this;
     }
-    
+
     /* sign in / authenicate */
     private function auth()
-    {        
-        $this->putRow('HELO ' . $this->localhost);        
+    {
+        $this->putRow('HELO ' . $this->localhost);
         if(strtolower(trim($this->secure)) == 'tls' && !$this->authTls()) {
             return false;
         }
         if($this->server == 'localhost') {
-            return true;            
-        }        
-        if ($this->putRow('AUTH LOGIN') != '334') { 
+            return true;
+        }
+        if ($this->putRow('AUTH LOGIN') != '334') {
             return false;
         }
         if ($this->putRow(base64_encode($this->username)) != '334') {
@@ -201,18 +201,18 @@ class SmtpClient
         }
         if ($this->putRow(base64_encode($this->password)) != '235') {
             return false;
-        }        
+        }
         return true;
     }
-        
+
     private function authTls()
     {
         if ($this->putRow('STARTTLS') != '220') {
             return false;
-        }        
+        }
         stream_socket_enable_crypto(
             $this->conn,
-            true, 
+            true,
             STREAM_CRYPTO_METHOD_TLS_CLIENT
         );
         if ($this->putRow('HELO ' . $this->localhost) != '250') {
@@ -220,14 +220,14 @@ class SmtpClient
         }
         return true;
     }
-    
+
     private function putRow($command)
     {
         fputs($this->conn, $command . $this->newline);
-        $resp = $this->getServerResponse();        
+        $resp = $this->getServerResponse();
         return substr($resp,0,3);
     }
-    
+
     /* send the email message */
     public function send($from, $to, $subject, $message, $headers=null, $utf8=false)
     {
@@ -272,7 +272,7 @@ class SmtpClient
     }
 
     private function setRecipients($to) /* assumes there is at least one recipient */
-    { 
+    {
         $r = 'To: ';
         if(!($to=='')) { $r .= $to . ','; }
         if(count($this->recipients)>0) {
@@ -294,7 +294,7 @@ class SmtpClient
     private function sendRecipients(array $recipients)
     {
         if (empty($recipients)) {
-            return; 
+            return;
         }
         foreach($recipients as $recipient) {
             $this->putRow('RCPT TO: <'. $this->getMailAddr($recipient) .'>');
@@ -345,7 +345,7 @@ class SmtpClient
     }
 
     /* Quit and disconnect */
-    function __destruct() 
+    function __destruct()
     {
         fputs($this->conn, 'QUIT' . $this->newline);
         $this->getServerResponse();
@@ -358,8 +358,8 @@ class SmtpClient
         $data = "";
         while($str = fgets($this->conn,4096)) {
             $data .= $str;
-            if(substr($str,3,1) == " ") { 
-                break;              
+            if(substr($str,3,1) == " ") {
+                break;
             }
         }
         if($this->debug) {
@@ -380,12 +380,12 @@ class SmtpClient
         }
         return $addr;
     }
-    
+
     public function getResponse()
     {
         return implode(PHP_EOL,$this->response);
     }
-    
+
     private function randID($len)
     {
         $index = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -408,8 +408,8 @@ class SmtpClient
 
     private function multipartMessage($htmlpart,$boundary)
     {
-        if($this->altBody == "") { 
-            $this->altBody = strip_html_tags($htmlpart); 
+        if($this->altBody == "") {
+            $this->altBody = strip_tags($htmlpart);
         }
         $altBoundary = $this->generateBoundary();
         ob_start(); //Turn on output buffering

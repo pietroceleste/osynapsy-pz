@@ -13,13 +13,25 @@ namespace Osynapsy\Network;
 
 class Rest
 {
-    public static function get($endpoint, $data = [], array $headers = [], $autorizathionToken = null)
+    public static function get($endpoint, $data = [])
+    {
+        $url = $endpoint;
+        if (!empty($data)) {
+                $url .= '?'.http_build_query($data);
+        }
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        return curl_exec($ch);
+    }
+    
+    public static function get2($endpoint, $data = [], array $headers = [], $autorizathionToken = null)
     {
         $url = $endpoint;
         if (!empty($data)) {
            $url .= '?'.http_build_query($data);
         }
-        $ch = curl_init($url);        
+        $ch = curl_init($url);
         if (!empty($autorizathionToken)) {
              $headers['Authorization'] = sprintf('Bearer %s', $autorizathionToken);
         }
@@ -74,14 +86,14 @@ class Rest
         return $response;
     }
 
-    
+
     public static function getJson($url, $data, array $arrayHeaders = [], $autorizathionToken = null)
-    {        
+    {
         $response = self::get($url, $data, $arrayHeaders, $autorizathionToken);
         $response['body'] = json_decode($response['body'], true) ?? $response['body'];
         return $response;
     }
-    
+
     public static function postJson($url, $data, array $arrayHeaders = [], $autorizathionToken = null)
     {
         $json = json_encode($data, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);
@@ -113,7 +125,7 @@ class Rest
         // Parametri: percorso reale, tipo mime, nome che vedrà Adiuto
         return new \CURLFile($path, $mimeType, $fileName);
     }
-    
+
     private static function array2header(array $array = [])
     {
         return array_map(

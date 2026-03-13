@@ -28,7 +28,7 @@ class Dropdown extends Component
 
     public function __construct($name, $label, $align = 'left', $tag = 'div')
     {
-        parent::__construct($tag);
+        parent::__construct($tag, $name . '_cnt');
         $this->addClass('dropdown')->add(new HiddenBox($name));
         $this->button = $this->add($this->buttonFactory($name.'_btn', $label));
         $this->list = $this->add($this->ulFactory($name, $align));

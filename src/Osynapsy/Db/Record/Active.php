@@ -200,6 +200,17 @@ abstract class Active implements RecordInterface
         return null;
     }
 
+    public function getExtend($field = null)
+    {
+        if (is_null($field)) {
+            return $this->extendRecord;
+        }
+        if (is_array($this->extendRecord) && array_key_exists($field, $this->extendRecord)) {
+            return $this->extendRecord[$field];
+        }
+        return null;
+    }
+
     public function getCollection(?callable $func = null)
     {
         return empty($func) ? $this->recordCollection : array_map($func, $this->recordCollection);
@@ -567,13 +578,13 @@ abstract class Active implements RecordInterface
         $this->behavior = $behavior;
     }
 
-    public function clone()
+    public function clone(array $defaultValue = [])
     {
         $values = $this->get();
         foreach($this->keys as $key) {
             unset($values[$key]);
         }
-        $this->reset()->save($values);
+        $this->reset()->save($defaultValue + $values);
         return $this;
     }
 

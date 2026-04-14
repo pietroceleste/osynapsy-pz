@@ -25,8 +25,8 @@ class Client
 
     public function __construct($key, $secret, $baseUrl)
     {
-        $this->key = $key;
-        $this->secret = $secret;
+        $this->key = trim($key);
+        $this->secret = trim($secret);
         $this->baseUrl = rtrim($baseUrl, '/');
     }
 
@@ -49,33 +49,36 @@ class Client
     /**
      * Cuore del modulo: gestisce firma e invio
      */
-    protected function request($rawmethod, $endpoint, array $queryParams = [], array $body = [])
+    protected function request($method, $endpoint, array $queryParams = [], array $body = [])
     {
-        $method = strtoupper($rawmethod);
+        $method = strtoupper($method);
         $gmtDate = gmdate("D, d M Y H:i:s") . " GMT";
         $contentType = "application/json";
         $accept = "application/json";
 
-        // 1. Costruzione Query String ordinata (necessaria per la firma)
-        $encodedParams = array_map([$this, 'customEncode'], $queryParams);
-        ksort($encodedParams);
+        // 1. Applichiamo la codifica speciale ai valori dei parametri
+        $processedParams = [];
+        foreach ($queryParams as $key => $value) {
+            $processedParams[$key] = $this->customEncode($value);
+        }
 
+        // 2. Ordinamento lessicografico delle chiavi (obbligatorio per Pudu)
+        ksort($processedParams);
+
+        // 3. Costruzione della query string
         $queryString = '';
-        if (!empty($encodedParams)) {
+        if (!empty($processedParams)) {
             $pairs = [];
-            foreach ($encodedParams as $k => $v) {
+            foreach ($processedParams as $k => $v) {
                 $pairs[] = "$k=$v";
             }
             $queryString = "?" . implode("&", $pairs);
         }
 
-        // 2. Pulizia Path per la firma (rimozione prefissi ambiente)
-        $pathForSignature = $this->getCleanPath($endpoint);
-        if (!empty($queryString)) {
-            $pathForSignature .= $queryString;
-        }
+        // 4. Path pulito per la firma
+        $pathForSignature = $this->getCleanPath($endpoint) . $queryString;
 
-        // 3. Calcolo MD5 per il body (solo per POST)
+        // 5. Gestione MD5 del Body
         $contentMd5 = "";
         $bodyJson = "";
         if ($method === 'POST' && !empty($body)) {
@@ -83,8 +86,10 @@ class Client
             $contentMd5 = base64_encode(md5($bodyJson));
         }
 
-        // 4. Generazione Firma HMAC-SHA1
+        // 6. Costruzione della stringa di firma (fai attenzione ai \n)
         $signingStr = "x-date: $gmtDate\n$method\n$accept\n$contentType\n$contentMd5\n$pathForSignature";
+
+        // 7. Generazione HMAC-SHA1
         $signature = base64_encode(hash_hmac('sha1', $signingStr, $this->secret, true));
 
         $authorization = sprintf(
@@ -93,7 +98,7 @@ class Client
             $signature
         );
 
-        // 5. Esecuzione tramite cURL (o il tuo modulo Osynapsy\Network\Rest)
+        // Esecuzione
         return $this->execute($method, $this->baseUrl . $endpoint . $queryString, [
             "Accept: $accept",
             "Content-Type: $contentType",
@@ -122,6 +127,8 @@ class Client
 
     protected function execute($method, $url, $headers, $body = null)
     {
+var_dump($headers);
+exit;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
@@ -144,8 +151,7 @@ class Client
 
     public function getMapCurrent($sn)
     {
-        $endpoint = $this->baseUrl . self::EP_MAP;
         $params = ['sn' => $sn, 'need_element' => 'true'];
-        return $this->get($endpoint, $params);
+        return $this->get(self::EP_MAP, $params);
     }
 }

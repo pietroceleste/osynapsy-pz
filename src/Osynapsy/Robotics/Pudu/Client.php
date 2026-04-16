@@ -1,24 +1,17 @@
 <?php
-/*
- * This file is part of the Osynapsy package.
- *
- * (c) Pietro Celeste <p.celeste@osynapsy.org>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 namespace Osynapsy\Robotics\Pudu;
 
+use Osynapsy\Robotics\Pudu\Command\CommandInterface;
+
 /**
  * Pudu Robotics API Client
- *
- * @author Pietro Celeste <p.celeste@osynapsy.net>
+ * 
+ * 
+ * * @author Pietro Celeste <p.celeste@osynapsy.net>
  */
 class Client
 {
-    CONST EP_MAP = '/map-service/v1/open/current';
-
     private $key;
     private $secret;
     private $baseUrl;
@@ -29,67 +22,67 @@ class Client
         $this->secret = trim($secret);
         $this->baseUrl = rtrim($baseUrl, '/');
     }
-
-    /**
-     * Esegue una chiamata GET
-     */
-    public function get($endpoint, array $queryParams = [])
+    
+    public function executeCommand(CommandInterface $command) 
     {
-        return $this->request('GET', $endpoint, $queryParams);
+        return $this->request(
+            $command->getMethod(),
+            $command->getEndpoint(),
+            $command->getQueryParams(),
+            $command->getBody()
+        );
     }
-
+    
     /**
-     * Esegue una chiamata POST
-     */
-    public function post($endpoint, array $body = [], array $queryParams = [])
-    {
-        return $this->request('POST', $endpoint, $queryParams, $body);
-    }
-
-    /**
-     * Cuore del modulo: gestisce firma e invio
+     * Cuore del modulo: Gestione Firma HMAC (Logica allineata a Python)
      */
     protected function request($method, $endpoint, array $queryParams = [], array $body = [])
     {
         $method = strtoupper($method);
+        // Formato GMT: Tue, 14 Apr 2026 14:00:00 GMT
         $gmtDate = gmdate("D, d M Y H:i:s") . " GMT";
         $contentType = "application/json";
         $accept = "application/json";
 
-        // 1. Applichiamo la codifica speciale ai valori dei parametri
-        $processedParams = [];
-        foreach ($queryParams as $key => $value) {
-            $processedParams[$key] = $this->customEncode($value);
-        }
-
-        // 2. Ordinamento lessicografico delle chiavi (obbligatorio per Pudu)
-        ksort($processedParams);
-
-        // 3. Costruzione della query string
-        $queryString = '';
-        if (!empty($processedParams)) {
-            $pairs = [];
-            foreach ($processedParams as $k => $v) {
-                $pairs[] = "$k=$v";
+        // 1. GESTIONE PATH E PARAMETRI PER LA FIRMA (RAW)
+        ksort($queryParams);
+        $sigParams = [];
+        foreach ($queryParams as $k => $v) {
+            if ($v === "" || $v === null) {
+                $sigParams[] = $k;
+            } else {
+                // In caso di array, unisce con virgola come da specifica
+                $val = is_array($v) ? implode(',', $v) : $v;
+                $sigParams[] = $k . "=" . $val;
             }
-            $queryString = "?" . implode("&", $pairs);
         }
 
-        // 4. Path pulito per la firma
-        $pathForSignature = $this->getCleanPath($endpoint) . $queryString;
+        $cleanPath = $this->getCleanPath($endpoint);
+        $pathForSignature = $cleanPath;
+        if (!empty($sigParams)) {
+            $pathForSignature .= "?" . implode("&", $sigParams);
+        }
 
-        // 5. Gestione MD5 del Body
+        // 2. GESTIONE MD5 (Base64 dell'Hex Digest)
         $contentMd5 = "";
         $bodyJson = "";
-        if ($method === 'POST' && !empty($body)) {
-            $bodyJson = json_encode($body);
-            $contentMd5 = base64_encode(md5($bodyJson));
+        if ($method === 'POST') {
+            $bodyJson = !empty($body) ? json_encode($body, JSON_UNESCAPED_SLASHES) : "{}";
+            $contentMd5 = base64_encode(md5($bodyJson)); 
         }
 
-        // 6. Costruzione della stringa di firma (fai attenzione ai \n)
-        $signingStr = "x-date: $gmtDate\n$method\n$accept\n$contentType\n$contentMd5\n$pathForSignature";
+        // 3. COSTRUZIONE STRINGA DI FIRMA (Struttura a 6 campi)
+        $signingStr = sprintf(
+            "x-date: %s\n%s\n%s\n%s\n%s\n%s",
+            $gmtDate,
+            $method,
+            $accept,
+            $contentType,
+            $contentMd5,
+            $pathForSignature
+        );
 
-        // 7. Generazione HMAC-SHA1
+        // 4. CALCOLO FIRMA HMAC-SHA1
         $signature = base64_encode(hash_hmac('sha1', $signingStr, $this->secret, true));
 
         $authorization = sprintf(
@@ -98,60 +91,65 @@ class Client
             $signature
         );
 
-        // Esecuzione
-        return $this->execute($method, $this->baseUrl . $endpoint . $queryString, [
+        // 5. COSTRUZIONE URL FINALE (Codifica per invio HTTP)
+        $urlParts = [];
+        foreach ($queryParams as $k => $v) {
+            $val = is_array($v) ? implode(',', array_map('rawurlencode', $v)) : rawurlencode($v);
+            $urlParts[] = "$k=$val";
+        }
+        $finalUrl = $this->baseUrl . $endpoint . (!empty($urlParts) ? "?" . implode("&", $urlParts) : "");
+
+        return $this->execute($method, $finalUrl, [
+            "Host: " . parse_url($this->baseUrl, PHP_URL_HOST),
             "Accept: $accept",
             "Content-Type: $contentType",
             "x-date: $gmtDate",
             "Authorization: $authorization"
-        ], $bodyJson);
+        ], $method === 'POST' ? $bodyJson : null);
     }
 
+    /**
+     * Pulizia del path dai prefissi ambiente
+     */
     private function getCleanPath($url)
     {
         $path = parse_url($url, PHP_URL_PATH);
         $prefixes = ['/release', '/test', '/prepub'];
         foreach ($prefixes as $prefix) {
             if (strpos($path, $prefix) === 0) {
-                return substr($path, strlen($prefix)) ?: '/';
+                // Rimuove il primo segmento (es. /release)
+                $parts = explode('/', ltrim($path, '/'), 2);
+                return isset($parts[1]) ? '/' . $parts[1] : '/';
             }
         }
         return $path ?: '/';
     }
-
-    private function customEncode($str)
-    {
-        $map = ['%' => '%25', '#' => '%23', '=' => '%3D', '&' => '%26', '?' => '%3F', '/' => '%2F', '+' => '%2B', ' ' => '%20'];
-        return str_replace(array_keys($map), array_values($map), $str);
-    }
-
+    
+    /**
+     * Esecuzione cURL
+     */
     protected function execute($method, $url, $headers, $body = null)
     {
-var_dump($headers);
-exit;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
+        
         if ($method === 'POST' && $body) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
         }
 
         $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
         curl_close($ch);
 
         if ($error) {
-            throw new \Exception("Pudu API Error: " . $error);
+            throw new \Exception("Pudu cURL Error: " . $error);
         }
 
-        return json_decode($response, true);
-    }
-
-    public function getMapCurrent($sn)
-    {
-        $params = ['sn' => $sn, 'need_element' => 'true'];
-        return $this->get(self::EP_MAP, $params);
+        // Decodifica il JSON se possibile
+        $decoded = json_decode($response, true);
+        return ($decoded === null) ? $response : $decoded;
     }
 }

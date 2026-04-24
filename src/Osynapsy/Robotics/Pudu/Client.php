@@ -68,7 +68,7 @@ class Client
         $bodyJson = "";
         if ($method === 'POST') {
             $bodyJson = !empty($body) ? json_encode($body, JSON_UNESCAPED_SLASHES) : "{}";
-            $contentMd5 = base64_encode(md5($bodyJson)); 
+            $contentMd5 = base64_encode(md5($bodyJson, true)); 
         }
 
         // 3. COSTRUZIONE STRINGA DI FIRMA (Struttura a 6 campi)
@@ -99,13 +99,20 @@ class Client
         }
         $finalUrl = $this->baseUrl . $endpoint . (!empty($urlParts) ? "?" . implode("&", $urlParts) : "");
 
-        return $this->execute($method, $finalUrl, [
+        $headers = [
             "Host: " . parse_url($this->baseUrl, PHP_URL_HOST),
             "Accept: $accept",
             "Content-Type: $contentType",
             "x-date: $gmtDate",
             "Authorization: $authorization"
-        ], $method === 'POST' ? $bodyJson : null);
+        ];
+
+        // AGGIUNGI L'HEADER CONTENT-MD5!
+        if ($method === 'POST') {
+            $headers[] = "Content-MD5: $contentMd5";
+        }
+        
+        return $this->execute($method, $finalUrl, $headers, $method === 'POST' ? $bodyJson : null);
     }
 
     /**

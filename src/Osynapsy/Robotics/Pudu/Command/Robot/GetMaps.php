@@ -12,9 +12,9 @@ class GetMaps implements CommandInterface
 {
     protected $sn;
     
-    public function __construct($serialNumber) 
+    public function __construct($shopId) 
     {
-        $this->sn = $serialNumber;        
+        $this->shop_id = $shopId;        
     }
     
     public function getMethod(): string 
@@ -24,12 +24,12 @@ class GetMaps implements CommandInterface
 
     public function getEndpoint(): string 
     { 
-        return '/pudu-entry/map-service/v1/open/list'; 
+        return '/pudu-entry/data-open-platform-service/v1/api/maps'; 
     }
 
     public function getQueryParams(): array
     { 
-        return ['sn' => $this->sn];
+        return ['shop_id' => $this->shop_id];
     }
     
     public function getBody(): array

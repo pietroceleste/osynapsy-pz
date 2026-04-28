@@ -97,7 +97,7 @@ class Client
             $val = is_array($v) ? implode(',', array_map('rawurlencode', $v)) : rawurlencode($v);
             $urlParts[] = "$k=$val";
         }
-        $finalUrl = $this->baseUrl . $endpoint . (!empty($urlParts) ? "?" . implode("&", $urlParts) : "");
+        $finalUrl = $this->baseUrl . trim($endpoint) . (!empty($urlParts) ? "?" . implode("&", $urlParts) : "");
 
         $headers = [
             "Host: " . parse_url($this->baseUrl, PHP_URL_HOST),

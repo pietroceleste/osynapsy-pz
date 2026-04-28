@@ -33,7 +33,7 @@ class LiftingAction implements CommandInterface
 
     public function getEndpoint(): string
     {
-        return '/pudu-entry/open-platform-service/v1/lifting_action ';
+        return '/pudu-entry/open-platform-service/v1/lifting_action';
     }
 
     public function getQueryParams(): array

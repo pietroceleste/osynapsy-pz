@@ -8,7 +8,7 @@ class LiftingMission implements CommandInterface
     const POINT_TYPE_LIFT = 'LIFT_POINT'; //Punto carico pedana
     const POINT_TYPE_STAY = 'STAY_POINT'; //Punto di transito
     const POINT_TYPE_DROP = 'DROP_POINT'; //Punto di consegna
-    
+
     private $sn;
     private $points = [];
     private $mapNamnete;
@@ -44,7 +44,7 @@ class LiftingMission implements CommandInterface
     public function addPoints(array $dataset)
     {
         foreach($dataset as $point) {
-            $this->addPoint($point['ADDR'], $point['TYPE'] ?? self::POINT_TYPE_STAY);
+            $this->addPoint($point[0], $point[1] ?? self::POINT_TYPE_STAY);
         }
     }
 

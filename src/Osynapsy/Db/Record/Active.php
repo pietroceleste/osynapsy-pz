@@ -154,7 +154,7 @@ abstract class Active implements RecordInterface
         $parameters = $conditions = [];
         foreach ($values as $field => $value) {
             if ($value instanceof Expression) {
-                $conditions[] = sprintf("%s = %s", !is_int($field) ? $field : $fieldName, strval($value));
+                $conditions[] = sprintf("%s %s %s", !is_int($field) ? $field : $fieldName, $value->getOperator(), strval($value));
                 continue;
             }
             $parameterId = "p{$idx}";

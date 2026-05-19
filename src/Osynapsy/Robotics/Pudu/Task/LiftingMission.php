@@ -11,7 +11,7 @@ class LiftingMission implements CommandInterface
 
     private $sn;
     private $points = [];
-    private $mapNamnete;
+    private $mapName;
 
     /**
      * @param string $sn Seriale del robot
@@ -35,8 +35,7 @@ class LiftingMission implements CommandInterface
             "point_name" => $name,
             "point_type" => $type,
             "point_attr" => $attr,
-            "map_info"   => ["map_name" => $this->mapName],
-            "fail_action" => ["action" => "STAY"] // Sicurezza: si ferma se fallisce
+            "map_info"   => [ "map_name" => $this->mapName]
         ];
         return $this; // Consente il concatenamento (Fluent Interface)
     }
@@ -65,16 +64,17 @@ class LiftingMission implements CommandInterface
 
     public function getBody(): array
     {
-        return [
+        $body = [
             "sn" => $this->sn,
             "payload" => [
-                "type" => "DEFAULT",
                 "tasks" => [
                     [
                         "point_list" => $this->points
                     ]
-                ]
+                ],
+                "type" => "DEFAULT"
             ]
         ];
+        return $body;
     }
 }

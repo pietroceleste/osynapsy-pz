@@ -17,6 +17,9 @@ class DataGrid extends Component
     private $checkSelected = [];
     protected $pager;
     protected $hooks = [];
+    protected $totals = [];
+    protected $totalPaddingClass;
+    protected $totalLabel = 'Totali';
 
     public function __construct($name, $debugQuery = false, $debugCountQuery = false)
     {
@@ -123,10 +126,23 @@ class DataGrid extends Component
                 $this->executeHook('after-row-build', $body, $rec);
             }
         }
+        if (!empty($this->totals)) {
+            $this->totalRowFactory($body);
+        }
         $this->executeHook('after-body-build', $body, $rec ?? []);
         return $body;
     }
 
+    protected function totalRowFactory($body)
+    {
+        $row = $body->add(new Tag('div', null, 'row'));
+        $row->add(new Tag('div', null, 'bcl-datagrid-td text-right ' . $this->totalPaddingClass))->add('<b>' . $this->totalLabel . '</b>');
+        foreach($this->totals as $key => $v) {
+            $class = $this->columns[$key]['class'];
+            $row->add(new Tag('div', null, 'bcl-datagrid-td ' . $class))->add($key[0] === '_' ? '' : $v);
+        }
+    }
+    
     protected function executeHook($hookId, $body, $rec)
     {
         $hook = $this->hooks[$hookId] ?? null;
@@ -169,7 +185,10 @@ class DataGrid extends Component
     private function buildRow($row)
     {
         $tr = new Tag('div', null, 'row');
-        foreach ($this->columns as $properties) {
+        foreach ($this->columns as $label => $properties) {            
+            if (!empty($label) && array_key_exists($label, $this->totals)) {
+                $this->totals[$label] += $row[$properties['field']] ?? 0; 
+            }
             $value = array_key_exists($properties['field'], $row) ?
                      $row[$properties['field']] :
                      '<label class="label label-warning">No data found</label>';
@@ -264,6 +283,7 @@ class DataGrid extends Component
         if (array_key_exists($label, $this->columns)) {
             unset($this->columns[$label]);
         }
+        return $this;
     }
 
     public function setColumn($label, $field, $class = '', $type = 'string', callable $function = null, $prefix = null, $position = null)
@@ -289,6 +309,7 @@ class DataGrid extends Component
     public function setColumnProperty($columnId, $property, $value)
     {
         $this->columns[$columnId][$property] = $value;
+        return $this;
     }
 
     public function setColumns($columns)
@@ -337,35 +358,50 @@ class DataGrid extends Component
     public function showHead($value)
     {
         $this->showHead = $value;
+        return $this;
     }
 
     public function hideHeadOnMobile()
     {
         $this->thClass .= ' hidden-xs hidden-sm d-none d-sm-block';
+        return $this;
     }
 
     public function setMaxHeight($height)
     {
         $this->bodyHeight = $height;
+        return $this;
     }
 
     public function setCheckSelected(array $checkSelected)
     {
         $this->checkSelected = $checkSelected;
+        return $this;
     }
 
     public function setBeforeRowBuild(callable $fnc)
     {
         $this->hooks['before-row-build'] = $fnc;
+        return $this;
     }
 
     public function setAfterRowBuild(callable $fnc)
     {
         $this->hooks['after-row-build'] = $fnc;
+        return $this;
     }
 
     public function setAfterBodyBuild(callable $fnc)
     {
         $this->hooks['after-body-build'] = $fnc;
+        return $this;
+    }
+    
+    public function setTotalFields(array $fields, $paddingClass, $label = 'Totali')
+    {
+        $this->totals = array_fill_keys($fields, 0);
+        $this->totalPaddingClass = $paddingClass;
+        $this->totalLabel = $label;
+        return $this;
     }
 }

@@ -286,6 +286,11 @@ class DataGrid extends Component
         return $this;
     }
 
+    public function getDataset()
+    {
+        return $this->data;
+    }
+    
     public function setColumn($label, $field, $class = '', $type = 'string', callable $function = null, $prefix = null, $position = null)
     {
         $this->columns[$label] = [

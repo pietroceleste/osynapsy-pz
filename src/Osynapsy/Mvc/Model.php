@@ -116,7 +116,7 @@ abstract class Model
         $lastId = null;
 
         if ($this->sequence && is_array($where) && count($where) == 1) {
-            $lastId = $values[$where[0]] = $this->db->execUnique("SELECT {$this->sequence}.nextval FROM DUAL",'NUM');
+            $lastId = $values[$where[0]] = $this->db->execUnique("SELECT {$this->sequence}.nextval FROM DUAL");
             $this->db->insert($this->repo->get('table'), $values);
         } else {
             $lastId = $this->db->insert($this->repo->get('table'), $values);
@@ -138,7 +138,10 @@ abstract class Model
 
     public function update($values, $where)
     {
-        $this->beforeUpdate();
+        $error = $this->beforeUpdate();
+        if (!empty($error)) {
+            return;
+        }
         if ($this->controller->response->error()) {
             return;
         }
@@ -193,6 +196,11 @@ abstract class Model
             $this->errorMessages[$errorId].$postfix
         );
         $this->controller->response->error($field->html, $error);
+    }
+    
+    protected function addErrorCustom($error, $fieldId = null)
+    {
+        $this->getController()->getResponse()->error($fieldId, $error);
     }
 
     public function assocData($values)

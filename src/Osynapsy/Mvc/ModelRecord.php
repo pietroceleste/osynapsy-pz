@@ -176,6 +176,11 @@ abstract class ModelRecord
         );
         $this->getController()->getResponse()->error($field->html, $error);
     }
+    
+    protected function addErrorCustom($error, $fieldHtmlId = null)
+    {
+        $this->getController()->getResponse()->error($fieldHtmlId, $error);
+    }
 
     public function map($htmlField, $dbField = null, $value = null, $type = 'string')
     {

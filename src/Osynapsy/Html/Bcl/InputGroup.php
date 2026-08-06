@@ -59,9 +59,9 @@ class InputGroup extends Component
         return $this->textBox;
     }
 
-    public function setPrefix($prefix, $inputGroupId)
+    public function setPrefix($prefix, $inputGroupId, $class = 'input-group-addon')
     {
-        $this->prefix = new Tag('span', $inputGroupId . '_prefix', 'input-group-addon');
+        $this->prefix = new Tag('span', $inputGroupId . '_prefix', $class);
         $this->prefix->add($prefix);
     }
 

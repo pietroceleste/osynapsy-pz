@@ -333,9 +333,33 @@ class SmtpClient
         $this->bcc = array();
     }
 
-    public function addAttachment($filePath)
+    public function addAttachment(string $fileDataOrPath, string $filename = '')
     {
-        $this->attachments[] = $filePath;
+        // Se il filename non è indicato e la stringa è un file esistente, ricava il nome dal path
+        if (empty($filename)) {
+            if (@is_file($fileDataOrPath)) {
+                $filename = basename($fileDataOrPath);
+            } else {
+                $filename = 'attachment_' . (count($this->attachments) + 1);
+            }
+        }
+
+        // Se è un percorso di file valido ed esistente, legge il contenuto da disco;
+        // altrimenti tratta $fileDataOrPath direttamente come contenuto binario in memoria
+        if (@is_file($fileDataOrPath)) {
+            $content = file_get_contents($fileDataOrPath);
+        } else {
+            $content = $fileDataOrPath;
+        }
+
+        if ($content !== false) {
+            $this->attachments[] = [
+                'filename' => $filename,
+                'content'  => $content
+            ];
+        }
+
+        return $this;
     }
 
     public function clearAttachments()
@@ -430,18 +454,20 @@ class SmtpClient
         $parts .= $htmlpart . $this->newline . $this->newline;
 
         $parts .= "--" . $altBoundary . "--" . $this->newline . $this->newline;
+        
+        if(!empty($this->attachments)) {
+            foreach ($this->attachments as $attach) {
+                $filename   = $attach['filename'];
+                $attachment = chunk_split(base64_encode($attach['content']));
+                $ext        = pathinfo($filename, PATHINFO_EXTENSION);
+                $mimeType   = !empty($ext) ? "application/$ext" : "application/octet-stream";
 
-        if(count($this->attachments) > 0) {
-          for($i=0;$i<count($this->attachments);$i++) {
-                $attachment = chunk_split(base64_encode(file_get_contents($this->attachments[$i])));
-                $filename = basename($this->attachments[$i]);
-                $ext = pathinfo($filename, PATHINFO_EXTENSION);
                 $parts .= "--" . $boundary . $this->newline;
-              $parts .= "Content-Type: application/$ext; name=\"$filename\"" . $this->newline;
+                $parts .= "Content-Type: $mimeType; name=\"$filename\"" . $this->newline;
                 $parts .= "Content-Transfer-Encoding: base64" . $this->newline;
                 $parts .= "Content-Disposition: attachment; filename=\"$filename\"" . $this->newline . $this->newline;
-                $parts .=  $attachment . $this->newline;
-          }
+                $parts .= $attachment . $this->newline;
+            }
         }
 
         $parts .= "--" . $boundary . "--";

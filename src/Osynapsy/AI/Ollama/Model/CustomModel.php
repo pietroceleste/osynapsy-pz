@@ -3,6 +3,7 @@ namespace Osynapsy\AI\Ollama\Model;
 
 use Osynapsy\AI\Ollama\Prompt\PromptInterface;
 use Osynapsy\AI\Ollama\Response\ChatResponse;
+use Osynapsy\AI\Ollama\Response\GenerateResponse;
 use Osynapsy\AI\Ollama\Response\ResponseInterface;
 
 /**
@@ -12,15 +13,19 @@ use Osynapsy\AI\Ollama\Response\ResponseInterface;
  */
 class CustomModel implements ModelInterface
 {
-    protected $id;
-    protected $options = [
-        'format' => null,
-        'images' => [],
-        'max-tokens' => null,
-        'temperature' => null
-    ];
-    protected $images = [];
+    const ENDPOINT_CHAT = '/api/chat';
+    const ENDPOINT_GENERATE = '/api/generate';
 
+    protected $id;
+    protected $repo = [
+        'format' => null,
+        'max-tokens' => null,
+        'keep_alive' => -1,
+        'options' => [
+            'temperature' => 0.1
+        ]
+    ];
+    
     public function __construct(string $id)
     {
         $arr = explode(':', $id, 2);
@@ -35,20 +40,20 @@ class CustomModel implements ModelInterface
 
     public function getEndpoint() : string
     {
-        return '/api/generate';
+        return self::ENDPOINT_GENERATE;
     }
 
     public function buildRequest(PromptInterface $prompt) : array
     {
-        $model = implode(':', [$this->getId(), $this->tag ?? 'latest']);
-        $body = [
-            'model' => $model,
-            'prompt' => $prompt->get(),
-            'stream' => false
-        ];
-        foreach($this->options as $option => $value) {
+        $this->setParameter('model', implode(':', [$this->getId(), $this->tag ?? 'latest']));
+        $this->setParameter('stream', false);
+        $body = [];
+        if ($this->getEndpoint() === self::ENDPOINT_GENERATE) {
+            $body += $prompt->getArray();
+        }
+        foreach($this->repo as $parameter => $value) {
             if (!is_null($value)) {
-                $body[$option] = $value;
+                $body[$parameter] = $value;
             }
         }
         return $body;
@@ -61,21 +66,50 @@ class CustomModel implements ModelInterface
 
     public function getResponse(array $rawresponse) : ResponseInterface
     {
-        return new ChatResponse($rawresponse);
+        return $this->getEndpoint() === self::ENDPOINT_GENERATE
+            ? new GenerateResponse($rawresponse)
+            : new ChatResponse($rawresponse);
     }
 
     public function setFormat(string $format)
     {
-        $this->option['format'] = $format;
+        return $this->setParameter('format', $format);
     }
 
     public function setTemperature(float $v)
     {
-        $this->option['temperature'] = $v;
+        return $this->setOption('temperature', $v);
     }
 
-    public function addImages(array $images)
+    public function setThink(bool $v)
     {
-        $this->option['images'] = array_merge($this->option['images'], $images);
+        return $this->setParameter('think', $v);
+    }
+
+    public function setOption($option, $value)
+    {
+        $this->repo['options'][$option] = $value;
+        return $this;
+    }
+
+    public function getOption($option)
+    {
+        return $this->repo['options'][$option];
+    }
+
+    public function setStop(array $stop)
+    {
+        return $this->setOption('stop', $stop);
+    }
+
+    public function getParameter($parameter)
+    {
+        return $this->repo[$parameter];
+    }
+
+    public function setParameter($parameter, $value)
+    {
+        $this->repo[$parameter] = $value;
+        return $this;
     }
 }

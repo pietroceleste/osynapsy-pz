@@ -54,16 +54,12 @@ class DbFactory
             return $this->connectionPool[$this->connectionIndex[$connectionString]];
         }
         $type = strtok($connectionString, ':');
-        switch ($type) {
-            case 'oracle':
-                $databaseConnection = new DbOci($connectionString);
-                break;
-            default:
-                $databaseConnection = new DbPdo($connectionString);
-                break;
-        }
+        $databaseConnection = match ($type) {
+            'oracle' => new DbOci($connectionString),
+            default => new DbPdo($connectionString)                
+        };
         //Exec connection
-        $res = $databaseConnection->connect();
+        $databaseConnection->execConnect();
         $currentIndex = count($this->connectionPool);
         $this->connectionIndex[$connectionString] = $currentIndex;
         $this->connectionPool[$currentIndex] = $databaseConnection;

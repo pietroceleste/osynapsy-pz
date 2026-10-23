@@ -45,7 +45,9 @@ class DbPdo extends \PDO implements DboInterface
                 $this->param['db']  = trim($par[2]);
                 $this->param['usr'] = trim($par[3]);
                 $this->param['pwd'] = trim($par[4]);
-                $this->param['port'] = trim($par[5]);
+                if (!empty($par[5])) {
+                    $this->param['port'] = trim($par[5]);
+                }
                 $this->param['query-parameter-dummy'] = '?';
                 break;
         }
@@ -61,7 +63,7 @@ class DbPdo extends \PDO implements DboInterface
        return $this->iCursor->columnCount();
     }
 
-    public function connect()
+    public function execConnect()
     {
         $opt = array();
         switch ($this->param['typ']) {

@@ -29,7 +29,7 @@ class Connection
         $this->parameters[$name] = trim($value);
     }
 
-    public function connect()
+    public function execConnect()
     {
         $connectionString = sprintf("//%s:%s/%s", $this->getParameter('host'), $this->getParameter('port'), $this->getParameter('db'));        
         $this->connection = oci_connect($this->getParameter('username'), $this->getParameter('password'), $connectionString, 'AL32UTF8');

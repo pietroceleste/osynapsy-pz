@@ -52,7 +52,7 @@ class Statement
 
     public function fetchAll($method = OCI_ASSOC)
     {
-        oci_fetch_all($this->statement, $result, null, null, OCI_FETCHSTATEMENT_BY_ROW|OCI_RETURN_NULLS|OCI_RETURN_LOBS|$method);        
+        oci_fetch_all($this->statement, $result, null, null, OCI_FETCHSTATEMENT_BY_ROW|OCI_RETURN_NULLS|OCI_RETURN_LOBS|$method);
         return $result;
     }
 

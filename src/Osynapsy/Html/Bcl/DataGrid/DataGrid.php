@@ -27,8 +27,7 @@ class DataGrid extends Component
         $this->addClass('bcl-datagrid');
         $this->requireCss('Bcl3/DataGrid/style.css');
         $this->requireJs('Bcl3/DataGrid/script.js');
-        $this->debug = $debugQuery;
-        $this->debugCountQuery = $debugCountQuery;
+        $this->setDebug($debugQuery, $debugCountQuery);
     }
 
     public function __build_extra__()
@@ -142,7 +141,7 @@ class DataGrid extends Component
             $row->add(new Tag('div', null, 'bcl-datagrid-td ' . $class))->add($key[0] === '_' ? '' : $v);
         }
     }
-    
+
     protected function executeHook($hookId, $body, $rec)
     {
         $hook = $this->hooks[$hookId] ?? null;
@@ -185,9 +184,9 @@ class DataGrid extends Component
     private function buildRow($row)
     {
         $tr = new Tag('div', null, 'row');
-        foreach ($this->columns as $label => $properties) {            
+        foreach ($this->columns as $label => $properties) {
             if (!empty($label) && array_key_exists($label, $this->totals)) {
-                $this->totals[$label] += $row[$properties['field']] ?? 0; 
+                $this->totals[$label] += $row[$properties['field']] ?? 0;
             }
             $value = array_key_exists($properties['field'], $row) ?
                      $row[$properties['field']] :
@@ -290,7 +289,7 @@ class DataGrid extends Component
     {
         return $this->data;
     }
-    
+
     public function setColumn($label, $field, $class = '', $type = 'string', callable $function = null, $prefix = null, $position = null)
     {
         $this->columns[$label] = [
@@ -401,12 +400,18 @@ class DataGrid extends Component
         $this->hooks['after-body-build'] = $fnc;
         return $this;
     }
-    
+
     public function setTotalFields(array $fields, $paddingClass, $label = 'Totali')
     {
         $this->totals = array_fill_keys($fields, 0);
         $this->totalPaddingClass = $paddingClass;
         $this->totalLabel = $label;
         return $this;
+    }
+
+    public function setDebug(bool $debugQuery, bool $debugCountQuery = false)
+    {
+        $this->debug = $debugQuery;
+        $this->debugCountQuery = $debugCountQuery;
     }
 }

@@ -135,6 +135,8 @@ class Runner
 
     public function pageOopsHtml($message, $trace)
     {
+        error_log(sprintf("ERRORE APPLICATIVO: %s\nSTACK TRACE:\n%s", $message, print_r($trace, true)));
+        // Comportamento originale con i dettagli completi abilitati
         $body = '';
         foreach ($trace as $step) {
             $body .= '<tr>';
@@ -144,24 +146,21 @@ class Runner
             $body .= '<td>'.(!empty($step['line']) ? $step['line'] : '&nbsp;').'</td>';
             $body .= '</tr>';
         }
-        return <<<PAGE
 
-            <div class="container">
-                Si è verificato il seguente errore:
-                <div class="error-box">
-                {$message}
+        return <<<PAGE
+            <div class="container" style="font-family: Arial; text-align: center; margin-top: 50px;">
+                    <h2 ondblclick="document.getElementById('error').style.display = 'block';">Internal Server Error</h2>
+                    <p>Si è verificato un errore inaspettato. Riprova più tardi.</p>
                 </div>
-                <table style="border-collapse: collapse; max-width: 1200px;">
-                    <tr><th>Class</th><th>Function</th><th>File</th><th>Line</th></tr>
-                    {$body}
+                <div id="error" style="display : none; text-align: center;">
+                [ERRORE]
+                {$message}
+
+                [TRACE]
+                <table border=1 align="center">
+                {$body}
                 </table>
-            </div>
-            <style>
-                * {font-family: Arial;}
-                div.container {margin: auto;}
-                td,th {font-size: 12px; font-family: Arial; padding: 3px; border: 0.5px solid silver}
-                .error-box {border:1px solid #ddd; padding: 10px; background-color: #fefefe; margin: 10px 0px; font-size: 0.85em}
-            </style>
-PAGE;
+                </div>
+        PAGE;
     }
 }

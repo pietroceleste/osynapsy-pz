@@ -137,8 +137,9 @@ class DataGrid extends Component
         $row = $body->add(new Tag('div', null, 'row'));
         $row->add(new Tag('div', null, 'bcl-datagrid-td text-right ' . $this->totalPaddingClass))->add('<b>' . $this->totalLabel . '</b>');
         foreach($this->totals as $key => $v) {
-            $class = $this->columns[$key]['class'];
-            $row->add(new Tag('div', null, 'bcl-datagrid-td ' . $class))->add($key[0] === '_' ? '' : $v);
+            $ckey = str_starts_with($key, '_') ? substr($key, 1) : $key;
+            $class = $this->columns[$ckey]['class'];
+            $row->add(new Tag('div', null, 'bcl-datagrid-td ' . $class))->add($key[0] === '_' ? '&nbsp;' : $v);
         }
     }
 
